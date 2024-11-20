@@ -1,0 +1,207 @@
+@media (min-width: 651px)
+{
+    .mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper {padding: 20px;}
+    .mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper .mls-button.mls-pyc-button {padding: 8px 30px; width: auto; border-radius: 38px;}
+}
+
+
+@media (max-width: 1390px)
+{
+   .search-not-perform {margin: 0 20px; width: calc(100% - 40px);}
+}
+
+
+@media (max-width: 1250px)
+{
+    .mls-project-nav-slider .mls-project-nav-wrapper img {min-width: 70px; height: 70px;}
+    .mls-project-nav-slider {margin: 0 -3px;}
+    .mls-project-nav-wrapper {margin: 0 3px;}
+}
+
+@media (max-width: 1200px)
+{
+	.mls-pro-list-wrapper {gap: 15px;}
+	.mls-pyc-feature {grid-template-columns: 2fr 2fr;}
+	.mls-project-slider .mls-project-li-wrapper img, .mls-project-slider .mls-project-li-wrapper video {height: 420px;}
+	.filter-form-wrapper .form-group {width: calc(33.333% - 14px);}
+    .mls-project-nav-slider {margin: 0 -2px;}
+    .mls-project-nav-wrapper {margin: 0 2px;}
+}
+
+@media (max-width: 1100px)
+{
+    .property-schedule-singledate-wrapper {margin: 0 5px;}
+}
+
+@media (max-width: 991px)
+{
+	.mls-pro-list-wrapper {grid-template-columns: 2fr 2fr;}
+    .mls-project-full {
+        display: flex;
+        justify-content: space-between;
+    }
+    .mls-prj-detail-full {flex-flow: column-reverse wrap;}
+	.mls-prj-left {
+    width: calc(100% - 0px);
+    margin-bottom: 0;
+    margin-top: 20px;
+    }
+	.mls-prj-right 
+    {
+        width: 100%;
+    }
+	.mls-pro-list-wrapper.pro-list .mls-property-img {width: 40%;}
+	.mls-pro-list-wrapper.pro-list .mls-property-cnt {width: 60%;}
+	.mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper {width: 60%; left: 40%;}
+	.mls-pro-list-wrapper.pro-list .mls-pyc-feature {grid-template-columns: 3fr 3fr 3fr;}
+    
+    .hide-xs {display: none;}
+    .show-xs {display: block;}
+    .show-xs .ltst {border: none; padding-bottom: 0; margin-bottom: 20px;}
+    .mls-prj-right .mls-prj-sidebar-inner>div.mls-latest-post.cn-post {margin-bottom: 0;}
+    
+    .mls-pro-list-wrapper.pro-list .mls-property-img img {height: 100%;}
+    .mls-pro-list-wrapper.pro-list .mls-project-listing-slider, .mls-pro-list-wrapper.pro-list .slick-list, .mls-pro-list-wrapper.pro-list .slick-track {max-height: 360px;}
+    
+/*
+    .mls-share-social-fn.active:hover .social-share-buttons, .mls-share-social-fn:hover .social-share-buttons
+    {
+        visibility: hidden;
+        opacity: 0;
+    }
+*/
+    .mls-share-social-fn .social-share-buttons, .loc-fv-toggle .loc-fv
+    {
+        display: none !important;
+    }
+    .mls-share-social-fn.active .social-share-buttons
+    {
+        display: flex !important; visibility: visible; opacity: 1;
+    }
+    .loc-fv-toggle.active .loc-fv {display: inline-block !important; visibility: visible; opacity: 1;}
+	.ltst {grid-template-columns: 200px 2fr;}
+	
+	.mls-pagination-btns-block {flex-flow: row wrap; margin-bottom: 0; gap: 5px;}
+	.mls-pagination-btns-block .mls-pagi-btns-left, .mls-pagination-btns-block .mls-pagi-btns-right {width: auto;}
+    
+}
+
+@media (max-width: 767px)
+{
+	.mls-project-slider .mls-project-li-wrapper img, .mls-project-slider .mls-project-li-wrapper video {height: 340px;}
+	.mls-prj-feature {grid-template-columns: 3fr 3fr 3fr;}
+	.mls-prj-moredetail ul li {grid-template-columns: 130px 2fr;}
+	.mls-prj-amen {grid-template-columns: 52px 2fr;}
+	.filter-form-wrapper form {grid-template-columns: 2fr 2fr;}
+    .filter-form-wrapper .form-group {width: calc(50% - 10px);}
+    
+/*     .mls-prj-amen span.amen-img {width: 50px;} 
+	.mls-prj-amen span.amen-img + span {margin-left: 20px;}*/
+    
+    .mls-prjs6 form {gap: 10px;}
+    .mls-c2, .mls-c3.tiw-align {width: calc(50% - 5px);}
+    .mls-c3, .videohidecls .mls-c3.tiw-align {width: calc(33.333% - 7px);}
+    .mls-c1b3 {width: calc(68% - 12px);}
+    .pervid {gap: 4px;}
+    
+    .schedule-date-slider .slick-prev, .schedule-date-slider .slick-next {height: 30px; width: 30px; font-size: 11px; padding: 0;}
+    .property-schedule-singledate-wrapper div span {font-size: 12px;}
+    .property-schedule-singledate-wrapper div span.day-num {font-size: 18px;}
+    .schedule-date-slider .slick-prev {left: -15px;}
+    .schedule-date-slider .slick-next {right: -15px;}
+    
+    .ltst {grid-template-columns: 130px 2fr;}
+    
+    .lg-toolbar .lg-zoom-in.lg-icon {width: 30px !important;}
+}
+
+@media (max-width: 650px)
+{
+	.mls-pro-list-wrapper.pro-list .mls-property-in {flex-flow: column wrap;}
+	.mls-pro-list-wrapper.pro-list .mls-property-img {width: 100%;}
+	.mls-pro-list-wrapper.pro-list .mls-property-cnt {width: 100%;}
+	.mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper {width: 100%; left: 0;}
+	.mls-pro-list-wrapper.pro-list .mls-pyc-feature {grid-template-columns: 3fr 3fr 3fr;}
+	.mls-prj-amenities {grid-template-columns: 2fr 2fr;}
+    .mls-prj-lay {padding: 20px;}
+    
+    .mls-pro-list-wrapper.pro-list .mls-project-listing-slider, .mls-pro-list-wrapper.pro-list .slick-list, .mls-pro-list-wrapper.pro-list .slick-track {height: 300px;}
+	.mls-project-slider .mls-project-li-wrapper img, .mls-project-slider .mls-project-li-wrapper video {height: 300px;}
+    .mls-list-filter .layout-filter {display: none;}
+    .mls-list-filter {justify-content: space-between; padding: 25px;}
+    .mls-list-filter .sorttype {max-width: calc(50% - 10px);}
+    .mls-list-filter .sorttype form {flex-flow: column wrap; align-items: flex-start; gap: 5px;}
+}
+
+@media screen and (max-width: 640px)
+{
+	.lead-form-temp {margin: 0 20px; width: calc(100% - 40px);}
+}
+
+@media screen and (max-width: 575px)
+{
+	.mls-prjs1-top {grid-template-columns: 1fr;}
+	.cn-area a.button {width: auto;}
+    
+    .mls-prjs6 form {gap: 15px;}
+    .mls-c1b3 {width: calc(100% - 0px);}
+    .mls-c1b1 {width: calc(100% - 0px);}
+	.mls-c2, .mls-c3.tiw-align {width: calc(100% - 0px);}
+    .mls-c3, .videohidecls .mls-c3.tiw-align {width: calc(100% - 0px);}
+	
+	.lead-form-temp .mls-main-content p {grid-template-columns: 1fr;}
+    
+	.mls-pro-list-wrapper {grid-template-columns: 1fr;}
+    .mls-pro-list-wrapper.pro-list .mls-property-img img {height: 300px;}
+    
+    .mls-project-nav-slider {margin-top: 5px !important;}
+	.mls-pagination-btns-block .mls-pagi-btns-right > div {gap: 5px;}
+}
+
+@media (max-width: 550px)
+{
+    .mls-project-nav-slider .mls-project-nav-wrapper img {min-width: 60px; height: 60px;}
+}
+
+@media (max-width: 500px)
+{
+	.mls-prjs1-bottom {flex-flow: column-reverse wrap; align-items: flex-start; gap: 15px;}
+}
+
+@media (max-width: 480px)
+{
+	.mls-pro-list-wrapper.pro-list .mls-pyc-feature {grid-template-columns: 2fr 2fr;}
+	.mls-prj-feature {grid-template-columns: 2fr 2fr;}
+	.mls-prj-moredetail ul li {grid-template-columns: 1fr; gap: 10px; margin: 0 0 20px;}
+	.mls-prj-amenities {grid-template-columns: 1fr; gap: 20px 10px;}
+	.filter-form-wrapper form {gap: 10px;}
+    .filter-form-wrapper .form-group {width: calc(100% - 0px);}
+    .mls-list-filter .sorttype {max-width: calc(100% - 0px);}
+    
+    .cn-area div {order: 2; min-width: 124px;}
+    .cn-area h3 {order: 1;}
+    
+    .mls-project-slider .mls-project-li-wrapper img, .mls-project-slider .mls-project-li-wrapper video {height: 240px;}
+	
+	.ltst {grid-template-columns: 1fr;}
+}
+
+@media (max-width: 380px)
+{
+	#mls-lead-form .mls-form-group input[type="submit"] {width: 100%;}
+}
+
+@media (max-width: 340px)
+{
+    .mls-prj-price.cn-area {grid-template-columns: 1fr; gap: 15px; justify-items: flex-start;}
+    
+    .mls-list-filter {flex-flow: column-reverse wrap;}
+    .mls-list-filter .sorttype {max-width: 100%;}
+	.mls-share-social-pd {gap: 5px; flex-flow: column wrap; align-items: flex-start;}
+}
+
+
+@media (min-width: 575px) and (max-width: 680px)
+{
+    .pervid .pervid-blk label {font-size: 12px; line-height: 1;}
+}
