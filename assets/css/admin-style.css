@@ -1,0 +1,340 @@
+.mls-table-reponsive {width: 100%; overflow-x: auto;}
+.mls-table-reponsive table {width: 1100px; border: none;}
+.mls-table-reponsive table thead {background: #0073e1;}
+.mls-table-reponsive table thead th {color: #fff;}
+.mls-table-reponsive table td, .mls-table-reponsive table th {border-bottom: 1px solid #ebebeb;}
+
+.mls-lead-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+z-index: 999999;
+}
+
+.mls-lead-details-content {
+    position: relative;
+    background: #fff;
+    border-radius: 6px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+}
+#mls-lead-header
+{
+    position: relative;
+    padding: 15px 50px 15px 15px;
+    background-color: #0073e1;
+
+}
+#mls-lead-header h2 {margin: 0; line-height: 1.4; color: #fff;}
+
+#mls-lead-details-body
+{
+    margin: 20px;
+    height: calc(65vh - 68px);
+    overflow-y: auto;
+    background-color: #f6f7f7;
+        border: 2px solid #e5e5e5;
+}
+#mls-lead-details-body p
+{
+    display: grid;
+    align-items: center;
+    grid-template-columns: 150px auto;
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 10px;
+    color: #5c727d;
+    font-weight: 600;
+}
+#mls-lead-details-body p:nth-last-child(even)
+{
+    background-color: #fff;
+}
+#mls-lead-details-body p strong {font-weight: 800;}
+.mls-close-modal {
+    background: #fff;
+    color: #0073e1;
+    padding: 0 0 2px 1px;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    outline: none;
+    border: none;
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+    border-radius: 50%;
+    font-size: 18px;
+    z-index: 8;
+    transform: translateY(-50%);
+}
+#mls-lead-details-body::-webkit-scrollbar {
+	width: 5px;
+}
+#mls-lead-details-body::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0.3);
+	box-shadow: inset 0 0 0px rgba(0,0,0,0.3);
+}
+#mls-lead-details-body::-webkit-scrollbar-thumb {
+  background-color: #e5e5e5;
+  outline: 0px solid slategrey;
+}
+
+.mls-lead-details-content h2 {color: #222222; font-size: 20px; margin: 0 0 20px;}
+
+.form-table.easySel-style select.sel-app {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	padding-right: 35px;
+	display: block;
+	background-image: url(../images/down-arrow-blk.png);
+	background-size: 18px;
+	background-repeat: no-repeat;
+	background-position: right 15px center;
+	cursor: pointer;
+    height: 40px;
+	min-height: inherit;
+    width: 100%;
+    max-width: 100%;    
+}
+.form-table.easySel-style .easySelect .styledSelect {height: auto; /*width: 700px; overflow-x: auto;*/ width: 188px; border: 1px solid #dedede; border-radius: 2px; background-color: #fff;}
+.form-table.easySel-style .easySelect .options {border: 1px solid #dedede !important; background-color: #fff;}
+.form-table.easySel-style .easySelect .divSearcheasySelect {border-bottom: 1px solid #dedede !important;}
+.form-table.easySel-style .easySelect .searchInputeasySelect {display: none;}
+.form-table.easySel-style .easySelect .styledSelect:after {right: 10px;}
+.form-table.easySel-style .scrolableDiv .container-item {font-size: 14px; padding: 0px 0px 10px 22px !important;}
+.form-table.easySel-style .scrolableDiv .container-item .checkmark:after {left: 5px; border: 1px solid #a2a2a2; border-width: 0 1px 1px 0;}
+.form-table.easySel-style .easySelect .clearSelectfromDiv {display: none !important;}
+
+.licence-style p.submit {display: inline-block; padding: 0px;}
+
+.easySel-style input[type=date], .easySel-style input[type=datetime-local], .easySel-style input[type=datetime], .easySel-style input[type=email], .easySel-style input[type=month], .easySel-style input[type=number], .easySel-style input[type=password], .easySel-style input[type=search], .easySel-style input[type=tel], .easySel-style input[type=text], .easySel-style input[type=time], .easySel-style input[type=url], .easySel-style input[type=week]
+{
+    padding: 5px 15px;
+    min-height: 40px;
+    width: 100%;
+    max-width: 240px;
+    border: 1px solid #dedede;
+}
+.easySel-style .easySelect {/*width: 750px !important;*/ width: 240px !important; position: relative;}
+.form-table.easySel-style.ft-flex td {display: flex; flex-flow: row wrap; align-items: center;}
+.form-table.easySel-style td .easySelect {margin-right: 2px;}
+.form-table td p.description {width: 100%;}
+
+
+.form-table.easySel-style .easySelect .styledSelect::-webkit-scrollbar {height: 10px;}
+.form-table.easySel-style .easySelect .styledSelect::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0.3);
+	box-shadow: inset 0 0 0px rgba(0,0,0,0.3);
+}
+.form-table.easySel-style .easySelect .styledSelect::-webkit-scrollbar-thumb {
+  background-color: #dedede;
+  outline: 0px solid slategrey;
+}
+.easySel-style .styledSelect:before {background-color: #fff;}
+/* .easySel-style .styledSelect:before, .easySel-style .styledSelect:after {display: none !important; background-image: none !important;}
+.easySel-style .styledSelect {
+    background-image: url(../images/admin_select_arw.png);
+    background-size: 18px;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+.easySel-style .styledSelect:before 
+{
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+	background-color: #fff;
+    transform: translateY(-50%);
+}
+ */
+/*-------------ToolTip----------------*/
+
+span.mls-admin-info-btn
+{
+    display: inline-block;
+    padding: 5px;
+    cursor: pointer;
+}
+span.mls-admin-info-btn svg {height: 15px; color: #B3B3B2;}
+.mls-admin-info-wrap {position: relative; display: inline-block; width: auto;}
+.mls-admin-info-toggle
+{
+	background-color: #0073aa;
+    color: #fff;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 9;
+    top: 50%;
+    left: 35px;
+    transform: translateY(-50%);
+    min-width: 200px;
+}
+.mls-admin-info-toggle p
+{
+	margin: 0 !important;
+    font-size: 12px;
+    line-height: 1.2;
+    color: #fff;
+}
+.mls-admin-info-toggle:after 
+{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -6px;
+    z-index: 1;
+    width: 0;
+    height: 0;
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid transparent;
+    border-right: 6px solid #0073aa;
+    transform: translateY(-50%);
+}
+
+.wp-list-table a.mls-toggle-qualified {display: inline-block; margin-top: 4px; margin-right: 5px; color: inherit; outline: none; border: none; box-shadow: none;}
+.wp-list-table a.mls-toggle-qualified .dashicons-star-empty {color: #9a9a9a;}
+.wp-list-table a.mls-toggle-qualified .dashicons-star-filled, .wp-list-table a.mls-toggle-qualified:hover .dashicons-star-empty {color: #e9c51f;}
+.form-table td p {margin-bottom: 4px;}
+.wp-list-table.widefat td {position: relative;}
+p#mls-last-refresh {width: 100%;}
+
+.mls-qualified-info-toggle
+{
+	background-color: #0073aa;
+    color: #fff;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 9;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    min-width: 170px;
+}
+.mls-qualified-info-toggle p
+{
+	margin: 0 !important;
+    font-size: 12px;
+    line-height: 1.2;
+    color: #fff;
+}
+.mls-qualified-info-toggle:after 
+{
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    z-index: 1;
+    width: 0;
+    height: 0;
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid transparent;
+    border-left: 6px solid #0073aa;
+    transform: translateY(-50%);
+}
+
+.mls-table-no-data td {text-align: center;}
+input.vd-btn.button {margin: 5px 5px 0 0;}
+.mls-lkv-msg {display: table; margin-top: 5px;}
+.form-table .mlspreflang label {display: inline-block; margin-bottom: 8px; margin-right: 8px;}
+
+/*-------KeyWord--------*/
+
+.form-table .tagsinput
+{
+    background-color: #fff;
+    margin: 0 0 10px;
+    width: 100%;
+    border: 1px solid #dedede;
+    font-size: 14px;
+    color: var(--mlsDefault-color);
+    box-shadow: none;
+    padding: 7px 7px;
+    border-radius: 3px;
+    text-transform: none;
+    text-shadow: none;
+    text-align: left;
+    height: 40px !important;
+    margin: 0;
+    font-family: inherit;
+    display: inline-flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+	max-width: 400px;
+}
+
+.form-table .tagsinput::-webkit-scrollbar {height: 2px;}
+.form-table .tagsinput::-webkit-scrollbar-track {box-shadow: inset 0 0 0px rgba(0,0,0,0.3);}
+.form-table .tagsinput::-webkit-scrollbar-thumb {background-color: #bfbfbf; outline: 0px solid slategrey;}
+
+.form-table input.tag-input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: #5c727d;
+    font-size: 14px;
+}
+.form-table input.tag-input::-moz-placeholder { /* Firefox 19+ */
+    color: #5c727d;
+    font-size: 14px;
+}
+.form-table input.tag-input:-ms-input-placeholder { /* IE 10+ */
+    color: #5c727d;
+    font-size: 14px;
+}
+.form-table input.tag-input:-moz-placeholder { /* Firefox 18- */
+    color: #5c727d;
+    font-size: 14px;
+}
+.form-table .tagsinput div input {color: var(--mlsDefault-color);}
+.form-table .tagsinput .tag {background: #efefef;}
+/* .form-table .tagsinput .tag .tag-remove:before, .tagsinput .tag .tag-remove:after {background: #f14a4a;} */
+.form-table .tagsinput .tag .tag-remove:before, .form-table .tagsinput .tag .tag-remove:after {background: #f14a4a;}
+/*-----------------*/
+
+/* .wp-core-ui .form-table select {min-width: 240px; max-width: 240px; height: 40px; border: 1px solid #dedede;}
+ */
+.wp-core-ui .mls-trial-notice.notice
+{
+	background-color: #f36b04;
+    border: none;
+    padding: 12px;
+	padding-left: 46px;
+	background-image: url(../images/trial_cal.png);
+	background-size: 24px;
+	background-position: left 12px center;
+	background-repeat: no-repeat;
+	border-radius: 0;
+}
+.wp-core-ui .mls-trial-notice.notice p
+{
+	color: #fff;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+.wp-core-ui .mls-trial-notice.notice p a {color: #fff; text-decoration: underline;}
+.wp-core-ui .mls-trial-notice.notice p a:hover {text-decoration: none;}
+.wp-core-ui .mls-trial-notice.notice .notice-dismiss {top: 50%; transform: translatey(-50%); transition: all 0.2s linear;}
+.wp-core-ui .mls-trial-notice.notice .notice-dismiss:hover {opacity: 0.7; transition: all 0.2s linear;}
+.wp-core-ui .mls-trial-notice.notice .notice-dismiss:before {color: #fff;}
+
+
+

@@ -1,0 +1,120 @@
+.tagsinput {
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-flex-wrap: wrap;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+	box-sizing: border-box;
+	background: #fff;
+	font-size: 14px;
+	line-height: 20px;
+	color: #5c727d;
+	padding: 5px 5px 0 5px;
+	border: 1px solid #e7e7e7;
+	border-radius: 2px;
+}
+
+.tagsinput.focus {
+	border-color: #e7e7e7;
+}
+
+.tagsinput * {
+	box-sizing: border-box;
+}
+
+.tagsinput .tag {
+	position: relative;
+	background: #e9e9e9;
+	display: block;
+	max-width: 100%;
+	word-wrap: break-word;
+	color: #5c727d;
+	padding: 5px 20px 5px 5px;
+	border-radius: 3px;
+	margin: 0;
+    line-height: 1;
+}
+.tagsinput .tag + .tag {margin-left: 2px;}
+.tagsinput .tag .tag-remove {
+	position: absolute;
+	background: none;
+	display: block;
+	width: 15px;
+	height: 24px;
+	top: 0;
+	right: 0;
+	cursor: pointer;
+	text-decoration: none;
+	text-align: center;
+	color: #222222;
+	line-height: 30px;
+	padding: 0;
+	border: 0;
+}
+
+.tagsinput .tag .tag-remove:before,
+.tagsinput .tag .tag-remove:after {
+	background: #222222;
+	position: absolute;
+	display: block;
+	width: 10px;
+	height: 1px;
+	top: 12px;
+	left: 1px;
+	content: '';
+}
+
+.tagsinput .tag .tag-remove:before {
+	-webkit-transform: rotateZ(45deg);
+	transform: rotateZ(45deg);
+}
+
+.tagsinput .tag .tag-remove:after {
+	-webkit-transform: rotateZ(-45deg);
+	transform: rotateZ(-45deg);
+}
+
+.tagsinput div {
+	-webkit-box-flex: 1;
+	-webkit-flex-grow: 1;
+	-ms-flex-positive: 1;
+	flex-grow: 1;
+    min-width: 160px;
+}
+
+.tagsinput div input {
+	background: transparent;
+	display: block;
+	width: 100%;
+	font-size: 16px;
+	line-height: 20px;
+	padding: 0 0 0 5px;
+	border: 0 none;
+	margin: 0;
+}
+
+.tagsinput div input.error {
+	color: #ff6b6b;
+}
+
+.tagsinput div input::-ms-clear {
+	display: none;
+}
+
+.tagsinput div input::-webkit-input-placeholder {
+	color: #5c727d;
+}
+
+.tagsinput div input:-moz-placeholder {
+	color: #5c727d;
+}
+
+.tagsinput div input::-moz-placeholder {
+	color: #5c727d;
+}
+
+.tagsinput div input:-ms-input-placeholder {
+	color: #5c727d;
+}
