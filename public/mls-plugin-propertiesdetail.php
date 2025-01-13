@@ -6,27 +6,29 @@ if (session_status() == PHP_SESSION_NONE) {
 function mls_property_details_shortcode() {
     $property_ref = get_query_var('property_ref');
     $property_type = isset($_GET['type']) ? $_GET['type'] : '';
+	$property_lang = isset($_GET['lang']) ? $_GET['lang'] : '';
 	$view_more_url = home_url( add_query_arg( [], $_SERVER['REQUEST_URI'] ) );
 	
 	// Map property types to their corresponding filters
 $filter_map = [
-    'For Sale' => get_option('mls_plugin_filter_id_sales'),
-    'For Rent' => get_option('mls_plugin_filter_id_short_rentals'),
-    'For Rent' => get_option('mls_plugin_filter_id_long_rentals'),
-    'Featured' => get_option('mls_plugin_filter_id_features'),
+    mls_plugin_translate('labels','for_sale') ?? 'For Sale' => get_option('mls_plugin_filter_id_sales'),
+    mls_plugin_translate('labels','for_rent') ?? 'For Rent' => get_option('mls_plugin_filter_id_short_rentals'),
+    mls_plugin_translate('labels','for_rent') ?? 'For Rent' => get_option('mls_plugin_filter_id_long_rentals'),
+    mls_plugin_translate('labels','featured') ?? 'Featured' => get_option('mls_plugin_filter_id_features'),
 ];
 	
-	
+	if(isset($_SESSION['mls_search_filters']['newdevelopment']) ){ $newdevelopment = $_SESSION['mls_search_filters']['newdevelopment']; }
+// 	echo $newdevelopment . "<br>";
     if (!$property_ref || !$property_type) {
-        return '<div class="search-not-perform"><p>Invalid property information.</p></div>';
+        return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_invalid_found') .'</p></div>';
     }
 // echo $property_ref . "<br>";
 // 	echo $property_type . "<br>";
     // Fetch property details using the reference and type
-    $properties = mls_plugin_fetch_ref($property_ref, $property_type);
+    $properties = mls_plugin_fetch_ref($property_ref, $property_type, $property_lang, $newdevelopment);
 
     if (!$properties) {
-        return '<div class="search-not-perform"><p>Property not found.</p></div>';
+        return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_not_found') .'</p></div>';
     }
 // 	else{
 // 		return '<pre>' . print_r($properties, true) . '</pre>';
@@ -39,8 +41,10 @@ $property_details = $properties['Property'];
 <section class="mls-parent-wrapper">
     <div class="mls-prj-details mls-main-content">
        <div class="mls-container">
-          <div class="mls-breadcrumb">
-             <?php mls_plugin_breadcrumb(); ?>
+		   <?php  $breadcrumbhide = get_option('mls_plugin_style_breadcrumbhide', '1'); 
+		   if($breadcrumbhide) { $breadcrumbhide="mlsbc-hide";}else{$breadcrumbhide="";} ?>
+          <div class="mls-breadcrumb <?php echo $breadcrumbhide; ?>">
+             <?php  mls_plugin_breadcrumb();  ?>
           </div>
 		   <div class="mls-pagination-btns-block">
     <div class="mls-pagi-btns-left">
@@ -53,22 +57,20 @@ $property_details = $properties['Property'];
 
             ?>
                 <a href="<?php echo esc_url($previous_page_url); ?>" class="mls-button">
-                    <img src="<?php echo esc_url(plugins_url('assets/images/prev-arrow.png', __DIR__)); ?>" alt="Previous" />
-                    Back to previous page </a>
+                    <img src="<?php echo esc_url(plugins_url('assets/images/prev-arrow.png', __DIR__)); ?>" alt="Previous" /><?php echo mls_plugin_translate('buttons','back_previous'); ?></a>
             <?php
             } else {
 				$previous_page_url = home_url();
                 // Fallback if no referrer is found
             ?>
                 <a href="<?php echo esc_url($previous_page_url); ?>" class="mls-button">
-                    <img src="<?php echo esc_url(plugins_url('assets/images/prev-arrow.png', __DIR__)); ?>" alt="Previous" />
-                    Back to Home </a>
+                    <img src="<?php echo esc_url(plugins_url('assets/images/prev-arrow.png', __DIR__)); ?>" alt="Previous" /><?php echo mls_plugin_translate('buttons','back_home'); ?></a>
             <?php
             }
             ?>
         </div>
     </div>
-    <div class="mls-pagi-btns-right">
+<!--     <div class="mls-pagi-btns-right">
         <div>
             <a href="javascript:void(0);" class="mls-button">
                 <img src="<?php echo esc_url(plugins_url('assets/images/prev.png', __DIR__)); ?>" alt="Previous" /> 
@@ -78,7 +80,7 @@ $property_details = $properties['Property'];
                 Next <img src="<?php echo esc_url(plugins_url('assets/images/next.png', __DIR__)); ?>" alt="Next" />
             </a>
         </div>
-    </div>
+    </div> -->
 </div>
 
           <div class="mls-prj-detail-full mls-heading">
@@ -91,14 +93,12 @@ $property_details = $properties['Property'];
     // Loop through and find the matching property type
     foreach ($filter_map as $mlsrentkey => $value) {
         if ($property_type == $value) {
-//             echo "Property type matches {$key} filter";
 			echo '<div class="mls-pyc-left"><span>'. $mlsrentkey .'</span></div>';
-            // Additional actions can be performed here based on the match
             break;
         }
     }
 } ?>
-                                <?php $prptitle = $property_details['PropertyType']['NameType'] . ' in ' . $property_details['Location']  . ', ' . $property_details['Area'] . ', ' . $property_details['Country']; 
+                                <?php $prptitle = $property_details['PropertyType']['NameType'] . ' ' . (mls_plugin_translate('general','in') ?? 'in') . ' ' . $property_details['Location']  . ', ' . $property_details['Area'] . ', ' . $property_details['Country']; 
 //                                 $prpfulllocation = $property_details['Location']  . ', ' . $property_details['Area'] . ', ' . $property_details['Country'];
 	$prpfulllocation = $property_details['Location']  . ', ' . $property_details['Province'] ;
                                 $prplocation = $property_details['Location'];
@@ -106,11 +106,11 @@ $property_details = $properties['Property'];
 								$prpgeoY = isset($property_details['GpsY']) ? $property_details['GpsY'] : null;
 								$prpVirtualTour = isset($property_details['VirtualTour']) ? $property_details['VirtualTour'] : null;
 								$prpVideoTour = isset($property_details['VideoTour']) ? $property_details['VideoTour'] : null;
-								$rentalpriceperiod = $property_details['RentalPeriod'] ?? 'Month'; 
+								$rentalpriceperiod = $property_details['RentalPeriod'] ?? mls_plugin_translate('general','month'); 
                                 ?>
 
                                <h2><?php echo esc_html($prptitle); ?></h2>
-                               <p><i class="fa-solid fa-location-dot"></i> <?php echo esc_html($property_details['Area'] . ', ' . $property_details['Country']); ?></p>
+                               <p class="mls-pyc-d-loc"><img src="<?php echo esc_url(plugins_url('assets/images/map-pin.png', __DIR__)); ?>"> <?php echo esc_html($property_details['Area'] . ', ' . $property_details['Country']); ?></p>
                             </div> 
                          </div>
                      </div>
@@ -134,11 +134,11 @@ $property_details = $properties['Property'];
                    </div>
                      <div class="mls-prjs1-bottom">
                         <div class="mls-share-social-pd">
-                            <span class="mls-ss-title">Share this:</span> <?php echo wp_kses_post(social_share_function($view_more_url)); ?>
+                            <span class="mls-ss-title"><?php echo mls_plugin_translate('general','share'); ?></span> <?php echo wp_kses_post(social_share_function($view_more_url)); ?>
                         </div>
 						 <div class="mls-virtual-btn">
-							 <?php if($prpVirtualTour){ ?> <a href="javascript:void(0);" id="open-virtual-tour" class="mls-button"><i class="fa-solid fa-vr-cardboard"></i> Virtual Tour</a><?php } ?> 
-							<?php if($prpVideoTour){ ?> <a href="javascript:void(0);" id="open-video-tour" class="mls-button"><i class="fa-solid fa-video"></i> Video Tour</a><?php } ?> 
+							 <?php if($prpVirtualTour){ ?> <a href="javascript:void(0);" id="open-virtual-tour" class="mls-button"><i class="fa-solid fa-vr-cardboard"></i> <?php echo mls_plugin_translate('buttons','virtual_tour'); ?></a><?php } ?> 
+							<?php if($prpVideoTour){ ?> <a href="javascript:void(0);" id="open-video-tour" class="mls-button"><i class="fa-solid fa-video"></i> <?php echo mls_plugin_translate('buttons','video_tour'); ?></a><?php } ?> 
 						 </div>
                      </div>
                  </div>
@@ -155,9 +155,9 @@ $property_details = $properties['Property'];
                  <div class="mls-prj-section mls-prj-lay mls-prjs5 show-xs">
                     <div class="cn-post">
                         <div class="mls-prj-price cn-area">
-                           <div><a href="#contact-from" class="mls-button">Book a Viewing</a></div>                            			<?php $price = $property_details['Price'];
+                           <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === 'For Rent' ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
+                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
                         </div>
                     </div>
                  </div>
@@ -165,7 +165,7 @@ $property_details = $properties['Property'];
                     <div class="mls-prj-feature">
         <?php if (!empty($property_details['Bedrooms']) && $property_details['Bedrooms'] != 0): ?>
             <div>
-                <div class="mls-pycf-t">Bedrooms</div>
+                <div class="mls-pycf-t"><?php echo mls_plugin_translate('specification','bedrooms'); ?></div>
                 <div class="mls-pycf-c">
                     <img src="<?php echo esc_url(plugins_url('assets/images/bed.png', __DIR__)); ?>" alt="Bedrooms" /> 
                     <span><?php echo esc_html($property_details['Bedrooms']); ?></span>
@@ -175,7 +175,7 @@ $property_details = $properties['Property'];
 
         <?php if (!empty($property_details['Bathrooms']) && $property_details['Bathrooms'] != 0): ?>
             <div>
-                <div class="mls-pycf-t">Bathrooms</div>
+                <div class="mls-pycf-t"><?php echo mls_plugin_translate('specification','bathrooms'); ?></div>
                 <div class="mls-pycf-c">
                     <img src="<?php echo esc_url(plugins_url('assets/images/bathtub.png', __DIR__)); ?>" alt="Bathrooms" />
                     <span><?php echo esc_html($property_details['Bathrooms']); ?></span>
@@ -185,7 +185,7 @@ $property_details = $properties['Property'];
 
         <?php if (!empty($property_details['Built']) && $property_details['Built'] != 0): ?>
             <div>
-                <div class="mls-pycf-t">Built Area</div>
+                <div class="mls-pycf-t"><?php echo mls_plugin_translate('specification','built'); ?></div>
                 <div class="mls-pycf-c">
                     <img src="<?php echo esc_url(plugins_url('assets/images/angle.png', __DIR__)); ?>" alt="Built Area" /> 
                     <span><?php echo esc_html($property_details['Built']); ?> m<sup>2</sup></span>
@@ -195,7 +195,7 @@ $property_details = $properties['Property'];
 
         <?php if (!empty($property_details['GardenPlot']) && $property_details['GardenPlot'] != 0): ?>
             <div>
-                <div class="mls-pycf-t">Garden Plot</div>
+                <div class="mls-pycf-t"><?php echo mls_plugin_translate('specification','garden'); ?></div>
                 <div class="mls-pycf-c">
                     <img src="<?php echo esc_url(plugins_url('assets/images/garden.png', __DIR__)); ?>" alt="Garden Plot" /> 
                     <span><?php echo esc_html($property_details['GardenPlot']); ?> m<sup>2</sup></span>
@@ -205,7 +205,7 @@ $property_details = $properties['Property'];
 
         <?php if (!empty($property_details['Terrace']) && $property_details['Terrace'] != 0): ?>
             <div>
-                <div class="mls-pycf-t">Terrace</div>
+                <div class="mls-pycf-t"><?php echo mls_plugin_translate('specification','terrace'); ?></div>
                 <div class="mls-pycf-c">
                     <img src="<?php echo esc_url(plugins_url('assets/images/outdoor.png', __DIR__)); ?>" alt="Terrace" /> 
                     <span><?php echo esc_html($property_details['Terrace']); ?> m<sup>2</sup></span>
@@ -216,67 +216,67 @@ $property_details = $properties['Property'];
 
                  </div>
                  <div class="mls-prj-section mls-prj-lay mls-prjs5 show-xs">
-                               <h4>Property Highlights</h4>
+                               <h4><?php echo mls_plugin_translate('prp_highlights','property_highlights'); ?></h4>
                                <div class="ltst-pst">
                     <?php if (!empty($property_ref)): ?>
                         <div class="ltst">
-                            <h4>Reference ID</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','referenceid'); ?></h4>
                             <p><?php echo esc_html($property_ref); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
                         <div class="ltst">
-                            <h4>Price</h4>
-                            <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === 'For Rent' ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></p>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
+                            <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['Location'])): ?>
                         <div class="ltst">
-                            <h4>Location</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','location'); ?></h4>
                             <p><?php echo esc_html($property_details['Location']); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['Area'])): ?>
                         <div class="ltst">
-                            <h4>Area</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','area'); ?></h4>
                             <p><?php echo esc_html($property_details['Area']); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['Country'])): ?>
                         <div class="ltst">
-                            <h4>Country</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','country'); ?></h4>
                             <p><?php echo esc_html($property_details['Country']); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['PropertyType']['NameType'])): ?>
                         <div class="ltst">
-                            <h4>Property type</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','property_type'); ?></h4>
                             <p><?php echo esc_html($property_details['PropertyType']['NameType']); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['Basura_Tax_Year']) && $property_details['Basura_Tax_Year'] != 0): ?>
                         <div class="ltst">
-                            <h4>Garbage fees/year</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','garbage_fees'); ?></h4>
                             <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html($property_details['Basura_Tax_Year']); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <?php if (!empty($property_details['IBI_Fees_Year']) && $property_details['IBI_Fees_Year'] != 0): ?>
                         <div class="ltst">
-                            <h4>IBI Fees</h4>
+                            <h4><?php echo mls_plugin_translate('prp_highlights','ibi_fees'); ?></h4>
                             <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html($property_details['IBI_Fees_Year']); ?></p>
                         </div>
                     <?php endif; ?>
                 </div>
                  </div>
                  <div class="mls-prj-section mls-prj-lay mls-prjs5">
-                     <h4>Features</h4>
+                     <h4><?php echo mls_plugin_translate('general','features'); ?></h4>
                      <div class="mls-prj-moredetail">
                          <ul>
             <?php $propertyFeatures = $property_details['PropertyFeatures'];
@@ -287,13 +287,13 @@ $property_details = $properties['Property'];
     <span class="mls-prjmd-cnt"><?php echo esc_html(implode(', ', $feature['Value'])); ?></span>
                 </li>
             <?php endforeach; 
-            }else{ echo "<p>No Features Available.</p>"; }
+            }else{ echo "<p>".mls_plugin_translate('error','mls_propertdetail_no_features')."</p>"; }
             ?>
         </ul>
                      </div>
                 </div>
                  <div class="mls-prj-section mls-prj-lay mls-prjs3">
-                     <h4>Description</h4>
+                     <h4><?php echo mls_plugin_translate('general','description'); ?></h4>
                      <div class="mls-prj-content">
                       <?php echo wp_kses_post( wpautop( $property_details['Description'] ) ); ?>
                      </div>
@@ -365,14 +365,14 @@ $property_details = $properties['Property'];
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p>No amenities available.</p>
+                <p><?php echo mls_plugin_translate('error','mls_propertdetail_no_amenities'); ?></p>
             <?php endif; ?>
         </div>
                  </div>
                  <?php $maphide = get_option('mls_plugin_maphide'); if(!$maphide){ ?>
                  <div class="mls-prj-section mls-prj-lay mls-prjs5">
-                     <h4>Property Location (Approximate)</h4>
-					 <p class="mls-prj-section-subtitle">For privacy reasons, the map displays an approximate location of the property. Please contact us for precise details or to arrange a viewing.</p>
+                     <h4><?php echo mls_plugin_translate('prp_map','property_location'); ?></h4>
+					 <p class="mls-prj-section-subtitle"><?php echo mls_plugin_translate('prp_map','property_location_descp'); ?></p>
                      <?php $map_provider = get_option('mls_plugin_map_provider', 'openstreetmap');
 
                         // Check if OpenStreetMap is selected
@@ -394,104 +394,163 @@ if (array_key_exists($prplocation, $prplocation_mapping)) {
                  </div>
 				 <?php } ?>
                  <div class="mls-prj-section mls-prj-lay mls-prjs6" id="contact-from">
-                     <h4>Book a Viewing</h4>
+                     <h4><?php echo get_option("mls_plugin_leadformheading"); ?></h4>
 					  <?php $videohide = get_option('mls_plugin_leadformvideohide');
-							 if($videohide){ $videohidecls ="videohidecls"; }else{$videohidecls="";} ?>
-                   <div class="mls-form <?php echo esc_attr( $videohidecls ); ?>">
+	$scheduledatehide = get_option('mls_plugin_leadformscheduledatehide');
+	$langhide = get_option('mls_plugin_leadformlanghide');
+	$buyersellerhide = get_option('mls_plugin_leadformbuyersellerhide');
+							 if($videohide){ $videohidecls ="videohidecls"; }else{$videohidecls="";}
+					 $options = [
+    'videohide' => 'videohidecls',
+    'scheduledatehide' => 'date-time-hide',
+    'langhide' => 'lang-hide',
+    'buyersellerhide' => 'bsa-hide',
+];
+
+$classes = [];
+foreach ($options as $option_key => $class_name) {
+    $option_value = get_option("mls_plugin_leadform{$option_key}");
+    $classes[$class_name] = $option_value ? $class_name : '';
+}
+
+// Example usage
+$videohidecls = $classes['videohidecls'];
+$scheduledatehidecls = $classes['date-time-hide'];
+$langhidecls = $classes['lang-hide'];
+$buyersellerhidecls = $classes['bsa-hide'];
+
+					 ?>
+                   <div class="mls-form <?php echo $videohidecls . " "; echo $scheduledatehidecls . " "; echo $langhidecls . " "; echo $buyersellerhidecls . " "; ?>">
                          <form id="mls-lead-form" method="POST">
                              <input type="hidden" name="action" value="mls_plugin_lead_form">
                              <input type="hidden" name="property_ref" value="<?php echo esc_attr($property_ref); ?>">
-                             <div class="mls-form-group mls-c1 date-field">
-                                 <div class="schedule-date-slider">
+                             <?php
+// Get the current year and month
+$currentYear = (int) date('Y');
+$currentMonth = (int) date('n'); // Numeric representation of month (1-12)
+
+// Generate years dynamically (current year + next 5 years)
+$years = range($currentYear, $currentYear + 1);
+
+// Generate months dynamically
+$months = [
+    1 => 'January',
+    2 => 'February',
+    3 => 'March',
+    4 => 'April',
+    5 => 'May',
+    6 => 'June',
+    7 => 'July',
+    8 => 'August',
+    9 => 'September',
+    10 => 'October',
+    11 => 'November',
+    12 => 'December',
+];
+?>
+
+<div class="mls-form-group mls-c2-fix month-field dmy custom-select">
+    <select name="month" id="month-select" onchange="updateDateSlider()">
+        <option value="">Please select the Month</option>
+        <?php foreach ($months as $key => $monthName): ?>
+            <option value="<?php echo $key; ?>" <?php echo ($key === $currentMonth) ? 'selected' : ''; ?>>
+                <?php echo esc_html($monthName); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+<div class="mls-form-group mls-c2-fix year-field dmy custom-select">
+    <select name="year" id="year-select" onchange="updateDateSlider()">
+        <option value="">Please select the Year</option>
+        <?php foreach ($years as $year): ?>
+            <option value="<?php echo $year; ?>" <?php echo ($year === $currentYear) ? 'selected' : ''; ?>>
+                <?php echo esc_html($year); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+                            <div class="mls-form-group mls-c1 date-field dmy">
+    <div class="schedule-date-slider" id="date-slider">
         <?php
-        // Get the current date
-        $currentDate = new DateTime();
+        // Loop through dates for the current month and year by default
+        $selectedMonth = $currentMonth;
+        $selectedYear = $currentYear;
+        $totalDays = cal_days_in_month(CAL_GREGORIAN, $selectedMonth, $selectedYear);
 
-        // Loop through the next 10 days
-        for ($i = 0; $i < 10; $i++) {
-            // Clone the current date to avoid modifying the original
-            $date = clone $currentDate;
-            $date->modify("+$i day");
+        for ($day = 1; $day <= $totalDays; $day++) {
+            $date = DateTime::createFromFormat('Y-n-j', "$selectedYear-$selectedMonth-$day");
 
-            // Get the day, date, and month
             $dayName = $date->format('D'); // Day name (e.g., Mon, Tue)
             $dayNum = $date->format('d');  // Day number (e.g., 01, 02)
-            $month = $date->format('M');   // Month name (e.g., Jan, Feb)
+            $month = $date->format('M');   // Short month name (e.g., Jan)
             $year = $date->format('Y');
-			// Get the formatted date
-            $formattedDate = $date->format('d/m/Y'); // Format: 03/12/2024
-            $dayFullName = $date->format('l'); // Full day name (e.g., Tuesday)
-
-            // Combine the formatted date and day name
+            $formattedDate = $date->format('d/m/Y');
+            $dayFullName = $date->format('l'); // Full day name
             $fullvalue = $formattedDate . ' (' . $dayFullName . ')';
-
-            // Generate a unique value for the radio button ID and value
-//             $value = strtolower($dayName) . '-' . $dayNum . '-' . strtolower($month) . '-' . $year;
-			$value = $dayName . '-' . $dayNum . '-' . $month . '-' . $year;
-            $isChecked = ($i === 0) ? 'checked="checked"' : ''; // Check the first input by default
         ?>
             <div>
                 <div class="property-schedule-singledate-wrapper">
-        <input type="radio" id="scheduledate" name="scheduledate" class="" value="<?php echo esc_attr($fullvalue); ?>" >
-        <div>
-            <span class="day-name"><?php echo esc_html($dayName); ?></span>
-            <span class="day-num"><?php echo esc_html($dayNum); ?></span>
-            <span class="day-month"><?php echo esc_html($month); ?></span>
-        </div>
-    </div>
+                    <input type="radio" id="scheduledate" name="scheduledate" value="<?php echo esc_attr($fullvalue); ?>">
+                    <div>
+                        <span class="day-name"><?php echo esc_html($dayName); ?></span>
+                        <span class="day-num"><?php echo esc_html($dayNum); ?></span>
+                        <span class="day-month"><?php echo esc_html($month); ?></span>
+                    </div>
+                </div>
             </div>
         <?php
         }
         ?>
     </div>
-								 <span class="error-message" id="scheduledateError"></span>
-                             </div>
+    <span class="error-message" id="scheduledateError"></span>
+</div>
                              <div class="mls-form-group mls-c3 time-field custom-select">
                                <?php mls_plugin_display_available_timings(); ?>
                              </div>
-							 <div class="mls-form-group mls-c3 time-field custom-select">
+							 <div class="mls-form-group mls-c3 lang-field custom-select">
                                <?php mls_plugin_display_language_options(); ?>
                              </div>
-                             <div class="mls-form-group mls-c3 user-type custom-select">
+                             <div class="mls-form-group mls-c3 bsa-field custom-select">
                                 <select name="buyerseller" id="buyerseller" >
-                                    <option>Buyer</option>
-                                    <option>Agent</option>
+                                    <option><?php echo mls_plugin_translate('placeholders','buyer'); ?></option>
+                                    <option><?php echo mls_plugin_translate('placeholders','agent'); ?></option>
                                 </select>
                              </div>
-                             <div class="mls-form-group mls-c3 tiw-align">
-                                <input type="text" placeholder="Your Name" id="user" name="user" >
+                             <div class="mls-form-group mls-c2 user-field">
+                                <input type="text" placeholder="<?php echo mls_plugin_translate('placeholders','your_name'); ?>" id="user" name="user" >
 								 <span class="error-message" id="userError"></span>
                              </div>
-                             <div class="mls-form-group mls-c3 tiw-align">
-                                <input type="email" placeholder="Your Email" id="email" name="email" >
+                             <div class="mls-form-group mls-c2 email-field">
+                                <input type="email" placeholder="<?php echo mls_plugin_translate('placeholders','your_email'); ?>" id="email" name="email" >
 								 <span class="error-message" id="emailError"></span>
                              </div>
-                             <div class="mls-form-group mls-c3 tiw-align">
-                                <input type="text" placeholder="Your Phone" id="phone" name="phone" >
+                             <div class="mls-form-group mls-c2 phone-field">
+                                <input type="text" placeholder="<?php echo mls_plugin_translate('placeholders','your_phone'); ?>" id="phone" name="phone" >
 								 <span class="error-message" id="phoneError"></span>
                              </div>
                               <?php if($videohide){ ?>
 							 <input type="hidden" name="personvideo" value="Person">
 							 <?php }else{ ?>
-                             <div class="mls-form-group mls-c3 tiw-align tour-info-wrap">
-                                 <label>Tour Type: <span class="tour-info"><i class="fa-solid fa-info"></i></span></label>
+                             <div class="mls-form-group mls-c2 tour-info-wrap">
+                                 <label><?php echo mls_plugin_translate('labels','tour_type'); ?> <span class="tour-info"><img src="<?php echo esc_url(plugins_url('assets/images/info.png', __DIR__)); ?>" class="tour-ico" alt="" /></span></label>
                                  <div class="tour-info-toggle">
-                                     <p>"If you are unable to visit the property in person, we can visit for you and connect via whatsapp video to give you a tour."</p>
+                                     <p><?php echo mls_plugin_translate('labels','tour_type_desc'); ?></p>
                                  </div>
                                  <div class="pervid">
-                                 <div class="pervid-blk active">
+                                 <div class="pervid-blk ">
                                     <input type="radio" id="Person" name="personvideo" value="Person" checked>
-                                    <label for="Person"><i class="fa-solid fa-user"></i> In Person</label>
+                                    <label for="Person"><img src="<?php echo esc_url(plugins_url('assets/images/person_t.png', __DIR__)); ?>" class="tour-ico" alt="" /> <?php echo mls_plugin_translate('placeholders','person'); ?></label>
                                  </div>
                                  <div class="pervid-blk">
                                     <input type="radio" id="Video" name="personvideo" value="Video">
-                                    <label for="Video"><i class="fa-solid fa-video"></i> Video</label>
+                                    <label for="Video"><img src="<?php echo esc_url(plugins_url('assets/images/video_t.png', __DIR__)); ?>" class="tour-ico" alt="" /> <?php echo mls_plugin_translate('placeholders','video'); ?></label>
                                  </div>
                                  </div>
                              </div>
 							 <?php } ?>
-                             <div class="mls-form-group mls-c1">
-                                 <?php $commentvalue = "I'm interested in '" . $prptitle . " , Ref: " . $property_ref . "'"; ?>
+                             <div class="mls-form-group mls-c1 interest-field">
+                                 <?php $commentvalue = mls_plugin_translate('placeholders','comment'). "'" . $prptitle . " , Ref: " . $property_ref . "'"; ?>
                                 <textarea id="comments" name="comment" cols="45" rows="8"><?php echo esc_html($commentvalue); ?></textarea>
                              </div>
                              <div class="mls-form-group mls-c1 mls-pr">
@@ -518,7 +577,7 @@ if (array_key_exists($prplocation, $prplocation_mapping)) {
                                  </div>
                              </div>
                              <div class="mls-form-group mls-c1">
-                                 <input type="submit" id="mlsSubmitButton" name="mls_leadform_submit" class="button" value="Submit Request">
+                                 <input type="submit" id="mlsSubmitButton" name="mls_leadform_submit" class="button" value="<?php echo mls_plugin_translate('buttons','submit_request'); ?>">
                              </div>
                          </form>
                      <div id="form-response-message"></div>
@@ -529,66 +588,66 @@ if (array_key_exists($prplocation, $prplocation_mapping)) {
                  <div class="mls-prj-sidebar-inner">
                     <div class="mls-latest-post cn-post">
                         <div class="mls-prj-price cn-area">
-                           <div><a href="#contact-from" class="mls-button">Book a Viewing</a></div>                            			<?php $price = $property_details['Price'];
+                           <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === 'For Rent' ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
+                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
                         </div>
                     </div>
                     <div class="mls-latest-post">
-                       <h3>Property Highlights</h3>
+                       <h3><?php echo mls_plugin_translate('prp_highlights','property_highlights'); ?></h3>
                        <div class="ltst-pst">
             <?php if (!empty($property_ref)): ?>
                 <div class="ltst">
-                    <h4>Reference ID</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','referenceid'); ?></h4>
                     <p><?php echo esc_html($property_ref); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
                 <div class="ltst">
-                    <h4>Price</h4>
-                    <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === 'For Rent' ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></p>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
+                    <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['Location'])): ?>
                 <div class="ltst">
-                    <h4>Location</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','location'); ?></h4>
                     <p><?php echo esc_html($property_details['Location']); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['Area'])): ?>
                 <div class="ltst">
-                    <h4>Area</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','area'); ?></h4>
                     <p><?php echo esc_html($property_details['Area']); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['Country'])): ?>
                 <div class="ltst">
-                    <h4>Country</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','country'); ?></h4>
                     <p><?php echo esc_html($property_details['Country']); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['PropertyType']['NameType'])): ?>
                 <div class="ltst">
-                    <h4>Property type</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','property_type'); ?></h4>
                     <p><?php echo esc_html($property_details['PropertyType']['NameType']); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['Basura_Tax_Year']) && $property_details['Basura_Tax_Year'] != 0): ?>
                 <div class="ltst">
-                    <h4>Garbage fees/year</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','garbage_fees'); ?></h4>
                     <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html($property_details['Basura_Tax_Year']); ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($property_details['IBI_Fees_Year']) && $property_details['IBI_Fees_Year'] != 0): ?>
                 <div class="ltst">
-                    <h4>IBI Fees</h4>
+                    <h4><?php echo mls_plugin_translate('prp_highlights','ibi_fees'); ?></h4>
                     <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html($property_details['IBI_Fees_Year']); ?></p>
                 </div>
             <?php endif; ?>

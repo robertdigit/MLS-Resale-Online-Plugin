@@ -1,5 +1,6 @@
 jQuery(document).ready(function(){
     jQuery("span.grid").addClass("active");
+    jQuery(".mls-tab-container").parents(".mls-form").addClass("mls-form-tab");
 	jQuery("span.list").click(function(){
       jQuery(this).parents(".mls-parent-wrapper").find(".mls-pro-list-wrapper").removeClass("pro-grid");
       jQuery(this).parents(".mls-parent-wrapper").find(".mls-pro-list-wrapper").addClass("pro-list");
@@ -27,6 +28,11 @@ jQuery(document).ready(function(){
     });
     jQuery('.loc a').attr('href', 'javascript:void(0);');
 });
+
+jQuery(document).ready(function($){
+	var sourceValue = $('.styledSelect').html();
+	$(this).parent("td").find(".easySelect-option-area").html(sourceValue);
+})
 
 jQuery(document).ready(function(){
 if (jQuery(window).width()<991) {
@@ -124,7 +130,7 @@ jQuery(document).ready(function(jQuery){
         dots: false,
         infinite: true,
         slidesToShow: 8,
-        slidesToScroll: 1,
+        slidesToScroll: 5,
         autoplay: false,
         margin: 0,
         arrows: true,
@@ -152,30 +158,35 @@ jQuery(document).ready(function(jQuery){
             {
               breakpoint: 750,
               settings: {
+				slidesToScroll: 2,
                 slidesToShow: 6
               }
               },
             {
               breakpoint: 575,
               settings: {
+				slidesToScroll: 2,
                 slidesToShow: 5
               }
               },
             {
               breakpoint: 450,
               settings: {
+				slidesToScroll: 2,
                 slidesToShow: 4
               }
               },
             {
               breakpoint: 380,
               settings: {
+				slidesToScroll: 2,
                 slidesToShow: 3
               }
               },
             {
               breakpoint: 340,
               settings: {
+				slidesToScroll: 1,
                 slidesToShow: 2
               }
               }
@@ -314,7 +325,7 @@ jQuery(document).ready(function(){
  jQuery(".mls_area_sel").easySelect({
      buttons: true,
      search: true,
-     placeholder: 'Area',
+     placeholder: mlsTranslations.search_area,
      placeholderColor: '',
      selectColor: '#524781',
      itemTitle: 'Car selected',
@@ -325,7 +336,7 @@ jQuery(document).ready(function(){
  jQuery(".mls_type_sel").easySelect({
      buttons: true,
      search: true,
-     placeholder: 'Type',
+     placeholder: mlsTranslations.search_property_type,
      placeholderColor: '',
      selectColor: '#524781',
      itemTitle: 'Car selected',
@@ -482,9 +493,18 @@ jQuery(document).ready(function(){
 
 });
 
-    
+jQuery(window).scroll(function(){
+  if (jQuery(window).scrollTop() >= 200) {
+    jQuery('header').addClass('fixed');
+   }
+   else {
+    jQuery('header').removeClass('fixed');
+   }
+});
+
  jQuery(document).ready(function() {
-	var stickyHeaderHeight = jQuery('header').outerHeight() + 20;
+	let stickyHeaderHeight = parseInt(mlsTranslations.mls_plugin_prop_detailsidebaroffset, 10);
+	 console.log(mlsTranslations.mls_plugin_prop_detailsidebaroffset);
    jQuery('.mls-prj-sidebar').stickySidebar({
         topSpacing: stickyHeaderHeight,
         container: '.mls-prj-detail-full',
@@ -494,6 +514,7 @@ jQuery(document).ready(function(){
         }
     });
  });
+
 
 jQuery(document).ready(function(jQuery) {
     // Check if the URL contains the anchor #contact
@@ -597,7 +618,7 @@ jQuery(document).ready(function() {
             'minChars': 1,
             'maxChars': null,
             'limit': null,
-            placeholder:'Search by Reference ID',
+            placeholder: mlsTranslations.search_reference_id,
         });
         jQuery('#mls_search_keyword_ban').tagsInput({
             'delimiter': [',', ';'],
@@ -605,7 +626,7 @@ jQuery(document).ready(function() {
             'minChars': 1,
             'maxChars': null,
             'limit': null,
-            placeholder:'Search by Reference ID',
+            placeholder: mlsTranslations.search_reference_id,
         });
     });
 });
@@ -616,38 +637,38 @@ jQuery(document).ready(function(jQuery) {
 		
 		// Reset error messages
         jQuery('.error-message').text('');
-
+		var phonenumbercode = $('.iti__selected-dial-code').text();
         var isValid = true;
         var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        var phonePattern = /^\d{9,15}$/; // Example for a 9,15-digit phone number
+        var phonePattern = /^\d{4,15}$/; // Example for a 9,15-digit phone number
 
         // Validate scheduledate
         if (!jQuery('input[name="scheduledate"]:checked').val()) {
-    jQuery('#scheduledateError').text('Please select a schedule date.');
+    jQuery('#scheduledateError').text(mlsTranslations.mls_propertdetail_form_scheduledate);
     isValid = false;
 }
 
         // Validate name
         if (jQuery('#user').val().trim() === '') {
-            jQuery('#userError').text('Please enter your name.');
+            jQuery('#userError').text(mlsTranslations.mls_propertdetail_form_name);
             isValid = false;
         }
 
         // Validate email
         if (jQuery('#email').val().trim() === '') {
-            jQuery('#emailError').text('Please enter your email.');
+            jQuery('#emailError').text(mlsTranslations.mls_propertdetail_form_email);
             isValid = false;
         } else if (!emailPattern.test(jQuery('#email').val().trim())) {
-            jQuery('#emailError').text('Please enter a valid email.');
+            jQuery('#emailError').text(mlsTranslations.mls_propertdetail_form_valid_email);
             isValid = false;
         }
 
         // Validate phone
         if (jQuery('#phone').val().trim() === '') {
-    jQuery('#phoneError').text('Please enter your phone number.');
+    jQuery('#phoneError').text(mlsTranslations.mls_propertdetail_form_phone_number);
     isValid = false;
 } else if (!phonePattern.test(jQuery('#phone').val().trim())) {
-    jQuery('#phoneError').text('Please enter a valid phone number (9 to 15 digits).');
+    jQuery('#phoneError').text(mlsTranslations.mls_propertdetail_form_valid_phone_number);
     isValid = false;
 } else {
     jQuery('#phoneError').text(''); // Clear the error message if valid
@@ -656,16 +677,17 @@ jQuery(document).ready(function(jQuery) {
 		if (isValid) {
 		
         var formData = jQuery(this).serialize(); // Serialize form data
+		formData += '&phonenumbercode=' + encodeURIComponent(phonenumbercode);
 		console.log(formData);
         jQuery.ajax({
             url: mls_ajax_obj.ajax_url, // AJAX handler
             type: 'POST',
             data: formData + '&action=mls_plugin_handle_lead_form', // Add action to data
 			beforeSend: function() {
-                    jQuery('#mlsSubmitButton').prop('disabled', true).val('Submitting...');
+                    jQuery('#mlsSubmitButton').prop('disabled', true).val(mlsTranslations.mls_propertdetail_form_submitting);
                 },
             success: function(response) {
-				jQuery('#mlsSubmitButton').prop('disabled', false).val('Submit Request');
+				jQuery('#mlsSubmitButton').prop('disabled', false).val(mlsTranslations.mls_propertdetail_form_submitrequest);
                 if (response.success) {
                     jQuery('#form-response-message').html('<p class="success-message">' + response.data.message + '</p>');
                     jQuery('#mls-lead-form')[0].reset(); // Reset form fields on success
@@ -674,12 +696,143 @@ jQuery(document).ready(function(jQuery) {
                 }
             },
             error: function() {
-                jQuery('#form-response-message').html('<p class="error-message">There was an issue submitting the form. Please try again.</p>');
+                jQuery('#form-response-message').html('<p class="error-message">'+ mlsTranslations.mls_propertdetail_form_submiterror +'</p>');
             }
         });
 	}else {
-                    jQuery('#form-response-message').html('<p class="error-message">Required fields are missing.</p>');
+                    jQuery('#form-response-message').html('<p class="error-message">'+ mlsTranslations.mls_propertdetail_form_submitrequiredmissing +'</p>');
                 }
     });
 });
 
+jQuery(document).ready(function() {
+   var input = document.querySelector(".phone-field #phone");
+   window.intlTelInput(input,({
+	  countrySearch:true,
+	   initialCountry:"es",
+	   separateDialCode: true
+   }));        
+});
+
+jQuery(document).ready(function($) {
+	$("ul.srh-tab-nav").each(function(){
+        var countLi = $(this).find("li").length;
+        if(countLi == 4 ){
+           $(this).parents("form").find("ul.srh-tab-nav").addClass("c4");
+         }
+        if(countLi == 3 ){
+           $(this).parents("form").find("ul.srh-tab-nav").addClass("c3");
+         }
+        if(countLi == 2 ){
+           $(this).parents("form").find("ul.srh-tab-nav").addClass("c2");
+         }
+        if(countLi == 1 ){
+           $(this).parents("form").find("ul.srh-tab-nav").addClass("c1");
+         }
+    });
+
+});
+function updateDateSlider() {
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+    const dateSlider = jQuery('#date-slider'); // Use jQuery for better integration
+
+    const selectedMonth = monthSelect.value;
+    const selectedYear = yearSelect.value;
+
+    if (!selectedMonth || !selectedYear) {
+        dateSlider.html('<p>Please select both Month and Year.</p>');
+        return;
+    }
+
+    // AJAX request using jQuery
+    jQuery.ajax({
+        url: mls_ajax_obj.ajax_url,
+        type: 'POST',
+        data: {
+            action: 'update_dates',
+            month: selectedMonth,
+            year: selectedYear
+        },
+        success: function (response) {
+            // Destroy the previous slick slider instance
+            if (dateSlider.hasClass('slick-initialized')) {
+                dateSlider.slick('unslick');
+            }
+
+            // Update the slider content
+            dateSlider.html(response);
+
+            // Reinitialize the slick slider
+            dateSlider.slick({
+        dots: false,
+        infinite: true,
+        slidesToShow: 8,
+        slidesToScroll: 5,
+        autoplay: false,
+        margin: 0,
+        arrows: true,
+        prevArrow:'<button type="button" class="slick-prev"><i class="fa-solid fa-chevron-left"></i></div>',
+        nextArrow:'<button type="button" class="slick-next"><i class="fa-solid fa-chevron-right"></i></div>',
+          responsive: [
+            {
+              breakpoint: 1300,
+              settings: {
+                slidesToShow: 7
+              }
+              },
+            {
+              breakpoint: 1200,
+              settings: {
+                slidesToShow: 6
+              }
+              },
+            {
+              breakpoint: 992,
+              settings: {
+                slidesToShow: 7
+              }
+              },
+            {
+              breakpoint: 750,
+              settings: {
+				slidesToScroll: 2,
+                slidesToShow: 6
+              }
+              },
+            {
+              breakpoint: 575,
+              settings: {
+				slidesToScroll: 2,
+                slidesToShow: 5
+              }
+              },
+            {
+              breakpoint: 450,
+              settings: {
+				slidesToScroll: 2,
+                slidesToShow: 4
+              }
+              },
+            {
+              breakpoint: 380,
+              settings: {
+				slidesToScroll: 2,
+                slidesToShow: 3
+              }
+              },
+            {
+              breakpoint: 340,
+              settings: {
+				slidesToScroll: 1,
+                slidesToShow: 2
+              }
+              }
+            ]	
+      });
+        },
+        error: function () {
+            console.error('Failed to fetch dates');
+        }
+    });
+}

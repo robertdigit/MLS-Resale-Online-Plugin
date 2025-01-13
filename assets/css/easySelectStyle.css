@@ -4,17 +4,17 @@
 }
 
 .form-group > .easySelect {
-    font-size: 16px !important;
+/*     font-size: var(--mls-lg-fontsize) !important; */
     cursor: default;
     display: block;
     /*make dropdown width */
     position: relative;
-    color: var(--default-color);
+    color: var(--mls-Text-color);
     border-radius: 3px;
     height: 40px;
 	margin: 0;
-	border: 1px solid var(--mlsBorder-color);
-    background-color: var(--mlsBgWhite-color);
+	border: 1px solid var(--mls-Border-color);
+    background-color: var(--mls-BgWhite-color);
 }
 
 .styledSelect {
@@ -27,26 +27,25 @@
 	height: 38px;
     padding: 10px 35px 10px 15px;
     font-weight: 400 !important;
-/* 	border: 1px solid var(--mlsBorder-color); */
-    background-color: var(--mlsBgWhite-color);
-
-    color: var(--default-color) !important;
+/* 	border: 1px solid var(--mls-Border-color); */
+    background-color: var(--mls-BgWhite-color);
+    color: var(--mls-Text-color) !important;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-	font-size: 14px;
-    line-height: 14px;
+	font-size: var(--mls-lg-fontsize);
+    line-height: var(--mls-lg-fontsize);
 	display: flex;
     align-items: center;
     cursor: pointer;
     width: 100%;
 }
-.styledSelect:before {content: ''; position: absolute; top: 0; right: 0; width: 35px; height: 100%; background-color: var(--mlsBgWhite-color);}
+.styledSelect:before {content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 100%; background-color: var(--mls-BgWhite-color);}
 
 .clearSelectfromDiv {
     float: left;
     margin-left: 4px;
-    font-size: 16px;
+    font-size: var(--mls-lg-fontsize);
     cursor: pointer;
     position: relative;
     top: 50%;
@@ -80,7 +79,7 @@
 
 .styledSelect:active,
 .styledSelect.active {
-    background-color: var(--mlsBgWhite-color);
+    background-color: var(--mls-BgWhite-color);
 }
 
 .easySelect .options {
@@ -94,8 +93,8 @@
     padding: 0 !important;
     padding: 3px 0 0 0px !important;
     list-style: none;
-    border: 1px solid var(--mlsBorder-color) !important;
-    background-color: var(--mlsBgWhite-color);
+    border: 1px solid var(--mls-Border-color) !important;
+    background-color: var(--mls-BgWhite-color);
     border-radius: 6px;
     -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -108,13 +107,13 @@
 }
 
 .divSearcheasySelect {
-    border-bottom: 1px solid var(--mlsBorder-color) !important;
+    border-bottom: 1px solid var(--mls-Border-color) !important;
 }
 
 .easySelect .options li {
     margin: auto;
     max-width: 100% !important;
-    font-size: 15px !important;
+    font-size: var(--mls-md-fontsize) !important;
     font-weight: 500;
     overflow: hidden;
 }
@@ -132,7 +131,7 @@
     margin: 0px;
     width: auto !important;
     cursor: pointer;
-    font-size: 15px;
+    font-size: var(--mls-md-fontsize);
     padding: 2px 0px 10px 25px !important;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -183,7 +182,7 @@
     top: 1px;
     width: 4.5px;
     height: 10px;
-    border: 1px solid #8e8e8e;
+    border: 1px solid var(--mls-Border-color);
     border-width: 0 1px 1px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -195,7 +194,7 @@
     padding: 10px;
     overflow: hidden;
 }
-.mls-form .divSearcheasySelect input[type="text"] {margin: 10px 0 0 !important; padding: 5px; font-size: 14px; height: 34px; border: 1px solid var(--mlsBorderLight-color) !important;}
+.mls-form .divSearcheasySelect input[type="text"] {margin: 10px 0 0 !important; padding: 5px; font-size: var(--mls-md-fontsize); height: 34px; border: 1px solid var(--mls-Border-color) !important;}
 .optionRow {
     margin: -4px 0px 8px 0px;
     border-radius: 3px;
@@ -210,14 +209,14 @@
     margin: 0;
     text-align: center;
     padding: 7px 5px 5px;
-    font-size: 12px;
+    font-size: var(--mls-md-fontsize);
     cursor: pointer;
     border-radius: 4px;
     font-weight: 500;
-    background-color: #e2e2e2;
-    color: #494949;
+    background-color: var(--mls-BgGrey-color);
+    color: var(--mls-Text-color);
 }
-#clearAlleasySelect:hover, #selectAlleasySelect:hover {background-color: #cdcdcd;}
+#clearAlleasySelect:hover, #selectAlleasySelect:hover {background-color: var(--mls-BgDark-color);}
 
 .optionRow:hover {
     color: rgba(65, 76, 82, 0.81);
@@ -225,38 +224,41 @@
 
 .optionRow .alleasySelect {
     display: none;
-    font-size: 13px;
+    font-size: var(--mls-sm-fontsize);
     margin: 2px auto auto 4px;
 }
 
 .divSearcheasySelect .searchInputeasySelect {
     width: 100%;
     margin-right: auto;
-    color: var(--primary-color);
-    border: 1px solid var(--mlsBorder-color) !important;
+    color: var(--mls-Text-color);
+    border: 1px solid var(--mls-Border-color) !important;
     height: 42px;
-    background-color: var(--mlsBorderLight-color) !important;
-    font-size: var(--font-normal);
+    background-color: var(--mls-BgWhite-color) !important;
+    font-size: var(--mls-md-fontsize);
     text-indent: 8px;
     border-radius: 6px;
 	padding: 10px;
 }
 
 .divSearcheasySelect .searchInputeasySelect::-ms-input-placeholder {
-    color: #6c757d !important;
+    color: var(--mls-Text-color) !important;
+	font-size: var(--mls-md-fontsize);
 }
 
 .divSearcheasySelect .searchInputeasySelect::-moz-placeholder {
-    color: #6c757d !important;
+    color: var(--mls-Text-color) !important;
+	font-size: var(--mls-md-fontsize);
 }
 
 .divSearcheasySelect .searchInputeasySelect::placeholder {
-    color: #6c757d !important;
+    color: var(--mls-Text-color) !important;
+	font-size: var(--mls-md-fontsize);
 }
 
 .divSearcheasySelect .searchInputeasySelect:focus {
-    color: #495057;
-    background-color: var(--mlsBgWhite-color);
+    color: var(--mls-Text-color);
+    background-color: var(--mls-BgWhite-color);
     outline: 0;
 /*
     border-color: var(--info) !important;
@@ -268,12 +270,12 @@
 
 .divOptionsesySelect>p {
     display: inline-block;
-    font-size: 12px;
+    font-size: var(--mls-sm-fontsize);
 }
 
 .messageMaxallowedSelections {
     padding: 0px !important;
-    font-size: 12px;
+    font-size: var(--mls-sm-fontsize);
     font-weight: bold;
     margin: auto;
     color: #838383;
@@ -286,7 +288,7 @@
 }
 
 li.hiddenLieasySelect {
-    font-size: 12px !important;
+    font-size: var(--mls-sm-fontsize) !important;
     font-weight: 600;
 }
 
@@ -297,7 +299,7 @@ li.hiddenLieasySelect {
 
 .easySelect .options li.no_results {
     padding: 0 0 8px;
-    font-size: 13px !important;
+    font-size: var(--mls-md-fontsize) !important;
     font-weight: 400;
     text-align: center;
     margin-top: -8px;

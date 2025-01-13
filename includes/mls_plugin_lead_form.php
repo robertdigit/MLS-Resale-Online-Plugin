@@ -9,7 +9,7 @@ $required_fields = ['property_ref', 'user', 'email', 'phone', 'scheduledate'];
 // Loop through each required field and check if it's empty
 foreach ($required_fields as $field) {
     if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
-        wp_send_json_error(['message' => 'Required fields are missing.']);
+        wp_send_json_error(['message' => mls_plugin_translate('error','mls_propertdetail_form_submitrequiredmissing') ]);
         return; // Stop further execution
     }
 }
@@ -20,7 +20,7 @@ foreach ($required_fields as $field) {
     // Sanitize form data
     $user_name = sanitize_text_field($_POST['user']);
     $email = sanitize_email($_POST['email']);
-    $phone = sanitize_text_field($_POST['phone']);
+    $phone = sanitize_text_field($_POST['phonenumbercode']) . sanitize_text_field($_POST['phone']);
     $comments = sanitize_textarea_field($_POST['comment']);
     $property_ref = sanitize_textarea_field($_POST['property_ref']);
     $personvideo = sanitize_textarea_field($_POST['personvideo']);
@@ -70,15 +70,67 @@ foreach ($required_fields as $field) {
     $sent = wp_mail($admin_email, $subject, $message, $headers);
 
     if ($sent) {
-        wp_send_json_success(['message' => 'Thank you! Your request has been submitted, and an email has been sent.']);
+        wp_send_json_success(['message' => mls_plugin_translate('error','mls_propertdetail_form_submitsuccess') ]);
     } else {
-        wp_send_json_error(['message' => 'There was an issue submitting the form. Please try again.']);
+        wp_send_json_error(['message' => mls_plugin_translate('error','mls_propertdetail_form_submiterror') ]);
     }
 
     wp_die(); // Required to terminate the AJAX call properly
 }
 add_action('wp_ajax_mls_plugin_handle_lead_form', 'mls_plugin_handle_lead_form_submission');
 add_action('wp_ajax_nopriv_mls_plugin_handle_lead_form', 'mls_plugin_handle_lead_form_submission');
+
+add_action('wp_ajax_update_dates', 'update_date_slider');
+add_action('wp_ajax_nopriv_update_dates', 'update_date_slider');
+
+function update_date_slider() {
+    // Get the selected month and year from the AJAX request
+    $month = isset($_POST['month']) ? intval($_POST['month']) : 0;
+    $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
+
+    if (!$month || !$year) {
+        echo '<p>Error: Invalid Month or Year.</p>';
+        wp_die();
+    }
+
+    // Calculate the number of days in the selected month and year
+    $totalDays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+    // Generate HTML for the date slider in slick slider format
+    $output = '';
+
+    for ($day = 1; $day <= $totalDays; $day++) { 
+        $date = DateTime::createFromFormat('Y-n-j', "$year-$month-$day");
+
+        $dayName = $date->format('D'); // Day name (e.g., Mon, Tue)
+        $dayNum = $date->format('d');  // Day number (e.g., 01, 02)
+        $monthName = $date->format('M');   // Short month name (e.g., Jan)
+        $formattedDate = $date->format('d/m/Y');
+        $dayFullName = $date->format('l'); // Full day name
+
+        $fullValue = $formattedDate . ' (' . $dayFullName . ')';
+
+        // Add each day as a slick-slide
+        $output .= '<div class="slick-slide" style="width: 106px;">';
+        $output .= '  <div class="property-schedule-singledate-wrapper">';
+        $output .= '    <input type="radio" id="scheduledate" name="scheduledate" value="' . esc_attr($fullValue) . '">';
+        $output .= '    <div>';
+        $output .= '      <span class="day-name">' . esc_html($dayName) . '</span>';
+        $output .= '      <span class="day-num">' . esc_html($dayNum) . '</span>';
+        $output .= '      <span class="day-month">' . esc_html($monthName) . '</span>';
+        $output .= '    </div>';
+        $output .= '  </div>';
+        $output .= '</div>';
+    }
+
+    $output .= ''; // Close slick-list and slick-track
+
+    // Return the full slick slider HTML
+    echo $output;
+    wp_die();
+}
+
+
 
 // Function to display the language option in the settings page
 function mls_plugin_display_language_setting_options(){
@@ -104,12 +156,12 @@ function mls_plugin_display_language_setting_options(){
 	
 	$output = '';
     foreach ($predefined_languages as $key => $label) {
-        $output .= '<label>';
+        $output .= '<div class="mls-custom-checkbox">';
         $output .= '<input type="checkbox" name="mls_plugin_languages[]" value="' . esc_attr($key) . '"';
         $output .= checked(in_array($key, (array)$languages), true, false);
-        $output .= '>';
+        $output .= '><label>';
         $output .= esc_html($label);
-        $output .= '</label>';
+        $output .= '</label></div>';
     }
 
     $output .= '<br><br>';
@@ -229,17 +281,17 @@ function mls_plugin_display_lead_form_data() {
 
     ?>
     <div class="wrap">
-        <h1>Lead Form Submissions</h1>
+        <h1 class="mls-ap-heading-style1">Lead Form Submissions</h1>
         <div class="mls-table-reponsive">
-            <table class="wp-list-table widefat fixed striped">
+            <table class="wp-list-table widefat fixed mls-table-theme">
                 <thead>
                     <tr>
-                        <th>Entry ID</th>
-                        <th>Reference ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-						<th>Date Submitted</th>
-                        <th>Actions</th>
+                        <th><span class="mls-table-icon mls-id"></span>Entry ID</th>
+                        <th><span class="mls-table-icon mls-id"></span>Reference ID</th>
+                        <th><span class="mls-table-icon mls-name"></span>Name</th>
+                        <th><span class="mls-table-icon mls-email"></span>Email</th>
+						<th><span class="mls-table-icon mls-datetime"></span>Date Submitted</th>
+                        <th><span class="mls-table-icon mls-actions"></span>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -365,17 +417,17 @@ function mls_plugin_display_qualified_leads() {
 
     ?>
     <div class="wrap">
-        <h1>Qualified Leads</h1>
+        <h1 class="mls-ap-heading-style1">Qualified Leads</h1>
 		<div class="mls-table-reponsive">
-        <table class="wp-list-table widefat fixed striped">
+        <table class="wp-list-table widefat fixed mls-table-theme">
             <thead>
                 <tr>
-                    <th>Entry ID</th>
-                    <th>Property ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Date Submitted</th>
-					<th>Actions</th>
+                    <th><span class="mls-table-icon mls-id"></span>Entry ID</th>
+                    <th><span class="mls-table-icon mls-id"></span>Property ID</th>
+                    <th><span class="mls-table-icon mls-name"></span>Name</th>
+                    <th><span class="mls-table-icon mls-email"></span>Email</th>
+                    <th><span class="mls-table-icon mls-datetime"></span>Date Submitted</th>
+					<th><span class="mls-table-icon mls-actions"></span>Actions</th>
                 </tr>
             </thead>
             <tbody>

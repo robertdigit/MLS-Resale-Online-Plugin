@@ -34,16 +34,51 @@ function mls_plugin_fetch_locations() {
     return $results;
 }
 
+// Function to fetch currency using the Resales Online API.
+function mls_plugin_fetch_currency() {
+    $mls_plugin_api_key = get_option('mls_plugin_api_key');
+    $mls_plugin_client_id = get_option('mls_plugin_client_id');
+    $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
+	
+    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getProperties']; // Replace with actual API endpoint
+
+    // Build the full URL with the passed parameters
+    $query_args = array(
+        'P_ApiId' => $mls_plugin_filter_id_sales,
+        'p1' => $mls_plugin_client_id,
+        'p2' => $mls_plugin_api_key,
+    );
+
+    $baseurl = add_query_arg($query_args, $endpoint);
+
+    // Make the API request.
+    $response = wp_remote_get($baseurl);
+
+    if (is_wp_error($response)) {
+        return "Error: " . $response->get_error_message();
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $results = json_decode($body, true);
+
+    // Check for JSON decoding errors
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return "Error: Could not decode JSON response.";
+    }
+
+    return $results;
+	
+}
+
 /*****Location cache - To avoid making frequent API calls, we use WordPress transients to cache the locations temporarily:****/
 
 function mls_plugin_get_cached_locations() {
     // Try to get locations from transient
     $locations = get_transient('mls_plugin_locations');
-
+	
     if ($locations === false) {
         // If transient does not exist, fetch from API
         $locations = mls_plugin_fetch_locations();
-
         // Check if locations array is valid and not empty
         if (!empty($locations) && $locations['QueryInfo']['LocationCount'] > 0) {
             // Cache the results for 12 hours only if data is valid
@@ -57,18 +92,78 @@ function mls_plugin_get_cached_locations() {
     return $locations;
 }
 
+function mls_plugin_get_cached_currencies() {
+	$currency = get_transient('mls_plugin_currency');
+	
+    if ($currency === false) {
+        
+		$currency = mls_plugin_fetch_currency();
+		// Check if currency property array is valid and not empty
+        if ( !empty($currency) ) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient('mls_plugin_currency', $locations, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient('mls_plugin_currency', [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $currency;
+}
+
+function mls_plugin_get_cached_mls_connection() {
+    // Try to get locations from transient
+    $mls_connection = get_transient('mls_plugin_connectionsts');
+	
+    if ($mls_connection === false) {
+        // If transient does not exist, fetch from API
+        $mls_connection = check_mls_connection();
+        // Check if locations array is valid and not empty
+       
+			if ( !empty($mls_connection) && $mls_connection['transaction']['status'] === 'success') {
+            // Cache the results for 12 hours only if data is valid
+            set_transient('mls_plugin_connectionsts', $mls_connection, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient('mls_plugin_connectionsts', $mls_connection, 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $mls_connection;
+}
+
 /***** Refresh Location cache through ajax call - To avoid making frequent API calls, we use WordPress transients to cache the locations temporarily:****/
 add_action('wp_ajax_mls_refresh_locations', 'mls_plugin_refresh_locations');
 function mls_plugin_refresh_locations() {
     
     // Clear the transient
-    if (delete_transient('mls_plugin_locations')) {
+    $location_deleted = delete_transient('mls_plugin_locations');
+$currency_deleted = delete_transient('mls_plugin_currency');
+$connectionsts_deleted = delete_transient('mls_plugin_connectionsts');
+$propertytype_multilang_deleted = delete_transient('mls_plugin_propertytype_multilang');
+
+if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propertytype_multilang_deleted) {
 		$current_time = current_time('mysql');
         update_option('mls_plugin_last_cache_refresh', $current_time);
 		mls_plugin_get_cached_locations();
-        wp_send_json_success('Location cache refreshed successfully.');
+	if (defined('DOING_AJAX') && DOING_AJAX) {
+            wp_send_json_success('Cache cleared & Resale Online data synced successfully.');
+        } else {
+            return true; // Success for form submission
+        }
+//         wp_send_json_success('Cache cleared & Resale Online data synced successfully.');
     } else {
-        wp_send_json_error('Failed to refresh location cache.');
+        $error_messages = [];
+    if (!$location_deleted) $error_messages[] = 'Locations';
+    if (!$currency_deleted) $error_messages[] = 'Currency';
+    if (!$connectionsts_deleted) $error_messages[] = 'Connection Status';
+	if (!$propertytype_multilang_deleted) $error_messages[] = 'Property types Multi-language';
+	
+    if (defined('DOING_AJAX') && DOING_AJAX) {
+    wp_send_json_error('Failed to sync data for: ' . implode(', ', $error_messages));
+		 } else {
+            return false; 
+        }
     }
 }
 
@@ -82,6 +177,7 @@ function mls_plugin_property_type_filter_callback() {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
 	 $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
+	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
 
     // Define the API endpoint.
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesTypes'];
@@ -91,6 +187,7 @@ function mls_plugin_property_type_filter_callback() {
 		'P_ApiId' => $mls_plugin_filter_id_sales,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
+		'P_Lang' => $mls_plugin_prop_language,
     ), $endpoint);
 
 // 	echo $url; 
@@ -110,10 +207,10 @@ function mls_plugin_property_type_filter_callback() {
         echo "Error: Could not decode JSON response.";
         return;
     }
-
     // Check if the property types are available.
     if (isset($property_types['PropertyTypes']) && is_array($property_types['PropertyTypes'])) {
-        echo '<select name="mls_plugin_property_types[]" id="mls_property_types" multiple class="sel-app">';
+		echo '<input type="hidden" name="mls_plugin_currency" value="" />';
+        echo '<div class="mls-multiSelects"><select name="mls_plugin_property_types[]" id="mls_property_types" multiple class="sel-app">';
         
         foreach ($property_types['PropertyTypes']['PropertyType'] as $type) {
             $option_value = $type['OptionValue'];  // The value attribute
@@ -141,14 +238,114 @@ echo '<option value="' . esc_attr($json_encoded_suboption) . '" ' . esc_attr($se
             }
         }
 
-        echo '</select>';
+        echo '</select></div>';
     } else {
         echo "No property types found.";
     }
 }
 
+// Property types for multi-language.
+function mls_plugin_property_type_filter_callback_multilang($language) {
+
+    // Get the API key, client ID, and other required options.
+    $mls_plugin_api_key = get_option('mls_plugin_api_key');
+    $mls_plugin_client_id = get_option('mls_plugin_client_id');
+	 $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
+
+    // Define the API endpoint.
+    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesTypes'];
+
+    // Construct the API request URL with necessary parameters.
+    $url = add_query_arg(array(
+		'P_ApiId' => $mls_plugin_filter_id_sales,
+        'p1' => $mls_plugin_client_id,
+        'p2' => $mls_plugin_api_key,
+		'P_Lang' => $language,
+    ), $endpoint);
+
+// 	echo $url; 
+	
+    // Fetch property types from the API.
+    $response = wp_remote_get($url);
+
+    if (is_wp_error($response)) {
+        echo "Error: " . esc_html($response->get_error_message());
+        return;
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $property_types = json_decode($body, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo "Error: Could not decode JSON response.";
+        return;
+    }
+     return $property_types;
+}
+
+function mls_plugin_get_cached_propertytype_multilang($language) {
+    // Try to get locations from transient
+    $propertytype_multilang = get_transient('mls_plugin_propertytype_multilang');
+	
+    if ($propertytype_multilang === false) {
+        // If transient does not exist, fetch from API
+        $propertytype_multilang = mls_plugin_property_type_filter_callback_multilang($language);
+        // Check if locations array is valid and not empty
+        if (!empty($propertytype_multilang) && $propertytype_multilang['PropertyTypes']['PropertyType'] > 0) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient('mls_plugin_propertytype_multilang', $propertytype_multilang, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient('mls_plugin_propertytype_multilang', [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $propertytype_multilang;
+}
+
+// Function to check connection status using the Resales Online API.
+function check_mls_connection() {
+	
+ 	$mls_plugin_api_key = get_option('mls_plugin_api_key');
+    $mls_plugin_client_id = get_option('mls_plugin_client_id');
+	 $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
+
+    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getProperties']; // Replace with actual API endpoint
+
+    // Build the full URL with the passed parameters
+    $query_args = array(
+        'P_ApiId' => $mls_plugin_filter_id_sales,
+        'p1' => $mls_plugin_client_id,
+        'p2' => $mls_plugin_api_key,
+    );
+
+
+    $baseurl = add_query_arg($query_args, $endpoint);
+
+//     echo 'base url' . $baseurl . '<br>';
+//     die('tst-end');
+
+    // Make the API request.
+    $response = wp_remote_get($baseurl);
+
+    if (is_wp_error($response)) {
+        return "Error: " . $response->get_error_message();
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $results = json_decode($body, true);
+
+    // Check for JSON decoding errors
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return "Error: Could not decode JSON response.";
+    }
+
+    return $results;
+	
+}
+
 // Function to fetch properties using the Resales Online API.
-function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id) {
+function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment) {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
     $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
@@ -159,14 +356,19 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 	$area = implode(',', $area);
 	$beds = $beds ? $beds. 'x' : '';
 	$baths = $baths ? $baths. 'x' : '';
-
-// 	echo $filter_type. "<br>";
+	if (!get_option('mls_plugin_style_proplanghide')) {
+        $language = get_option('mls_plugin_prop_language');
+    }
+// 	echo "lang: ". $language. "<br>";
 // 	echo $keyword. "<br>";
 
 	if ($filter_type === 'short_rentals') {
         $filter_id = $mls_plugin_filter_id_short_rentals;
     } elseif ($filter_type === 'long_rentals') {
         $filter_id = $mls_plugin_filter_id_long_rentals;
+    } elseif ($filter_type === 'new_development') {
+        $filter_id = $mls_plugin_filter_id_sales;
+		$newdevelopment ='only';
     } elseif ($filter_type === 'featured') {
         $filter_id = $mls_plugin_filter_id_features;
     } else {
@@ -177,7 +379,8 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 
     // Build the full URL with the passed parameters
     $query_args = array(
-        'P_ApiId' => $filter_id,
+//         'P_ApiId' => '58159',
+		'P_ApiId' => $filter_id,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
         'P_Location' => $area ? urlencode($area) : '',
@@ -187,10 +390,12 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
         'P_Min' => $min_price ? urlencode($min_price) : '',
         'P_Max' => $max_price ? urlencode($max_price) : '',
         'P_RefId' => $keyword ? urlencode($keyword) : '',
+		'P_Lang' => $language,
         'P_PageSize' => '9',
         'P_SortType' => $p_sorttype ? urlencode($p_sorttype) : '0',
         // 'p_images' => '4',
-        // 'P_IncludeRented' => 'TRUE',
+//         'P_IncludeRented' => '1',
+		'p_new_devs' => $newdevelopment,
         'P_PageNo' => $page,
     );
 
@@ -224,11 +429,16 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 }
 
 // Function to fetch property detail page using the Resales Online API
-function mls_plugin_fetch_ref($reference, $type) {
+function mls_plugin_fetch_ref($reference, $type, $language, $newdevelopment) {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
 	$mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
-    
+	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
+    if (!get_option('mls_plugin_style_proplanghide')) {
+        $language = get_option('mls_plugin_prop_language');
+    }
+// 	echo "lang: ". $language. "<br>";
+	
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getProperty']; // Replace with the correct API endpoint for locations
 
     // Build the full URL with the necessary parameters
@@ -237,8 +447,12 @@ function mls_plugin_fetch_ref($reference, $type) {
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
 		'P_RefId' => $reference,
+		'P_Lang' => $language,
         'P_ShowGPSCoords' => 'TRUE',
 		'P_VirtualTours' => '2',
+		'P_show_dev_prices' => 'bottom',
+		'P_shownewdevname' => 'TRUE',
+		'p_new_devs' => $newdevelopment,
         // 'P_showdecree218' => 'YES',
     ), $endpoint);
 
@@ -270,6 +484,7 @@ function mls_plugin_fetch_searchfeatures() {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
 	$mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
+	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
     
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesFeatures']; // Replace with the correct API endpoint for locations
 
@@ -278,6 +493,7 @@ function mls_plugin_fetch_searchfeatures() {
         'P_ApiId' => $mls_plugin_filter_id_sales,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
+		'P_Lang' => $mls_plugin_prop_language,
     ), $endpoint);
 
 //     echo 'base url' . $baseurl . '<br>';

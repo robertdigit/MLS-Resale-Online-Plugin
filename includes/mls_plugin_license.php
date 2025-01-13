@@ -41,7 +41,7 @@ function mls_plugin_license_page() {
     // Display the settings form
     ?>
     <div class="wrap licence-style">
-        <h1><?php esc_attr_e('Plugin Settings', 'mls-plugin'); ?></h1>
+        <h1 class="mls-ap-heading-style1"><?php esc_attr_e('Plugin Settings', 'mls-plugin'); ?></h1>
         
         <?php if (!empty($message)) : ?>
             <div class="notice notice-success"><p><?php echo esc_html($message); ?></p></div>
@@ -54,7 +54,7 @@ function mls_plugin_license_page() {
 
 		?>
 		
-
+<div class="mls-section-style1 mls-licence-tab">
         <form method="post" action="">
             <?php
             settings_fields('mls_plugin_options_group');
@@ -78,12 +78,13 @@ function mls_plugin_license_page() {
                             <div style="color:#d63638;" class="mls-lkv-msg"> Invalid License Key. Please check your entry or purchase a valid license to enable the MLS Plugin. </div>
                         <?php endif; ?>
 
-                        <p>If you have not purchased, Please <a href="https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/" target="_blank">purchase Here </a>or <a href="http://34.199.212.7/resale-online-clarkdigital/mls-profile/" target="_blank">manage licenses</a></p>
+                        <p>If you have not purchased, Please <a href="https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/" target="_blank">Purchase Here </a>or <a href="http://34.199.212.7/resale-online-clarkdigital/mls-profile/" target="_blank">Manage Licenses</a></p>
                     </td>
                 </tr>
             </table>
             <?php submit_button(); ?>
         </form>
+		</div>
     </div>
     <?php
 }

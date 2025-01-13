@@ -116,15 +116,15 @@ jQuery(document).ready(function($) {
 
 jQuery(document).ready(function($){
  $("#mls_property_types").easySelect({
-     buttons: true, // 
-     search: true,
-     placeholder: 'Type',
-     placeholderColor: '',
-     selectColor: '#524781',
-     itemTitle: 'Car selected',
+     buttons: true, 
+    search: true,
+   placeholder: 'Type',
+    placeholderColor: '',
+   selectColor: '#524781',
+    itemTitle: 'Car selected',
      showEachItem: true,
-     width: '100%',
-     dropdownMaxHeight: '450px',
+   width: '100%',
+   dropdownMaxHeight: '214px',
  })
  $("#mls_avail_time").easySelect({
      buttons: true, // 
@@ -135,11 +135,15 @@ jQuery(document).ready(function($){
      itemTitle: 'Car selected',
      showEachItem: true,
      width: '100%',
-     dropdownMaxHeight: '450px',
+     dropdownMaxHeight: '214px',
  })
 });
 
 jQuery(document).ready(function($){
+    $(".mls-adminsc-info-toggle").hide();
+    $(".mls-shortcode").hover(function(){
+      $(this).siblings(".mls-adminsc-info-toggle").toggle();
+    });
     $(".mls-admin-info-toggle").hide();
     $(".mls-admin-info-btn").hover(function(){
       $(this).siblings(".mls-admin-info-toggle").toggle();
@@ -165,34 +169,64 @@ jQuery(document).ready(function($) {
     });
 });
 
-jQuery(document).ready(function($) {
-	console.log('inq');
-    $('#deactivate-license-btn').on('click', function(e) {
+jQuery(document).ready(function ($) {
+    // Separate function for SweetAlert confirmation
+    function showSweetAlertConfirmation(message, callback) {
+        Swal.fire({
+            title: 'Confirm Deactivation',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, deactivate it!',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                callback(true); // Proceed with the deactivation
+            } else {
+                callback(false); // Do nothing
+            }
+        });
+    }
+
+    $('#deactivate-license-btn').on('click', function (e) {
         e.preventDefault();
-console.log('int');
-        // Confirm before proceeding
-        if (confirm("Are you sure you want to deactivate your license?")) {
-            // Send AJAX request
-            $.ajax({
-                url: ajaxurl, // WordPress AJAX URL
-                type: 'POST',
-                data: {
-                    action: 'deactivate_license',
-                },
-                success: function(response) {
-                    if (response.success) {
-                        location.reload(); // Reload the page to reflect changes
-                    } else {
-                        alert(response.data.message || 'An error occurred while deactivating the license.');
-                    }
-                },
-                error: function() {
-                    alert('Failed to deactivate license. Please try again.');
-                }
-            });
-        }
+
+        // Call SweetAlert for confirmation
+        showSweetAlertConfirmation("Are you sure you want to deactivate your license?", function (confirmDeactivate) {
+            if (confirmDeactivate) {
+                // Send AJAX request
+                $.ajax({
+                    url: ajaxurl, // WordPress AJAX URL
+                    type: 'POST',
+                    data: {
+                        action: 'deactivate_license',
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload(); // Reload the page to reflect changes
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: response.data.message || 'An error occurred while deactivating the license.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to deactivate license. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                        });
+                    },
+                });
+            }
+        });
     });
 });
+
 
 jQuery(document).ready(function($) {
     $(".styledSelect").click(function(){
@@ -201,11 +235,15 @@ jQuery(document).ready(function($) {
             $(this).parents("form").find(".styledSelect").next("ul.options").hide();
 			$(this).removeClass("active");
             $(this).next("ul.options").show();
+				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
+				jQuery('.scrolableDiv > li').show();
 			}
 		else
 			{
 			$(this).addClass("active");
             $(this).next("ul.options").hide();
+				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
+				jQuery('.scrolableDiv > li').show();
 			}
     })
 });
@@ -214,7 +252,7 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
 
         const $button = $(this);
-        $button.text('Refreshing...').prop('disabled', true);
+        $button.text('Syncing...').prop('disabled', true);
 
         $.ajax({
             url: ajaxurl,
@@ -223,21 +261,205 @@ jQuery(document).ready(function ($) {
                 action: 'mls_refresh_locations'
             },
             success: function (response) {
+                const currentTime = new Date().toLocaleString();
+
                 if (response.success) {
-					const currentTime = new Date().toLocaleString();
-//                     $('#mls-last-refresh').text(`Last refreshed on: ${currentTime}`);
-                    alert(response.data);
-					window.location.reload();
+                    // Display success message with SweetAlert
+                    Swal.fire({
+                        title: 'Success',
+                        text: response.data,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload(); // Reload the page after confirmation
+                    });
                 } else {
-                    alert('Error: ' + response.data);
+                    // Display error message with SweetAlert
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.data || 'An error occurred.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
-                $button.text('Refresh').prop('disabled', false);
+
+                $button.text('Sync').prop('disabled', false);
             },
             error: function () {
-                alert('An error occurred while refreshing the location cache.');
-                $button.text('Refresh').prop('disabled', false);
+                // Display error message with SweetAlert
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while refreshing the cache.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+
+                $button.text('Sync').prop('disabled', false);
             }
         });
     });
 });
 
+
+jQuery(document).ready(function() {
+    jQuery("input.searchInputeasySelect").keyup(function() {
+        var jQueryinput = jQuery(this);
+        var value = jQueryinput.val().toLowerCase();
+        var jQueryoptions = jQueryinput.parents(".options");
+        var jQuerylistItems = jQueryoptions.find(".scrolableDiv > li");
+        
+        jQueryoptions.find(".no_results").hide(); // Hide no results initially
+        var hasResults = false; // Flag to track if there are matching results
+
+        jQuerylistItems.each(function() {
+            var content = jQuery(this).find('label').text();
+            if (content.toLowerCase().indexOf(value) === -1) {
+                jQuery(this).hide(); // Hide non-matching item
+            } else {
+                jQuery(this).show(); // Show matching item
+                hasResults = true; // Set flag to true if there's a match
+            }
+        });
+
+        // Show no results message if no matches found
+        if (!hasResults) {
+            jQueryoptions.find(".no_results").show();
+        }
+    });
+});
+
+
+jQuery(document).ready(function($) {
+    $(document).ready(function() {
+		$('input.mulpitply_checkbox_style').on('change', function() {
+//			if ($(this).is(':checked')) {
+				$('input.searchInputeasySelect').val(''); // Clear the search box value
+				$('.scrolableDiv > li').show();
+//			}
+		});
+	});
+});
+
+
+
+// jQuery(function($){
+//    $('.switch input').on("click",function(){
+//       $(this).parent().toggleClass('active');
+//    });
+// });
+
+jQuery(document).ready(function ($) {	
+  // Initialize the class based on the initial state
+  $('input[type="checkbox"]').each(function () {
+    if ($(this).prop('checked')) {
+      $(this).parent('.switch').addClass('active');
+    }
+  });
+  $('.proplang-note').hide();
+  $('.tog-propdetailpage-row-show').hide();
+  $('.tog-dark-row').hide();
+  $('input[type="checkbox"]#tog-timing-hide').each(function () {
+    if ($(this).prop('checked')) {
+      $(this).parents("table").find('.tog-timing-row').hide();
+    }
+  });
+  $('input[type="checkbox"]#tog-lang-hide').each(function () {
+    if ($(this).prop('checked')) {
+     $(this).parents("table").find('.tog-lang-row').hide();
+    }
+  });
+  $('input[type="checkbox"]#tog-proplang-hide').each(function () {
+    if ($(this).prop('checked')) {
+     $(this).parents("table").find('.tog-proplang-row').hide();
+     $(this).parents("table").find('.proplang-note').show();
+    }
+  });
+  $('input[type="checkbox"]#tog-propdetailpage-hide').each(function () {
+    if ($(this).prop('checked')) {
+     $(this).parents("table").find('.tog-propdetailpage-row').hide();
+     $(this).parents("table").find('.tog-propdetailpage-row-show').show();
+    }
+  });
+  $('input[type="checkbox"]#tog-darklight-hide').each(function () {
+    if ($(this).prop('checked')) {
+     $(this).parents("table").find('.tog-light-row').hide();
+     $(this).parents("table").find('.tog-dark-row').show();
+    }
+  });
+	
+  // Add toggle functionality for clicks
+  $('.switch input[type="checkbox"]').on("change", function () {
+    $(this).parent('.switch').toggleClass('active', $(this).prop('checked'));
+  });
+	
+});
+
+jQuery(document).ready(function($) {
+	$('input[type="checkbox"]#tog-timing-hide').change(function() {
+        if($(this).is(':checked')) {
+  		    $(this).parents("table").find('.tog-timing-row').hide();
+		} else {
+  		    $(this).parents("table").find('.tog-timing-row').show();
+		}
+	});
+	$('input[type="checkbox"]#tog-lang-hide').change(function() {
+        if($(this).is(':checked')) {
+  		    $(this).parents("table").find('.tog-lang-row').hide();
+		} else {
+  		    $(this).parents("table").find('.tog-lang-row').show();
+		}
+	});
+	$('input[type="checkbox"]#tog-proplang-hide').change(function() {
+        if($(this).is(':checked')) {
+  		    $(this).parents("table").find('.tog-proplang-row').hide();
+            $(this).parents("table").find('.proplang-note').show();
+		} else {
+  		    $(this).parents("table").find('.tog-proplang-row').show();
+            $(this).parents("table").find('.proplang-note').hide();
+		}
+	});
+	$('input[type="checkbox"]#tog-propdetailpage-hide').change(function() {
+        if($(this).is(':checked')) {
+  		    $(this).parents("table").find('.tog-propdetailpage-row').hide();
+            $(this).parents("table").find('.tog-propdetailpage-row-show').show();
+		} else {
+  		    $(this).parents("table").find('.tog-propdetailpage-row').show();
+            $(this).parents("table").find('.tog-propdetailpage-row-show').hide();
+		}
+	});
+	$('input[type="checkbox"]#tog-darklight-hide').change(function() {
+        if($(this).is(':checked')) {
+  		    $(this).parents("table").find('.tog-light-row').hide();
+            $(this).parents("table").find('.tog-dark-row').show();
+		} else {
+  		    $(this).parents("table").find('.tog-light-row').show();
+            $(this).parents("table").find('.tog-dark-row').hide();
+		}
+	});
+});
+
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('mls-shortcode')) {
+        const shortcodeElement = e.target;
+        const textToCopy = shortcodeElement.innerText;
+
+        // Copy to clipboard
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = textToCopy;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+
+        // Show 'Copied!' message
+        const statusElement = shortcodeElement.nextElementSibling; // Get the adjacent span
+        if (statusElement && statusElement.classList.contains('mls-shortcode-copy-status')) {
+            statusElement.style.display = 'inline';
+
+            // Hide the message after 2 seconds
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 2000);
+        }
+    }
+});

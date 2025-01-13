@@ -5,10 +5,10 @@ if (!session_id()) {
 }
 
 // Function to display the fetched properties.
-function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_sorttype) {
+function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_sorttype, $language,$filter_type) {
 	
 	ob_start();
-// 	if($data){ return '<pre>' . print_r($data, true) . '</pre>'; }
+// 		if($data){ return '<pre>' . print_r($data, true) . '</pre>'; }
     if (is_array($data) && isset($data['Property']) && is_array($data['Property'])) {
 
         if (isset($data['QueryInfo']) && is_array($data['QueryInfo'])) {
@@ -18,11 +18,14 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
             $total_properties = esc_html($data['QueryInfo']['PropertyCount']);
             $total_pages = ceil($total_properties / $properties_per_page);
 			
-			$filter_type = esc_html($data['QueryInfo']['SearchType']);
+// 			$filter_type = esc_html($data['QueryInfo']['SearchType']);
         }
 ?>
 
       <section class="mls-parent-wrapper">
+		  
+<!-- 	Start of Sort type & layout option   -->
+		  <?php if($total_properties > 1) { ?>
             <div class="mls-list-filter">
                 <div class="layout-filter">
     <span class="grid"><img src="<?php echo esc_url( plugins_url('assets/images/pixels.png', __DIR__) ); ?>" alt="" /></span>
@@ -32,13 +35,13 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
            <?php if ($includesorttype == '1') : ?>
     <div class="sorttype mls-form">
         <form id="sort_form"  method="get">
-            <span class="sb-label">Sort by:</span>
+            <span class="sb-label"><?php echo mls_plugin_translate('labels','sort_by'); ?></span>
             <select name="p_sorttype" id="order_search" onchange="this.form.submit()">
-    <option value="0" <?php selected($p_sorttype === '0'); ?>>Price (Lowest First)</option>
-    <option value="1" <?php selected($p_sorttype === '1'); ?>>Price (Highest First)</option>
-    <option value="2" <?php selected($p_sorttype === '2'); ?>>Location</option>
-    <option value="3" <?php selected($p_sorttype === '3'); ?>>Most Recent First</option>
-    <option value="4" <?php selected($p_sorttype === '4'); ?>>Oldest First</option>
+    <option value="0" <?php selected($p_sorttype === '0'); ?>><?php echo mls_plugin_translate('options','sort_lowest_price'); ?></option>
+    <option value="1" <?php selected($p_sorttype === '1'); ?>><?php echo mls_plugin_translate('options','sort_highest_price'); ?></option>
+    <option value="2" <?php selected($p_sorttype === '2'); ?>><?php echo mls_plugin_translate('options','sort_location'); ?></option>
+    <option value="3" <?php selected($p_sorttype === '3'); ?>><?php echo mls_plugin_translate('options','sort_most_recent'); ?></option>
+    <option value="4" <?php selected($p_sorttype === '4'); ?>><?php echo mls_plugin_translate('options','sort_oldest'); ?></option>
 </select>
             <?php
 
@@ -60,6 +63,8 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 			
 			?>
 </div>
+<?php } ?>
+<!-- 	End of Sort type & layout option   -->
  <?php 	$mls_def_prop_layout = get_option('mls_def_prop_layout');
 		if($total_properties > 2) {
 			$layoutclass = $mls_def_prop_layout; 
@@ -68,14 +73,17 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 		}else{
 			$layoutclass = "no-post"; } 
 		
-		// Retrieve filter values from session
-        if ($filter_type === 'Short Term Rental' || $filter_type === 'Long Term Rental') {
-        $filter_name = "For Rent";
-    	} elseif ($filter_type === 'Sale (Featured For RSO)') {
-        $filter_name = "Featured";
-    	} else {
-        $filter_name = "For Sale";
-   	 	}
+		// Retrieve filter values from atts
+		if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') {
+        $filter_name = mls_plugin_translate('labels','for_rent') ?? 'For Rent';
+    } elseif ($filter_type === 'new_development') {
+       $filter_name = mls_plugin_translate('labels','for_rent') ?? 'For Rent';
+    } elseif ($filter_type === 'featured') {
+        $filter_name = mls_plugin_translate('labels','featured') ?? 'Featured';
+    } else {
+        $filter_name = mls_plugin_translate('labels','for_sale') ?? 'For Sale';
+    }
+		
 			?>
             <div class="mls-pro-list-wrapper <?php echo esc_attr( $layoutclass ); ?>">
                 <?php if($total_properties > 0) {
@@ -93,11 +101,21 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 				$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
     $prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
 $prpdetailpage = get_post($prpdetailpage_id);
+if (get_option('mls_plugin_style_proplanghide')) {
+$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
+}else{
 $prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
-                                    $property_title = sanitize_title($property['PropertyType']['NameType'] . ' in ' . $property['Location'] . ', ' . $property['Area'] . ', ' . $property['Country']);
+}			
+$property_title = sanitize_title($property['PropertyType']['NameType'] . ' ' .
+(mls_plugin_translate('general','in') ?? 'in') . ' ' . $property['Location'] . ', ' . $property['Area'] . ', ' . $property['Country']);
                                     $property_ref = $property['Reference'];
                                     $property_filter_type = $data['QueryInfo']['ApiId'];
-                                    $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}");
+// Button Link with Multi-language condt
+if (get_option('mls_plugin_style_proplanghide')) {
+$view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}&lang={$language}");
+}else{
+$view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}");	
+}
                                     ?>
 									
     <?php if (isset($property['Pictures']['Count']) && isset($property['Pictures']['Picture'])) : ?>
@@ -155,13 +173,14 @@ $prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
                                 <div class="mls-pyc-title">
                                     <h2>
                                         <a href="<?php echo esc_url($view_more_url); ?>" >
-                                            <?php echo esc_html($property['PropertyType']['NameType']) . ' in ' . esc_html($property['Location']) . ', ' . esc_html($property['Area']) . ', ' . esc_html($property['Country']); ?>
+                                            <?php echo esc_html($property['PropertyType']['NameType']) . ' ' .
+    (mls_plugin_translate('general','in') ?? 'in') . ' ' . esc_html($property['Location']) . ', ' . esc_html($property['Area']) . ', ' . esc_html($property['Country']); ?>
                                         </a>
                                     </h2>
 									<?php $price = $property['Price'];
 									if(!$price){ $price = $property['RentalPrice1']; }
-									$rentalpriceperiod = $property['RentalPeriod'] ?? 'Month'; ?>
-                                    <h3><?php echo esc_html( RESALES_ONLINE_API_CURRENCY[$property['Currency']] ) . ' ' . esc_html( format_price( $price ) ); if ($filter_type === 'Short Term Rental' || $filter_type === 'Long Term Rental') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
+									$rentalpriceperiod = $property['RentalPeriod'] ?? mls_plugin_translate('general','month'); ?>
+                                    <h3><?php echo esc_html( RESALES_ONLINE_API_CURRENCY[$property['Currency']] ) . ' ' . esc_html( format_price( $price ) ); if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
 									</h3>
                                     <p>
 										<?php echo esc_html( wp_trim_words( wpautop( esc_html( $property['Description'] ) ), 25, '...' ) ); ?>
@@ -207,13 +226,13 @@ $prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
 
                             </div>
 
-                            <div class="mls-pyc-btn-wrapper"><a href="<?php echo esc_url($view_more_url); ?>"  class="mls-button mls-pyc-button">View More</a></div>
+                            <div class="mls-pyc-btn-wrapper"><a href="<?php echo esc_url($view_more_url); ?>"  class="mls-button mls-pyc-button"><?php echo mls_plugin_translate('buttons', 'view_more'); ?></a></div>
                         </div>
                     </div>
                 <?php endforeach; 
 			}else{ ?>
 				<div class="nopropertyfound">
-					<p>No properties found.</p>
+					<p><?php echo mls_plugin_translate('error','mls_no_properties_found') ?? 'No properties found.' ; ?></p>
 				</div>
 				<?php } ?>
             </div>
@@ -228,7 +247,7 @@ $prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
 
 <?php
     } else {
-        echo '<div class="search-not-perform"><p>No properties found.</p></div>';
+        echo '<div class="search-not-perform"><p>'. ( mls_plugin_translate('error','mls_no_properties_found') ?? 'No properties found.') .'</p></div>';
     }
 	// Return the buffered content instead of echoing it
     return ob_get_clean();

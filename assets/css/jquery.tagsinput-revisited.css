@@ -7,17 +7,17 @@
 	-ms-flex-wrap: wrap;
 	flex-wrap: wrap;
 	box-sizing: border-box;
-	background: #fff;
-	font-size: 14px;
-	line-height: 20px;
-	color: #5c727d;
+	background: var(--mls-BgWhite-color);
+/* 	font-size: var(--mls-lg-fontsize);
+	line-height: var(--mls-lg-fontsize); */
+	color: var(--mls-Text-color);
 	padding: 5px 5px 0 5px;
-	border: 1px solid #e7e7e7;
+	border: 1px solid var(--mls-Border-color);
 	border-radius: 2px;
 }
 
 .tagsinput.focus {
-	border-color: #e7e7e7;
+	border-color: var(--mls-Border-color);
 }
 
 .tagsinput * {
@@ -26,13 +26,14 @@
 
 .tagsinput .tag {
 	position: relative;
-	background: #e9e9e9;
+	background: var(--mls-BgGrey-color);
 	display: block;
 	max-width: 100%;
 	word-wrap: break-word;
-	color: #5c727d;
+	color: var(--mls-Text-color);
 	padding: 5px 20px 5px 5px;
 	border-radius: 3px;
+    font-size: var(--mls-md-fontsize);
 	margin: 0;
     line-height: 1;
 }
@@ -48,7 +49,7 @@
 	cursor: pointer;
 	text-decoration: none;
 	text-align: center;
-	color: #222222;
+	color: var(--mls-Black-color);
 	line-height: 30px;
 	padding: 0;
 	border: 0;
@@ -56,7 +57,7 @@
 
 .tagsinput .tag .tag-remove:before,
 .tagsinput .tag .tag-remove:after {
-	background: #222222;
+	background: var(--mls-Black-color);
 	position: absolute;
 	display: block;
 	width: 10px;
@@ -88,8 +89,8 @@
 	background: transparent;
 	display: block;
 	width: 100%;
-	font-size: 16px;
-	line-height: 20px;
+	font-size: var(--mls-lg-fontsize);
+	line-height: var(--mls-lg-fontsize);
 	padding: 0 0 0 5px;
 	border: 0 none;
 	margin: 0;
@@ -104,17 +105,21 @@
 }
 
 .tagsinput div input::-webkit-input-placeholder {
-	color: #5c727d;
+	color: var(--mls-Text-color);
+/* 	font-size: var(--mls-lg-fontsize); */
 }
 
 .tagsinput div input:-moz-placeholder {
-	color: #5c727d;
+	color: var(--mls-Text-color);
+/* 	font-size: var(--mls-lg-fontsize); */
 }
 
 .tagsinput div input::-moz-placeholder {
-	color: #5c727d;
+	color: var(--mls-Text-color);
+/* 	font-size: var(--mls-lg-fontsize); */
 }
 
 .tagsinput div input:-ms-input-placeholder {
-	color: #5c727d;
+	color: var(--mls-Text-color);
+/* 	font-size: var(--mls-lg-fontsize); */
 }

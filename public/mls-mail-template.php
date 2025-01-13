@@ -24,11 +24,11 @@
                   <td align="center" colspan="3" style="line-height:1px; font-size:1px; background-color: #0073e1; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px; " valign="top">
                      <table align="center" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin: 0">
                         <tr>
-                           <td align="center" height="40">
+                           <td align="center" height="30">
                               <span style="font-size: 32px; color: #fff;">
                               <?php if($mls_plugin_leadformmailheaderlogo){ ?>
                               <a style="text-decoration: none;" href="[_site_url]" target="_blank" rel="noopener">
-                              <img style="height:40px" src="<?php echo esc_url($mls_plugin_leadformmailheaderlogo); ?>" alt="logo" />
+                              <img style="height:30px" src="<?php echo esc_url($mls_plugin_leadformmailheaderlogo); ?>" alt="logo" />
                               </a>
                               <?php }else{ echo "Logo"; } ?>
                               </span>

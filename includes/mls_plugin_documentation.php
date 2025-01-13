@@ -18,12 +18,15 @@ add_action('admin_menu', 'mls_plugin_add_shortcodes_submenu');
 function mls_plugin_shortcodes_page() {
     ?>
     <div class="wrap">
-		<h1>MLS Plugin Shortcodes</h1>
-        <h2>Available Shortcodes</h2>
+		<h1 class="mls-ap-heading-style1">MLS Plugin Shortcodes</h1>
+		<div class="mls-innersection-style1">
+        <h2 class="mls-ap-heading-style2">Available Shortcodes</h2>
         <p class="description">Below are the shortcodes you can use in the MLS Plugin:</p>
 <!--    1st shortcode - search form     -->
-        <h2>1. Shortcode: <code>[mls_property_search]</code></h2>
-        <p>This shortcode allows you to display a property search form on any page of your site. You can customize the form using the attributes provided below.</p>
+        <h2 class="mls-ap-heading-style2">1. Shortcode: 
+			<span class="mls-shortcode-wrap"><code class="mls-shortcode">[mls_property_search]</code><code class="mls-shortcode-copy-status" style="display: none;">Copied!</code><span class="mls-adminsc-info-toggle">Click here to copy</span> </span>
+			</h2>
+        <p class="description">This shortcode allows you to display a property search form on any page of your site. You can customize the form using the attributes provided below.</p>
        <div class="mls-table-reponsive">
         <table class="widefat fixed striped" cellspacing="0">
             <thead>
@@ -108,23 +111,38 @@ function mls_plugin_shortcodes_page() {
                     <td><code>''</code> (empty)</td>
                     <td><code>[mls_property_search p_sorttype="0"]</code></td>
                 </tr>
+				<tr>
+    <td><code>language</code></td>
+    <td>Specifies the language to use for the property listings. Values are integers corresponding to the selected language (e.g., <code>1</code> for English, <code>2</code> for Spanish, etc., as defined in the Language tab).</td>
+    <td><code>1</code> (default)</td>
+    <td><code>[mls_property_search language="2"]</code></td>
+</tr>
+<tr>
+    <td><code>newdevelopment</code></td>
+    <td>Determines whether to include only properties marked as part of a new development. Possible values: <code>'include'</code> to include new developments, <code>'only'</code> to include only new developments, or <code>'exclude'</code> to exclude them.</td>
+    <td><code>'include'</code> (includes all properties)</td>
+    <td><code>[mls_property_search newdevelopment="exclude"]</code></td>
+</tr>
             </tbody>
         </table>
         </div>
 
-        <h3>Example Usage</h3>
+        <h3 class="mls-ap-heading-style3">Example Usage</h3>
         <p>To display the search form for properties available for sales with a custom title and sorting options:</p>
         <pre><code>[mls_property_search filtertype="sales" searchtitle="Find Your Dream Home" maxthumbnail="5" includesorttype="1"]</code></pre>
 
-        <h3>Notes</h3>
+        <h3 class="mls-ap-heading-style3">Notes</h3>
         <ul>
             <li>If no attributes are specified, the shortcode will use default values.</li>
             <li>The <code>filtertype</code> attribute determines the context of the search (e.g., sales, rentals).</li>
             <li>The form uses dynamic location and property type options fetched from the plugin settings.</li>
         </ul>
+		</div>
+		<div class="mls-innersection-style1">
 <!-- 	2nd shortcode - property listing	 -->
-		<h2>2. Shortcode: <code>[mls_property_list]</code></h2>
-        <p>This shortcode allows you to display a property list on any page of your site. You can also include a property search form as part of the listing by using the <code>includesearch</code> attribute. The table below explains each attribute.</p>
+		<h2 class="mls-ap-heading-style2">2. Shortcode: 
+			<span class="mls-shortcode-wrap"><code class="mls-shortcode">[mls_property_list]</code> <code class="mls-shortcode-copy-status" style="display: none;">Copied!</code><span class="mls-adminsc-info-toggle">Click here to copy</span></span></h2>
+        <p class="description">This shortcode allows you to display a property list on any page of your site. You can also include a property search form as part of the listing by using the <code>includesearch</code> attribute. The table below explains each attribute.</p>
 <div class="mls-table-reponsive">
         <table class="widefat fixed striped" cellspacing="0">
             <thead>
@@ -213,25 +231,39 @@ function mls_plugin_shortcodes_page() {
                     <td>Pre-defines a sorting type for the properties (e.g., by price or by date). Values are <code>0 => Order By price (ascending), 1 => Order By price (descending), 2 => Order By location,
 3 => Order By last updated date (most recent first), 4 => Order By last updated date (oldest first)</code></td>
                     <td><code>''</code> (empty)</td>
-                    <td><code>[mls_property_search p_sorttype="0"]</code></td>
+                    <td><code>[mls_property_list p_sorttype="0"]</code></td>
                 </tr>
+				<tr>
+    <td><code>language</code></td>
+    <td>Specifies the language to use for the property listings. Values are integers corresponding to the selected language (e.g., <code>1</code> for English, <code>2</code> for Spanish, etc., as defined in the Language tab).</td>
+    <td><code>1</code> (default)</td>
+    <td><code>[mls_property_list language="2"]</code></td>
+</tr>
+<tr>
+    <td><code>newdevelopment</code></td>
+    <td>Determines whether to include only properties marked as part of a new development. Possible values: <code>'include'</code> to include new developments, <code>'only'</code> to include only new developments, or <code>'exclude'</code> to exclude them.</td>
+    <td><code>'include'</code> (includes all properties)</td>
+    <td><code>[mls_property_list newdevelopment="exclude"]</code></td>
+</tr>
             </tbody>
         </table>
 </div>
-        <h3>Example Usage</h3>
+        <h3 class="mls-ap-heading-style3">Example Usage</h3>
         <p>To display a property list with an integrated search form for sales properties and custom filters:</p>
         <pre><code>[mls_property_list includesearch="true" filtertype="sales" searchtitle="Find Your Dream Home" maxthumbnail="5" bedsfilter="4" bathsfilter="2" includesorttype="1"]</code></pre>
 
-        <h3>Notes</h3>
+        <h3 class="mls-ap-heading-style3">Notes</h3>
         <ul>
             <li>The <code>includesearch</code> attribute allows you to include a search form above the property list.</li>
             <li>If no attributes are provided, default values will be used for the shortcode.</li>
             <li>The <code>filtertype</code> attribute determines the context of the property search, whether for sales or rentals.</li>
         </ul>
-		
+		</div>
+		<div class="mls-innersection-style1">
 <!-- 	3rd shortcode - Search Results	 -->
-		<h2>3. Shortcode: <code>[mls_search_results]</code></h2>
-<p>This shortcode is used to display the results from the property search form. It will only show results if a search has been performed and works in conjunction with the <code>[mls_property_search]</code> shortcode.</p>
+		<h2 class="mls-ap-heading-style2">3. Shortcode: 
+			<span class="mls-shortcode-wrap"><code class="mls-shortcode">[mls_search_results]</code> <code class="mls-shortcode-copy-status" style="display: none;">Copied!</code><span class="mls-adminsc-info-toggle">Click here to copy</span></span></h2>
+<p class="description">This shortcode is used to display the results from the property search form. It will only show results if a search has been performed and works in conjunction with the <code>[mls_property_search]</code> shortcode.</p>
 <div class="mls-table-reponsive">
     <table class="widefat fixed striped" cellspacing="0">
         <thead>
@@ -301,21 +333,33 @@ function mls_plugin_shortcodes_page() {
                     <td><code>formbackgroundcolor</code></td>
                     <td>Set specific color to Submit Button in the search form. You can enter in words or HEX value. Eg: <code>formbuttoncolor="red" , formbuttoncolor="#f7f7f7" </code></td>
                     <td><code>''</code> (empty)</td>
-                    <td><code>[mls_property_list formbackgroundcolor="#f7f7f7"]</code></td>
+                    <td><code>[mls_search_results formbackgroundcolor="#f7f7f7"]</code></td>
                 </tr>
 				<tr>
                     <td><code>formbuttoncolor</code></td>
                     <td>Set specific color to Submit Button in the search form. You can enter in words or HEX value. Eg: <code>formbuttoncolor="red" , formbuttoncolor="#0073e1" </code></td>
                     <td><code>''</code> (empty)</td>
-                    <td><code>[mls_property_list formbuttoncolor="red"]</code></td>
+                    <td><code>[mls_search_results formbuttoncolor="red"]</code></td>
                 </tr>
                 <tr>
                     <td><code>p_sorttype</code></td>
                     <td>Pre-defines a sorting type for the properties (e.g., by price or by date). Values are <code>0 => Order By price (ascending), 1 => Order By price (descending), 2 => Order By location,
 3 => Order By last updated date (most recent first), 4 => Order By last updated date (oldest first)</code></td>
                     <td><code>''</code> (empty)</td>
-                    <td><code>[mls_property_search p_sorttype="0"]</code></td>
+                    <td><code>[mls_search_results p_sorttype="0"]</code></td>
                 </tr>
+			<tr>
+    <td><code>language</code></td>
+    <td>Specifies the language to use for the property listings. Values are integers corresponding to the selected language (e.g., <code>1</code> for English, <code>2</code> for Spanish, etc., as defined in the Language tab).</td>
+    <td><code>1</code> (default)</td>
+    <td><code>[mls_search_results language="2"]</code></td>
+</tr>
+<tr>
+    <td><code>newdevelopment</code></td>
+    <td>Determines whether to include only properties marked as part of a new development. Possible values: <code>'include'</code> to include new developments, <code>'only'</code> to include only new developments, or <code>'exclude'</code> to exclude them.</td>
+    <td><code>'include'</code> (includes all properties)</td>
+    <td><code>[mls_search_results newdevelopment="exclude"]</code></td>
+</tr>
             <tr>
                 <td><code>mls_search_performed</code> (URL parameter)</td>
                 <td>Must be set to <code>1</code> in the URL to indicate a search was performed.</td>
@@ -344,24 +388,26 @@ function mls_plugin_shortcodes_page() {
     </table>
 </div>
 
-<h3>Example Usage</h3>
+<h3 class="mls-ap-heading-style3">Example Usage</h3>
 <p>This shortcode works in conjunction with a search form shortcode. After performing a search, the results can be displayed using:</p>
 <pre><code>[mls_search_results]</code></pre>
 
 <p>Ensure that your URL contains the necessary parameters for this shortcode to work, such as <code>mls_search_performed=1</code>, <code>query_id</code>, and other filters passed from the search form.</p>
 
-<h3>Notes</h3>
+<h3 class="mls-ap-heading-style3">Notes</h3>
 <ul>
     <li>This shortcode will only display results if the <code>mls_search_performed</code> parameter is set in the URL.</li>
     <li>The search form must store the relevant filter values in the session or pass them via the URL.</li>
     <li>The parameters such as <code>query_id</code>, <code>page_num</code>, and <code>filter_type</code> are automatically handled by the search form submission.</li>
     <li>If no search has been performed, the shortcode will return an empty result.</li>
 </ul>
-
+		</div>
+		<div class="mls-innersection-style1">
 
 <!-- 	4th shortcode - Property By reference id	 -->
-		 <h2>4. Shortcode: <code>[mls_property_byrefs]</code></h2>
-        <p>This shortcode is used to display properties by their reference IDs. The shortcode allows you to specify property references to fetch and display specific properties. If no reference IDs are provided, it will return a message prompting the user to add references.</p>
+		 <h2 class="mls-ap-heading-style2">4. Shortcode: 
+			 <span class="mls-shortcode-wrap"><code class="mls-shortcode" >[mls_property_byrefs]</code> <code class="mls-shortcode-copy-status" style="display: none;">Copied!</code><span class="mls-adminsc-info-toggle">Click here to copy</span></span></h2>
+        <p class="description">This shortcode is used to display properties by their reference IDs. The shortcode allows you to specify property references to fetch and display specific properties. If no reference IDs are provided, it will return a message prompting the user to add references.</p>
 <div class="mls-table-reponsive">
         <table class="widefat fixed striped" cellspacing="0">
             <thead>
@@ -392,24 +438,38 @@ function mls_plugin_shortcodes_page() {
                     <td><code>''</code> (empty)</td>
                     <td><code>[mls_property_byrefs references="R4586365,R1234567"]</code></td>
                 </tr>
+				<tr>
+    <td><code>language</code></td>
+    <td>Specifies the language to use for the property listings. Values are integers corresponding to the selected language (e.g., <code>1</code> for English, <code>2</code> for Spanish, etc., as defined in the Language tab).</td>
+    <td><code>1</code> (default)</td>
+    <td><code>[mls_property_byrefs language="2"]</code></td>
+</tr>
+<tr>
+    <td><code>newdevelopment</code></td>
+    <td>Determines whether to include only properties marked as part of a new development. Possible values: <code>'include'</code> to include new developments, <code>'only'</code> to include only new developments, or <code>'exclude'</code> to exclude them.</td>
+    <td><code>'include'</code> (includes all properties)</td>
+    <td><code>[mls_property_byrefs newdevelopment="exclude"]</code></td>
+</tr>
             </tbody>
         </table>
 </div>
-        <h3>Example Usage</h3>
+        <h3 class="mls-ap-heading-style3">Example Usage</h3>
         <p>To display specific properties by their reference IDs, use the following shortcode:</p>
         <pre><code>[mls_property_byrefs references="R4586365,R1234567" filtertype="sales" maxthumbnail="5"]</code></pre>
 
-        <h3>Notes</h3>
+        <h3 class="mls-ap-heading-style3">Notes</h3>
         <ul>
             <li>The <code>references</code> attribute is required. If it's not provided, the shortcode will display a message asking for property references.</li>
             <li>You can use the <code>filtertype</code> attribute to control whether the properties shown are for sales or rentals.</li>
             <li>The <code>maxthumbnail</code> attribute controls the number of the property thumbnails. It can be left empty to use the default numbers or set to values like <code>4</code>, <code>6</code>, etc.</li>
             <li>If no properties match the provided reference IDs, a message indicating no properties were found will be displayed.</li>
         </ul>
-		
+		</div>
+		<div class="mls-innersection-style1">
 <!--    5th shortcode - Banner Search Form    -->
-<h2>5. Shortcode: <code>[mls_banner_searchform]</code></h2>
-<p>This shortcode allows you to display a property banner search form with customizable options. You can modify the form using the attributes provided below. You can change the Form background grey color and button color in plugin setting page</p>
+<h2 class="mls-ap-heading-style2">5. Shortcode:
+	<span class="mls-shortcode-wrap"><code class="mls-shortcode">[mls_banner_searchform]</code> <code class="mls-shortcode-copy-status" style="display: none;">Copied!</code><span class="mls-adminsc-info-toggle">Click here to copy</span></span></h2>
+<p class="description">This shortcode allows you to display a property banner search form with customizable options. You can modify the form using the attributes provided below. You can change the Form background grey color and button color in plugin setting page</p>
 <div class="mls-table-reponsive">
     <table class="widefat fixed striped" cellspacing="0">
         <thead>
@@ -463,22 +523,34 @@ function mls_plugin_shortcodes_page() {
                 <td><code>250000,1000000</code></td>
                 <td><code>[mls_banner_searchform max_pricefilter="500000,2000000"]</code></td>
             </tr>
+			<tr>
+    <td><code>language</code></td>
+    <td>Specifies the language to use for the property listings. Values are integers corresponding to the selected language (e.g., <code>1</code> for English, <code>2</code> for Spanish, etc., as defined in the Language tab).</td>
+    <td><code>1</code> (default)</td>
+    <td><code>[mls_banner_searchform language="2"]</code></td>
+</tr>
+<tr>
+    <td><code>newdevelopment</code></td>
+    <td>Determines whether to include only properties marked as part of a new development. Possible values: <code>'include'</code> to include new developments, <code>'only'</code> to include only new developments, or <code>'exclude'</code> to exclude them.</td>
+    <td><code>'include'</code> (includes all properties)</td>
+    <td><code>[mls_banner_searchform newdevelopment="exclude"]</code></td>
+</tr>
         </tbody>
     </table>
 </div>
 
-<h3>Example Usage</h3>
+<h3 class="mls-ap-heading-style3">Example Usage</h3>
 <p>To display the banner search form for properties available for rent with a custom title and thumbnail limit:</p>
 <pre><code>[mls_banner_searchform filtertype="long_rentals" searchtitle="Find Your Dream Rental!" maxthumbnail="5"]</code></pre>
 
-<h3>Notes</h3>
+<h3 class="mls-ap-heading-style3">Notes</h3>
 <ul>
     <li>If no attributes are specified, the shortcode will use default values.</li>
     <li>The <code>filtertype</code> attribute determines the context of the search (e.g., sales, rentals, featured properties).</li>
     <li>The form uses dynamic location and property type options fetched from the plugin settings.</li>
 	<li>The form result will show in the Search result page.</li>
 </ul>
-
+		</div>
 		
     </div>
     <?php
