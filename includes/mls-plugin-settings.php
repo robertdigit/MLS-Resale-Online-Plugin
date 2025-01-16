@@ -234,7 +234,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                              <td>
       <section class="toggle-Section">
           <label class="switch">
-              <input type="checkbox" id="tog-darklight-hide" name="mls_plugin_style_darklighthide" value="1" <?php checked(get_option('mls_plugin_style_darklighthide', '1'), ''); ?>>
+              <input type="checkbox" id="tog-darklight-hide" name="mls_plugin_style_darklighthide" value="1" <?php checked(get_option('mls_plugin_style_darklighthide'), '1'); ?>>
               <span class="slider round"></span>
           </label>
        </section>
