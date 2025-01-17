@@ -145,7 +145,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 	// 	lead form setting update code
 	elseif ( isset($_POST['mls_plugin_save_lead_form_settings']) ) {
 		// Sanitize and update available timings
+    if (isset($_POST['mls_plugin_available_timings']) && is_array($_POST['mls_plugin_available_timings'])) {
     $selected_timings = array_map('sanitize_text_field', $_POST['mls_plugin_available_timings']);
+    } else { $selected_timings = []; }
     update_option('mls_plugin_available_timings', $selected_timings);
 	update_option('mls_plugin_leadformvideohide', sanitize_text_field($_POST['mls_plugin_leadformvideohide']));
 		 $selected_languages = array_map('sanitize_text_field', $_POST['mls_plugin_languages']);
