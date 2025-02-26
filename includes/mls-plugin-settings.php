@@ -79,6 +79,7 @@ update_option('mls_plugin_primary_color', sanitize_text_field($_POST['mls_plugin
 update_option('mls_plugin_secondary_color', sanitize_text_field($_POST['mls_plugin_secondary_color']));
 update_option('mls_plugin_text_color', sanitize_text_field($_POST['mls_plugin_text_color']));
 update_option('mls_plugin_black_color', sanitize_text_field($_POST['mls_plugin_black_color']));
+
 update_option('mls_plugin_bg_grey_color', sanitize_text_field($_POST['mls_plugin_bg_grey_color']));
 update_option('mls_plugin_bg_white_color', sanitize_text_field($_POST['mls_plugin_bg_white_color']));
 update_option('mls_plugin_bg_dark_color', sanitize_text_field($_POST['mls_plugin_bg_dark_color']));
@@ -97,6 +98,8 @@ update_option('mls_plugin_banner_search_bg_color', sanitize_text_field($_POST['m
 update_option('mls_plugin_banner_search_btn_color', sanitize_text_field($_POST['mls_plugin_banner_search_btn_color']));
 update_option('mls_plugin_banner_search_btn_bg_color', sanitize_text_field($_POST['mls_plugin_banner_search_btn_bg_color']));
 update_option('mls_plugin_banner_search_btn_hover_bg_color', sanitize_text_field($_POST['mls_plugin_banner_search_btn_hover_bg_color']));
+update_option('mls_plugin_banner_search_tabcolor', sanitize_text_field($_POST['mls_plugin_banner_search_tabcolor']));
+update_option('mls_plugin_banner_search_tabbackgroundcolor', sanitize_text_field($_POST['mls_plugin_banner_search_tabbackgroundcolor']));
 // Update options for dark theme colors
 update_option('mls_plugin_dark_primary_color', sanitize_text_field($_POST['mls_plugin_dark_primary_color']));
 update_option('mls_plugin_dark_secondary_color', sanitize_text_field($_POST['mls_plugin_dark_secondary_color']));
@@ -120,6 +123,8 @@ update_option('mls_plugin_dark_banner_search_bg_color', sanitize_text_field($_PO
 update_option('mls_plugin_dark_banner_search_btn_color', sanitize_text_field($_POST['mls_plugin_dark_banner_search_btn_color']));
 update_option('mls_plugin_dark_banner_search_btn_bg_color', sanitize_text_field($_POST['mls_plugin_dark_banner_search_btn_bg_color']));
 update_option('mls_plugin_dark_banner_search_btn_hover_bg_color', sanitize_text_field($_POST['mls_plugin_dark_banner_search_btn_hover_bg_color']));
+update_option('mls_plugin_dark_banner_search_tabcolor', sanitize_text_field($_POST['mls_plugin_dark_banner_search_tabcolor']));
+update_option('mls_plugin_dark_banner_search_tabbackgroundcolor', sanitize_text_field($_POST['mls_plugin_dark_banner_search_tabbackgroundcolor']));
 
 // 	layout update option	
 		update_option('mls_def_prop_layout', sanitize_text_field($_POST['mls_def_prop_layout']));
@@ -128,8 +133,11 @@ update_option('mls_plugin_dark_banner_search_btn_hover_bg_color', sanitize_text_
 		update_option('mls_plugin_prop_detailsidebaroffset', sanitize_text_field($_POST['mls_plugin_prop_detailsidebaroffset']));
 		update_option('mls_plugin_tabs_to_display', array_map('sanitize_text_field', $_POST['mls_plugin_tabs_to_display'] ?? ['sales']));
 
-// 	fontsize update option
-update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_plugin_paragraph_fontsize']));
+// 	fontsize update option 
+update_option('mls_plugin_google_font', sanitize_text_field($_POST['mls_plugin_google_font']));
+update_option('mls_custom_font_file', sanitize_text_field($_POST['mls_custom_font_file']));
+update_option('mls_plugin_fontfamily', sanitize_text_field($_POST['mls_plugin_fontfamily']));
+	update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_plugin_paragraph_fontsize']));
     update_option('mls_plugin_lg_fontsize', sanitize_text_field($_POST['mls_plugin_lg_fontsize']));
     update_option('mls_plugin_md_fontsize', sanitize_text_field($_POST['mls_plugin_md_fontsize']));
     update_option('mls_plugin_sm_fontsize', sanitize_text_field($_POST['mls_plugin_sm_fontsize']));
@@ -145,7 +153,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 	// 	lead form setting update code
 	elseif ( isset($_POST['mls_plugin_save_lead_form_settings']) ) {
 		// Sanitize and update available timings
+    if (isset($_POST['mls_plugin_available_timings']) && is_array($_POST['mls_plugin_available_timings'])) {
     $selected_timings = array_map('sanitize_text_field', $_POST['mls_plugin_available_timings']);
+    } else { $selected_timings = []; }
     update_option('mls_plugin_available_timings', $selected_timings);
 	update_option('mls_plugin_leadformvideohide', sanitize_text_field($_POST['mls_plugin_leadformvideohide']));
 		 $selected_languages = array_map('sanitize_text_field', $_POST['mls_plugin_languages']);
@@ -222,20 +232,20 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
             <?php
            
 
-            // Render the content for each tab based on the active tab
-            switch ($tab) {
-                case 'styles':
-                    ?>
-                    <h2>MLS Plugin Style Settings</h2>
-                    <form method="post">
-                    <table class="form-table ft-flex">
-						<tr valign="top">
-                            <th scope="row">Enable Dark Theme</th>
-                             <td>
+// Render the content for each tab based on the active tab
+switch ($tab) {
+case 'styles':
+?>
+<h2>MLS Plugin Style Setting</h2>
+<form method="post">
+<table class="form-table ft-flex">
+<tr valign="top">
+    <th scope="row">Enable Dark Theme</th>
+    <td>
       <section class="toggle-Section">
-          <label class="switch">
-              <input type="checkbox" id="tog-darklight-hide" name="mls_plugin_style_darklighthide" value="1" <?php checked(get_option('mls_plugin_style_darklighthide'), '1'); ?>>
-              <span class="slider round"></span>
+          <label class="mls-switch">
+              <input type="checkbox" id="tog-darklight-hide" name="mls_plugin_style_darklighthide" value="1" <?php checked(get_option('mls_plugin_style_darklighthide', ''), '1'); ?>>
+              <span class="mls-tog-slider round"></span>
           </label>
        </section>
 		<div class="mls-admin-info-wrap">
@@ -245,9 +255,8 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 			</div>                            
 		</div>
     </td>
-                        </tr>
-<tr valign="top" class="mls-row-heading tog-light-row"><th colspan="2"><h2>Styling Options</h2></th></tr>
-
+</tr>
+<tr valign="top" class="tog-light-row mls-row-heading"><th colspan="2"><h2>Styling Options</h2></th></tr>
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>General Colors</h3></th></tr>
 <!-- Light Theme -->
 <tr valign="top" class="tog-light-row">
@@ -256,7 +265,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the main accent color used across the site.</p>
+				<p>Defines the main accent color used across the site</p>
 			</div>                            
 		</div>
 	</td>
@@ -267,7 +276,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the secondary accent color.</p>
+				<p>Defines the secondary accent color</p>
 			</div>                            
 		</div>
 	</td>
@@ -279,18 +288,18 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for regular text.</p>
+				<p>Used for regular text</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Heading Text Color</th>
+    <th scope="row">Title Text Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_black_color" value="<?php echo esc_attr(get_option('mls_plugin_black_color', '#222222')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for headings</p>
+				<p>Used for titles</p>
 			</div>                            
 		</div>
 	</td>
@@ -302,7 +311,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the color of text links.</p>
+				<p>Defines the color of text links</p>
 			</div>                            
 		</div>
 	</td>
@@ -320,27 +329,28 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 </tr>
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Background Colors</h3></th></tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Block Background Color</th>
+    <th scope="row">Blocks Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_bg_grey_color" value="<?php echo esc_attr(get_option('mls_plugin_bg_grey_color', '#f7f7f7')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for overall block backgrounds.</p>
+				<p>Used for overall blocks backgrounds</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Form and  List Background Color</th>
+    <th scope="row">Form Fields & Property List Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_bg_white_color" value="<?php echo esc_attr(get_option('mls_plugin_bg_white_color', '#ffffff')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines background for forms and property lists.</p>
+				<p>Defines background for form fields and property lists</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
+
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Border Colors</h3></th></tr>
 <tr valign="top" class="tog-light-row">
     <th scope="row">Border Color</th>
@@ -348,7 +358,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for section and field borders.</p>
+				<p>Used for block and field borders</p>
 			</div>                            
 		</div>
 	</td>
@@ -364,9 +374,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		</div>
 	</td>
 </tr>
-
-<tr valign="top" class="mls-row-heading tog-light-row"><th colspan="2"><h2>Button Styles</h2></th></tr>
-
+<tr valign="top" class="tog-light-row mls-row-heading"><th colspan="2"><h2>Button Styles</h2></th></tr>
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Default Button Colors</h3></th></tr>
 <tr valign="top" class="tog-light-row">
     <th scope="row">Text Color</th>
@@ -374,7 +382,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the text color on buttons.</p>
+				<p>Defines the text color on buttons</p>
 			</div>                            
 		</div>
 	</td>
@@ -385,7 +393,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the button background color.</p>
+				<p>Defines the button background color</p>
 			</div>                            
 		</div>
 	</td>
@@ -396,41 +404,41 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the button border color.</p>
+				<p>Defines the button border color</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Hover Button Colors</h3></th></tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Text Hover Color</th>
+    <th scope="row">Hover Text Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_button_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_button_hover_color', '#ffffff')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the text color on hover.</p>
+				<p>Defines the text color on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Background Hover Color</th>
+    <th scope="row">Hover Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_button_bg_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_button_bg_hover_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button background color on hover.</p>
+				<p>Defines the button background color on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Border Hover Color</th>
+    <th scope="row">Hover Border Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_button_border_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_button_border_hover_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button border color on hover.</p>
+				<p>Defines the button border color on hover</p>
 			</div>                            
 		</div>
 	</td>
@@ -442,14 +450,12 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for reset and pagination buttons.</p>
+				<p>Used for Reset button, Back button, Pagination button and Select option checkmark</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
-
-<tr valign="top" class="mls-row-heading tog-light-row"><th colspan="2"><h2>Search Form Styles</h2></th></tr>
-
+<tr valign="top" class="tog-light-row mls-row-heading"><th colspan="2"><h2>Search Form Styles</h2></th></tr>
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Property Search Form</h3></th></tr>
 <tr valign="top" class="tog-light-row">
     <th scope="row">Tab Text Color</th>
@@ -457,7 +463,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the text color on search tabs.</p>
+				<p>Defines the text color on search tabs</p>
 			</div>                            
 		</div>
 	</td>
@@ -468,12 +474,11 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Defines the background color for search tabs.</p>
+				<p>Defines the background color for search tabs</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
-
 <tr valign="top" class="tog-light-row"> <th scope="row" colspan="2"><h3>Home Banner Search Form</h3></th></tr>
 <tr valign="top" class="tog-light-row">
     <th scope="row">Text Color</th>
@@ -481,7 +486,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-				<p>Used for text in the banner search form.</p>
+				<p>Used for text in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -492,7 +497,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background for the search form.</p>
+				<p>Defines the background for the search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -503,7 +508,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the text color of buttons in the banner search form.</p>
+				<p>Defines the text color of buttons in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -514,35 +519,32 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background color of buttons in the banner search form.</p>
+				<p>Defines the background color of buttons in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-light-row">
-    <th scope="row">Button Hover Background Color</th>
+    <th scope="row">Hover Button Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_banner_search_btn_hover_bg_color" value="<?php echo esc_attr(get_option('mls_plugin_banner_search_btn_hover_bg_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background color for buttons on hover.</p>
+				<p>Defines the background color for buttons on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
-
-
+<tr valign="top" class="tog-dark-row mls-row-heading"><th scope="row" colspan="2"><h2>Styling Options</h2></th></tr>
+<tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>General Colors</h3></th></tr>
 <!-- Dark Theme -->
-<tr valign="top" class="mls-row-heading tog-dark-row"><th colspan="2"><h2>Styling Options</h2></th></tr>
-<tr valign="top" class="tog-dark-row">
-<th scope="row" colspan="2"><h3>General Colors</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
     <th scope="row">Primary Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_primary_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_primary_color', '#0073e1')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the main accent color used across the site.</p>
+				<p>Defines the main accent color used across the site</p>
 			</div>                            
 		</div>
 	</td>
@@ -553,7 +555,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the secondary accent color.</p>
+				<p>Defines the secondary accent color</p>
 			</div>                            
 		</div>
 	</td>
@@ -565,29 +567,30 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for regular text.</p>
+				<p>Used for regular text</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Heading Text Color</th>
+    <th scope="row">Titles Text Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_black_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_black_color', '#ffffff')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for headings.</p>
+				<p>Used for titles</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
+
 <tr valign="top" class="tog-dark-row">
     <th scope="row">Link Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_link_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_link_color', '#0073e1')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the color of text links.</p>
+				<p>Defines the color of text links</p>
 			</div>                            
 		</div>
 	</td>
@@ -598,30 +601,30 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the color when hovering over text links</p>
+				<p>Defines the color when hovering over text links</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>Background Colors</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Block Background Color</th>
+    <th scope="row">Blocks Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_bg_grey_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_bg_grey_color', '#434343')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for overall block backgrounds.</p>
+				<p>Used for overall blocks backgrounds</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Form & List Background Color</th>
+    <th scope="row">Form Fields & Property List Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_bg_white_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_bg_white_color', '#434343')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines background for forms and property lists.</p>
+				<p>Defines background for form fields and property lists</p>
 			</div>                            
 		</div>
 	</td>
@@ -634,7 +637,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for section and field borders.</p>
+				<p>Used for block and field borders</p>
 			</div>                            
 		</div>
 	</td>
@@ -650,9 +653,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		</div>
 	</td>
 </tr>
-
 <tr valign="top" class="mls-row-heading tog-dark-row"><th colspan="2"><h2>Button Styles</h2></th></tr>
-
 <tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>Default Button Colors</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
     <th scope="row">Text Color</th>
@@ -660,7 +661,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the text color on buttons.</p>
+				<p>Defines the text color on buttons</p>
 			</div>                            
 		</div>
 	</td>
@@ -671,7 +672,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button background color.</p>
+				<p>Defines the button background color</p>
 			</div>                            
 		</div>
 	</td>
@@ -682,60 +683,58 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button border color.</p>
+				<p>Defines the button border color</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>Hover Button Colors</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Text Hover Color</th>
+    <th scope="row">Hover Text Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_button_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_button_hover_color', '#ffffff')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the text color on hover.</p>
+				<p>Defines the text color on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Background Hover Color</th>
+    <th scope="row">Hover Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_button_bg_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_button_bg_hover_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button background color on hover.</p>
+				<p>Defines the button background color on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Border Hover Color</th>
+    <th scope="row">Hover Border Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_button_border_hover_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_button_border_hover_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the button border color on hover.</p>
+				<p>Defines the button border color on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>Miscellaneous Buttons</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
-<th scope="row">Reset and Pagination Background Color</th>
+    <th scope="row">Reset & Pagination Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_bg_dark_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_bg_dark_color', '#383838')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for reset and pagination buttons.</p>
+				<p>Used for Reset button, Back button, Pagination button and Select option checkmark</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
-
-<tr valign="top" class="mls-row-heading tog-dark-row"><th colspan="2"><h2>Search Form Styles</h2></th></tr>
-
+<tr valign="top" class="tog-dark-row mls-row-heading"><th colspan="2"><h2>Search Form Styles</h2></th></tr>
 <tr valign="top" class="tog-dark-row"> <th scope="row" colspan="2"><h3>Property Search Form</h3></th></tr>
 <tr valign="top" class="tog-dark-row">
     <th scope="row">Tab Text Color</th>
@@ -743,7 +742,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the text color on search tabs.</p>
+				<p>Defines the text color on search tabs</p>
 			</div>                            
 		</div>
 	</td>
@@ -754,7 +753,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background color for search tabs.</p>
+				<p>Defines the background color for search tabs</p>
 			</div>                            
 		</div>
 	</td>
@@ -766,7 +765,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Used for text in the banner search form.</p>
+				<p>Used for text in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -777,7 +776,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background for the search form.</p>
+				<p>Defines the background for the search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -788,7 +787,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the text color of buttons in the banner search form.</p>
+				<p>Defines the text color of buttons in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
@@ -799,24 +798,62 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background color of buttons in the banner search form.</p>
+				<p>Defines the background color of buttons in the banner search form</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
 <tr valign="top" class="tog-dark-row">
-    <th scope="row">Button Hover Background Color</th>
+    <th scope="row">Hover Button Background Color</th>
     <td><input type="text" class="mls-color-field" data-alpha-enabled="true" name="mls_plugin_dark_banner_search_btn_hover_bg_color" value="<?php echo esc_attr(get_option('mls_plugin_dark_banner_search_btn_hover_bg_color', '#69c17d')); ?>" />
 		<div class="mls-admin-info-wrap">
 			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
 			<div class="mls-admin-info-toggle" style="display: none;">
-            <p>Defines the background color for buttons on hover.</p>
+				<p>Defines the background color for buttons on hover</p>
 			</div>                            
 		</div>
 	</td>
 </tr>
-
 <tr valign="top" class="mls-row-heading"><th colspan="2"><h2>Typography</h2></th></tr>
+<tr valign="top"> <th scope="row" colspan="2"><h3>Font Family</h3></th></tr>
+<tr valign="top">
+    <th scope="row">Select your Font Family</th>
+    <td class="mls-fz-col">
+		<?php $saved_font_family = get_option('mls_plugin_fontfamily', 'Default'); ?>
+        <label class="mls-custom-radio">Default Font from your Theme
+            <input type="radio" name="mls_plugin_fontfamily" id="Default" value="Default" 
+            <?php echo ($saved_font_family === 'Default') ? 'checked' : ''; ?> /><span class="checkmark"></span>
+        </label>
+        <label class="mls-custom-radio">Google Font
+            <input type="radio" name="mls_plugin_fontfamily" id="google" value="google" 
+            <?php echo ($saved_font_family === 'google') ? 'checked' : ''; ?> /><span class="checkmark"></span>
+            
+        </label>
+        <label class="mls-custom-radio">Custom Font
+            <input type="radio" name="mls_plugin_fontfamily" id="custom" value="custom" 
+            <?php echo ($saved_font_family === 'custom') ? 'checked' : ''; ?> /><span class="checkmark"></span>
+        </label>
+    </td>
+</tr>
+<tr valign="top" class="mls-gfonts-wrap">
+    <th scope="row">Select your Font Family from Google fonts</th>
+    <td class="mls-fz-col"><?php mls_plugin_google_fonts_dropdown(); ?>
+		<div class="mls-admin-info-wrap">
+			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
+			<div class="mls-admin-info-toggle" style="display: none;">
+				<p>Select the font family for overall MLS plugin texts</p>
+			</div>                            
+		</div>
+	</td>
+</tr>
+<tr valign="top" class="mls-cfonts-wrap">
+    <th scope="row">Upload your Custom Font Family</th>
+    <td class="mls-fz-col">
+		<input type="text" id="mls_custom_font_url" name="mls_custom_font_file" value="<?php echo esc_url(get_option('mls_custom_font_file', '')); ?>" placeholder="Font URL" style="width: 70%;">
+   <button type="button" class="button button-secondary" id="mls_upload_custom_font">Upload Font</button>
+   <p class="description">Upload your font file (WOFF, WOFF2, TTF, or OTF) using the button above.</p>
+	</td>
+</tr>
 <tr valign="top"><th scope="row" colspan="2"><h3>Font Size</h3></th></tr>
 <tr valign="top">
     <th scope="row">Paragraph Font Size</th>
@@ -873,7 +910,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 		</div>
 	</td>
 </tr>
-<tr valign="top"> <th scope="row" colspan="2"><h3>Heading Font Size</h3></th></tr>
+<tr valign="top"> <th scope="row" colspan="2"><h3>Titles Font Size</h3></th></tr>
 <tr valign="top">
     <th scope="row">Single Property Title</th>
     <td class="mls-fz-col"><input type="number" name="mls_plugin_property_single_heading" value="<?php echo esc_attr(get_option('mls_plugin_property_single_heading', '28')); ?>" /><span>px</span>
@@ -948,8 +985,13 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <td>
         <div class="mls_def_layout">
             <select name="mls_def_prop_layout" id="mls_def_prop_layout" >
-            <option value="pro-grid" <?php selected($mls_def_prop_layout, 'pro-grid'); ?>>Grid</option>
-<option value="pro-list" <?php selected($mls_def_prop_layout, 'pro-list'); ?>>List</option>
+			<option value="pro-list" <?php selected($mls_def_prop_layout, 'pro-list'); ?>>List</option>
+            <option value="cols2" <?php selected($mls_def_prop_layout, 'cols2'); ?>>Grid - 2 Column</option>
+			<option value="cols3" <?php selected($mls_def_prop_layout, 'cols3'); echo empty($mls_def_prop_layout) ? ' selected' : ''; ?>>Grid - 3 Column</option>
+			<option value="cols4" <?php selected($mls_def_prop_layout, 'cols4'); ?>>Grid - 4 Column</option>
+			<option value="cols5" <?php selected($mls_def_prop_layout, 'cols5'); ?>>Grid - 5 Column</option>
+				
+
 
         </select>
         </div>
@@ -960,9 +1002,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <th scope="row">Hide Breadcrumb</th>
     <td>
      <section class="toggle-Section">
-          <label class="switch">
+          <label class="mls-switch">
           <input type="checkbox" id="tog-breadcrumb-hide" name="mls_plugin_style_breadcrumbhide" value="1" <?php checked(get_option('mls_plugin_style_breadcrumbhide', '1'), '1'); ?>>
-          <span class="slider round"></span>
+          <span class="mls-tog-slider round"></span>
           </label>
        </section>
 
@@ -991,8 +1033,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
         </div>
     </td>
 </tr>
-
-                    </table>
+</table>
                     <p class="submit">
         <input type="submit" name="mls_plugin_save_style_settings" value="Save Changes" class="button button-primary" />
 		</p>
@@ -1049,9 +1090,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <th scope="row">Hide Tour Type field</th>
     <td>
 		<section class="toggle-Section">
-      <label class="switch">
+      <label class="mls-switch">
       <input type="checkbox" id="tog-tour-hide" name="mls_plugin_leadformvideohide" value="1" <?php checked(get_option('mls_plugin_leadformvideohide'), '1'); ?> >
-      <span class="slider round"></span>
+      <span class="mls-tog-slider round"></span>
       </label>
    </section>
       
@@ -1062,9 +1103,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <th scope="row">Hide Schedule date and Available Timing fields</th>
     <td>
  <section class="toggle-Section">
-      <label class="switch">
+      <label class="mls-switch">
       <input type="checkbox" id="tog-timing-hide" name="mls_plugin_leadformscheduledatehide" value="1" <?php checked(get_option('mls_plugin_leadformscheduledatehide'), '1'); ?>>
-      <span class="slider round"></span>
+      <span class="mls-tog-slider round"></span>
       </label>
    </section>
         
@@ -1081,9 +1122,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <th scope="row">Hide Preferred Languages field</th>
     <td>
  <section class="toggle-Section">
-      <label class="switch">
+      <label class="mls-switch">
       <input type="checkbox"  id="tog-lang-hide" name="mls_plugin_leadformlanghide" value="1" <?php checked(get_option('mls_plugin_leadformlanghide'), '1'); ?>>
-      <span class="slider round"></span>
+      <span class="mls-tog-slider round"></span>
       </label>
    </section>
     </td>
@@ -1091,6 +1132,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 						<tr valign="top" class="tog-lang-row">
                             <th scope="row">Preferred Languages</th>
                             <td class="mlspreflang mls-lf-pl">
+								
                     <?php mls_plugin_display_language_setting_options(); ?>
 </td>
                         </tr>
@@ -1098,9 +1140,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
     <th scope="row">Hide Buyer/Seller field</th>
     <td>
  <section class="toggle-Section">
-      <label class="switch">
+      <label class="mls-switch">
       <input type="checkbox"  id="tog-bsa-hide"  name="mls_plugin_leadformbuyersellerhide" value="1" <?php checked(get_option('mls_plugin_leadformbuyersellerhide'), '1'); ?>>
-      <span class="slider round"></span>
+      <span class="mls-tog-slider round"></span>
       </label>
    </section>
        
@@ -1183,9 +1225,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                             <th scope="row">Enable Multi-Language</th>
                             <td>
 							 <section class="toggle-Section">
-								  <label class="switch">
+								  <label class="mls-switch">
 								  <input type="checkbox" id="tog-proplang-hide" name="mls_plugin_style_proplanghide" value="1" <?php checked(get_option('mls_plugin_style_proplanghide'), '1'); ?>>
-								  <span class="slider round"></span>
+								  <span class="mls-tog-slider round"></span>
 								  </label>
 							   </section>
 								<p class="description note-style">Enable this toggle if your site is multi-language.</p>
@@ -1263,7 +1305,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide API Key</p>
+                                     <p>Provide API Key from Resale Online</p>
                                 </div>                            
                                 </div>
                             </td>
@@ -1274,7 +1316,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide Client ID</p>
+                                     <p>Provide Client ID from Resale Online</p>
                                 </div>                            
                                 </div>
                             </td>
@@ -1285,7 +1327,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide Default Filter ID Sales</p>
+                                     <p>Provide Default Filter ID Sales from Resale Online</p>
                                 </div>                            
                                 </div>
                             </td>
@@ -1296,7 +1338,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide Default Filter ID Short Rentals</p>
+                                     <p>Provide Default Filter ID Short Rentals from Resale Online</p>
                                 </div>                            
                                 </div>
                             </td>
@@ -1307,7 +1349,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide Default Filter ID Long Rentals</p>
+                                     <p>Provide Default Filter ID Long Rentals from Resale Online</p>
                                  </div>                            
                                 </div>
                             </td>
@@ -1318,7 +1360,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Provide Default Filter ID Features</p>
+                                     <p>Provide Default Filter ID Features from Resale Online</p>
                                  </div>                            
                                 </div>
                             </td>
@@ -1327,9 +1369,9 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                             <th scope="row">Enable Multi-language</th>
                             <td>
 							 <section class="toggle-Section">
-								  <label class="switch">
+								  <label class="mls-switch">
 									  <input type="checkbox" id="tog-propdetailpage-hide" name="mls_plugin_style_proplanghide" value="1" <?php checked(get_option('mls_plugin_style_proplanghide'), '1'); ?>>
-								  <span class="slider round"></span>
+								  <span class="mls-tog-slider round"></span>
 								  </label>
 							   </section>
 								<p class="description note-style">Enable this toggle if your site is multi-language.</p>
@@ -1344,7 +1386,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please Include Only Property Types on Search</p>
+                                     <p>Select Property Types you want to show in Search form</p>
                                  </div>                            
                                 </div>
 								<div class="easySelect-option-area"></div>
@@ -1367,7 +1409,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 								<div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please select the page to display property details.</p>
+                                     <p>Select the page to display property details.</p>
                                  </div>                            
                                 </div>
                    <p class="description note-style"> Use shortcode <code>[mls_property_details]</code> on the selected page.</p>
@@ -1380,7 +1422,7 @@ update_option('mls_plugin_paragraph_fontsize', sanitize_text_field($_POST['mls_p
 								<div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Please enter the page slug without slashes to display property details.</p>
+                                     <p>Enter the page slug without slashes to display property details.</p>
                                  </div>                            
                                 </div>
                    <p class="description note-style"> Note: All Language property detail page slug should be same. <br>Use shortcode <code>[mls_property_details]</code> on the selected page.</p>
@@ -1402,7 +1444,7 @@ if (!empty($api_status['transaction']) && !empty($api_status['transaction']['sta
         $transaction = $api_status['transaction'] ?? null;
 
         if (!empty($transaction) && is_array($transaction)) {
-            echo '<div class="cs-err w-100"><div class="mls-cstatus-error"><div class="mls-cstatus-error"><span class="dashicons dashicons-no-alt"></span> Error</div></div>';
+            echo '<div class="cs-err w-100"><div class="mls-cstatus-error"><span class="dashicons dashicons-no-alt"></span> Error</div></div>';
 
 			 // Start the error message container
     echo '<div class="mls-connection-error">';
@@ -1625,10 +1667,20 @@ echo "<style>
     </style>";
 	}
 	
+	$mls_plugin_fontfamily = get_option('mls_plugin_fontfamily');
+	if($mls_plugin_fontfamily == 'google'){
+		$mls_plugin_custom_font_family = get_option('mls_plugin_google_font');
+	}elseif($mls_plugin_fontfamily == 'custom'){
+		$mls_plugin_custom_font_family = 'CustomFont';
+	}else{
+		$mls_plugin_custom_font_family = '';
+	}
+	
 	// Output CSS for font sizes
 echo "<style>
     :root {
-        --mls-Paragraph-fontsize: " . esc_attr(get_option('mls_plugin_paragraph_fontsize', '18')) . "px;
+        --mls-fontfamily: " . esc_attr($mls_plugin_custom_font_family) . ";
+		--mls-Paragraph-fontsize: " . esc_attr(get_option('mls_plugin_paragraph_fontsize', '18')) . "px;
         --mls-lg-fontsize: " . esc_attr(get_option('mls_plugin_lg_fontsize', '16')) . "px;
         --mls-md-fontsize: " . esc_attr(get_option('mls_plugin_md_fontsize', '14')) . "px;
         --mls-sm-fontsize: " . esc_attr(get_option('mls_plugin_sm_fontsize', '12')) . "px;
@@ -1773,8 +1825,8 @@ function mls_plugin_admin_notice() {
 	/* Trial Period Notice */
 $trialperiodnotice = mls_plugin_is_license_valid();
 if ($trialperiodnotice) {
-    $trialenabled = $trialperiodnotice['data']['trialenabled'];
-    $expiration_date = $trialperiodnotice['data']['expiration_date'];
+    $trialenabled = isset($trialperiodnotice['data']['trialenabled']) ? $trialperiodnotice['data']['trialenabled'] : '';
+    $expiration_date = isset($trialperiodnotice['data']['expiration_date']) ? $trialperiodnotice['data']['expiration_date'] : '';
     if ($trialenabled && $expiration_date) {
         // Get the current date and time
         $current_date = new DateTime();

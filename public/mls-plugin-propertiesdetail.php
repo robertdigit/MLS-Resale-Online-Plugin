@@ -4,6 +4,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 function mls_property_details_shortcode() {
+	
     $property_ref = get_query_var('property_ref');
     $property_type = isset($_GET['type']) ? $_GET['type'] : '';
 	$property_lang = isset($_GET['lang']) ? $_GET['lang'] : '';
@@ -26,14 +27,14 @@ $filter_map = [
 // 	echo $property_type . "<br>";
     // Fetch property details using the reference and type
     $properties = mls_plugin_fetch_ref($property_ref, $property_type, $property_lang, $newdevelopment);
-
-    if (!$properties) {
+$property_details = $properties['Property'];
+    if (!$property_details) {
         return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_not_found') .'</p></div>';
     }
 // 	else{
 // 		return '<pre>' . print_r($properties, true) . '</pre>';
 // 	}
-$property_details = $properties['Property'];
+
 	
     // Start output buffering
     ob_start();
@@ -70,17 +71,7 @@ $property_details = $properties['Property'];
             ?>
         </div>
     </div>
-<!--     <div class="mls-pagi-btns-right">
-        <div>
-            <a href="javascript:void(0);" class="mls-button">
-                <img src="<?php echo esc_url(plugins_url('assets/images/prev.png', __DIR__)); ?>" alt="Previous" /> 
-                Previous
-            </a>
-            <a href="javascript:void(0);" class="mls-button">
-                Next <img src="<?php echo esc_url(plugins_url('assets/images/next.png', __DIR__)); ?>" alt="Next" />
-            </a>
-        </div>
-    </div> -->
+
 </div>
 
           <div class="mls-prj-detail-full mls-heading">
@@ -107,6 +98,8 @@ $property_details = $properties['Property'];
 								$prpVirtualTour = isset($property_details['VirtualTour']) ? $property_details['VirtualTour'] : null;
 								$prpVideoTour = isset($property_details['VideoTour']) ? $property_details['VideoTour'] : null;
 								$rentalpriceperiod = $property_details['RentalPeriod'] ?? mls_plugin_translate('general','month'); 
+								$prpdescription = $property_details['Description'];
+								$prpfirstimage = $property_details['Pictures']['Picture'][0]['PictureURL'];
                                 ?>
 
                                <h2><?php echo esc_html($prptitle); ?></h2>
@@ -157,7 +150,7 @@ $property_details = $properties['Property'];
                         <div class="mls-prj-price cn-area">
                            <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
+                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
                         </div>
                     </div>
                  </div>
@@ -228,7 +221,7 @@ $property_details = $properties['Property'];
                     <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
                         <div class="ltst">
                             <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
-                            <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></p>
+                            <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></p>
                         </div>
                     <?php endif; ?>
 
@@ -425,11 +418,12 @@ $buyersellerhidecls = $classes['bsa-hide'];
                              <input type="hidden" name="action" value="mls_plugin_lead_form">
                              <input type="hidden" name="property_ref" value="<?php echo esc_attr($property_ref); ?>">
                              <?php
-// Get the current year and month
+// Get the current year, month, and day
 $currentYear = (int) date('Y');
 $currentMonth = (int) date('n'); // Numeric representation of month (1-12)
+$currentDay = (int) date('j');  // Current day of the month
 
-// Generate years dynamically (current year + next 5 years)
+// Generate years dynamically (current year + next 1 year)
 $years = range($currentYear, $currentYear + 1);
 
 // Generate months dynamically
@@ -447,6 +441,8 @@ $months = [
     11 => 'November',
     12 => 'December',
 ];
+
+if (!$scheduledatehidecls) {
 ?>
 
 <div class="mls-form-group mls-c2-fix month-field dmy custom-select">
@@ -470,12 +466,16 @@ $months = [
         <?php endforeach; ?>
     </select>
 </div>
-                            <div class="mls-form-group mls-c1 date-field dmy">
+
+<div class="mls-form-group mls-c1 date-field dmy">
     <div class="schedule-date-slider" id="date-slider">
         <?php
         // Loop through dates for the current month and year by default
         $selectedMonth = $currentMonth;
         $selectedYear = $currentYear;
+
+        // Start from the current day for the current month and year
+        $startDay = ($selectedMonth === $currentMonth && $selectedYear === $currentYear) ? $currentDay : 1;
         $totalDays = cal_days_in_month(CAL_GREGORIAN, $selectedMonth, $selectedYear);
 
         for ($day = 1; $day <= $totalDays; $day++) {
@@ -488,10 +488,12 @@ $months = [
             $formattedDate = $date->format('d/m/Y');
             $dayFullName = $date->format('l'); // Full day name
             $fullvalue = $formattedDate . ' (' . $dayFullName . ')';
+   			$pastdayscls = ($day < $startDay) ? 'pastdayscls' : '';
+			$currentdaycls = ($day == $currentDay && $selectedMonth === $currentMonth && $selectedYear === $currentYear) ? 'currentdaycls' : '';
         ?>
-            <div>
+            <div class="<?php echo $pastdayscls. ' ' . $currentdaycls; ?>">
                 <div class="property-schedule-singledate-wrapper">
-                    <input type="radio" id="scheduledate" name="scheduledate" value="<?php echo esc_attr($fullvalue); ?>">
+                    <input type="radio" id="" name="scheduledate" value="<?php echo esc_attr($fullvalue); ?>">
                     <div>
                         <span class="day-name"><?php echo esc_html($dayName); ?></span>
                         <span class="day-num"><?php echo esc_html($dayNum); ?></span>
@@ -505,6 +507,14 @@ $months = [
     </div>
     <span class="error-message" id="scheduledateError"></span>
 </div>
+
+<?php 
+} else { 
+    echo '<div class="mls-form-group mls-c1 date-field dmy"><input type="radio" id="" name="scheduledate" value="-" checked /></div>'; 
+} 
+?>
+
+							 
                              <div class="mls-form-group mls-c3 time-field custom-select">
                                <?php mls_plugin_display_available_timings(); ?>
                              </div>
@@ -590,7 +600,7 @@ $months = [
                         <div class="mls-prj-price cn-area">
                            <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
+                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
                         </div>
                     </div>
                     <div class="mls-latest-post">
@@ -606,7 +616,7 @@ $months = [
             <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
                 <div class="ltst">
                     <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
-                    <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_price($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></p>
+                    <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></p>
                 </div>
             <?php endif; ?>
 
@@ -663,9 +673,17 @@ $months = [
 
 
     <?php
+	
+	
+
+
+
+	
+	
     // Return the buffered content
     return ob_get_clean();
+
 }
-if (mls_plugin_is_license_valid()) {
+if (mls_plugin_check_license_status()) {
 add_shortcode('mls_property_details', 'mls_property_details_shortcode');
 }

@@ -84,6 +84,11 @@ add_action('wp_ajax_update_dates', 'update_date_slider');
 add_action('wp_ajax_nopriv_update_dates', 'update_date_slider');
 
 function update_date_slider() {
+	// Get the current year, month, and day
+$currentYear = (int) date('Y');
+$currentMonth = (int) date('n'); // Numeric representation of month (1-12)
+$currentDay = (int) date('j');  // Current day of the 
+	
     // Get the selected month and year from the AJAX request
     $month = isset($_POST['month']) ? intval($_POST['month']) : 0;
     $year = isset($_POST['year']) ? intval($_POST['year']) : 0;
@@ -93,6 +98,9 @@ function update_date_slider() {
         wp_die();
     }
 
+	// Start from the current day for the current month and year
+     $startDay = ($month === $currentMonth && $year === $currentYear) ? $currentDay : 1;
+	
     // Calculate the number of days in the selected month and year
     $totalDays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
@@ -109,9 +117,11 @@ function update_date_slider() {
         $dayFullName = $date->format('l'); // Full day name
 
         $fullValue = $formattedDate . ' (' . $dayFullName . ')';
-
+		$pastdayscls = ($day < $startDay) ? 'pastdayscls' : '';
+		$currentdaycls = ($day == $currentDay && $month === $currentMonth && $year === $currentYear) ? 'currentdaycls' : '';
+		
         // Add each day as a slick-slide
-        $output .= '<div class="slick-slide" style="width: 106px;">';
+       $output .= '<div class="slick-slide ' . $pastdayscls . ' ' . $currentdaycls . '" style="width: 106px;">';
         $output .= '  <div class="property-schedule-singledate-wrapper">';
         $output .= '    <input type="radio" id="scheduledate" name="scheduledate" value="' . esc_attr($fullValue) . '">';
         $output .= '    <div>';
@@ -446,7 +456,7 @@ function mls_plugin_display_qualified_leads() {
                            							
                         </td>
                 </tr>
-            <?php } }else{ echo '<tr class="mls-table-no-data"><td>No data found</td></tr>'; } ?>
+            <?php } }else{ echo '<tr class="mls-table-no-data"><td colspan="6">No data found</td></tr>'; } ?>
             </tbody>
         </table>
 		</div>

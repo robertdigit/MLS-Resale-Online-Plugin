@@ -94,6 +94,7 @@
 	padding: 0 0 0 5px;
 	border: 0 none;
 	margin: 0;
+	font-family: inherit;
 }
 
 .tagsinput div input.error {
@@ -106,20 +107,20 @@
 
 .tagsinput div input::-webkit-input-placeholder {
 	color: var(--mls-Text-color);
-/* 	font-size: var(--mls-lg-fontsize); */
+	font-size: var(--mls-lg-fontsize);
 }
 
 .tagsinput div input:-moz-placeholder {
 	color: var(--mls-Text-color);
-/* 	font-size: var(--mls-lg-fontsize); */
+	font-size: var(--mls-lg-fontsize);
 }
 
 .tagsinput div input::-moz-placeholder {
 	color: var(--mls-Text-color);
-/* 	font-size: var(--mls-lg-fontsize); */
+	font-size: var(--mls-lg-fontsize);
 }
 
 .tagsinput div input:-ms-input-placeholder {
 	color: var(--mls-Text-color);
-/* 	font-size: var(--mls-lg-fontsize); */
+	font-size: var(--mls-lg-fontsize);
 }

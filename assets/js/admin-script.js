@@ -35,6 +35,35 @@ jQuery(document).ready(function($){
         });
     });
 
+jQuery(document).ready(function ($) {
+    $('#mls_upload_custom_font').on('click', function (e) {
+        e.preventDefault();
+
+        // Open WordPress media uploader with restrictions
+        var file_frame = wp.media({
+            title: 'Select or Upload Custom Font',
+            button: {
+                text: 'Use This Font',
+            },
+            multiple: false,
+        });
+
+        file_frame.on('select', function () {
+            var attachment = file_frame.state().get('selection').first().toJSON();
+
+            // Validate the file type again (fallback validation)
+            if (['woff', 'woff2', 'ttf', 'otf'].some(ext => attachment.url.endsWith(ext))) {
+                $('#mls_custom_font_url').val(attachment.url); // Set the font URL in the input field
+            } else {
+                alert('Please select a valid font file (WOFF, WOFF2, TTF, or OTF).');
+            }
+        });
+
+        file_frame.open();
+    });
+});
+
+
 /**Lead form submission popup**/
 jQuery(document).ready(function($) {
     const modal = $('#mls-lead-details-modal');
@@ -114,8 +143,8 @@ jQuery(document).ready(function($) {
     });
 });
 
-jQuery(document).ready(function($){
- $("#mls_property_types").easySelect({
+jQuery(document).ready(function(jQuery){
+ jQuery("#mls_property_types").easySelect({
      buttons: true, 
     search: true,
    placeholder: 'Type',
@@ -126,7 +155,7 @@ jQuery(document).ready(function($){
    width: '100%',
    dropdownMaxHeight: '214px',
  })
- $("#mls_avail_time").easySelect({
+ jQuery("#mls_avail_time").easySelect({
      buttons: true, // 
      search: true,
      placeholder: 'Type',
@@ -139,26 +168,26 @@ jQuery(document).ready(function($){
  })
 });
 
-jQuery(document).ready(function($){
-    $(".mls-adminsc-info-toggle").hide();
-    $(".mls-shortcode").hover(function(){
-      $(this).siblings(".mls-adminsc-info-toggle").toggle();
+jQuery(document).ready(function(jQuery){
+    jQuery(".mls-adminsc-info-toggle").hide();
+    jQuery(".mls-shortcode").hover(function(){
+      jQuery(this).siblings(".mls-adminsc-info-toggle").toggle();
     });
-    $(".mls-admin-info-toggle").hide();
-    $(".mls-admin-info-btn").hover(function(){
-      $(this).siblings(".mls-admin-info-toggle").toggle();
+    jQuery(".mls-admin-info-toggle").hide();
+    jQuery(".mls-admin-info-btn").hover(function(){
+      jQuery(this).siblings(".mls-admin-info-toggle").toggle();
     });
-    $(".mls-qualified-info-toggle").hide();
-    $(".mls-toggle-qualified").hover(function(){
-      $(this).find(".mls-qualified-info-toggle").toggle();
+    jQuery(".mls-qualified-info-toggle").hide();
+    jQuery(".mls-toggle-qualified").hover(function(){
+      jQuery(this).find(".mls-qualified-info-toggle").toggle();
     });
-	$(".dashicons-star-filled").next(".mls-qualified-info-toggle").text("Remove from Qualified Leads")
-	$(".dashicons-star-empty").next(".mls-qualified-info-toggle").text("Add to Qualified Leads")
+	jQuery(".dashicons-star-filled").next(".mls-qualified-info-toggle").text("Remove from Qualified Leads")
+	jQuery(".dashicons-star-empty").next(".mls-qualified-info-toggle").text("Add to Qualified Leads")
 });
 
-jQuery(document).ready(function($) {
-    $(function() {
-        $('#mls_plugin_custom_languages').tagsInput({
+jQuery(document).ready(function(jQuery) {
+    jQuery(function() {
+        jQuery('#mls_plugin_custom_languages').tagsInput({
             'delimiter': [',', ';'],
             'unique': true,
             'minChars': 1,
@@ -228,20 +257,20 @@ jQuery(document).ready(function ($) {
 });
 
 
-jQuery(document).ready(function($) {
-    $(".styledSelect").click(function(){
-		if ($(this).next("ul.options").is(":visible"))
+jQuery(document).ready(function(jQuery) {
+    jQuery(".styledSelect").click(function(){
+		if (jQuery(this).next("ul.options").is(":visible"))
 			{
-            $(this).parents("form").find(".styledSelect").next("ul.options").hide();
-			$(this).removeClass("active");
-            $(this).next("ul.options").show();
+            jQuery(this).parents("form").find(".styledSelect").next("ul.options").hide();
+			jQuery(this).removeClass("active");
+            jQuery(this).next("ul.options").show();
 				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
 				jQuery('.scrolableDiv > li').show();
 			}
 		else
 			{
-			$(this).addClass("active");
-            $(this).next("ul.options").hide();
+			jQuery(this).addClass("active");
+            jQuery(this).next("ul.options").hide();
 				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
 				jQuery('.scrolableDiv > li').show();
 			}
@@ -329,12 +358,12 @@ jQuery(document).ready(function() {
 });
 
 
-jQuery(document).ready(function($) {
-    $(document).ready(function() {
-		$('input.mulpitply_checkbox_style').on('change', function() {
-//			if ($(this).is(':checked')) {
-				$('input.searchInputeasySelect').val(''); // Clear the search box value
-				$('.scrolableDiv > li').show();
+jQuery(document).ready(function(jQuery) {
+    jQuery(document).ready(function() {
+		jQuery('input.mulpitply_checkbox_style').on('change', function() {
+//			if (jQuery(this).is(':checked')) {
+				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
+				jQuery('.scrolableDiv > li').show();
 //			}
 		});
 	});
@@ -348,92 +377,113 @@ jQuery(document).ready(function($) {
 //    });
 // });
 
-jQuery(document).ready(function ($) {	
+jQuery(document).ready(function (jQuery) {	
   // Initialize the class based on the initial state
-  $('input[type="checkbox"]').each(function () {
-    if ($(this).prop('checked')) {
-      $(this).parent('.switch').addClass('active');
+  jQuery('input[type="checkbox"]').each(function () {
+    if (jQuery(this).prop('checked')) {
+      jQuery(this).parent('.mls-switch').addClass('active');
     }
   });
-  $('.proplang-note').hide();
-  $('.tog-propdetailpage-row-show').hide();
-  $('.tog-dark-row').hide();
-  $('input[type="checkbox"]#tog-timing-hide').each(function () {
-    if ($(this).prop('checked')) {
-      $(this).parents("table").find('.tog-timing-row').hide();
+  jQuery('.proplang-note').hide();
+  jQuery('.tog-propdetailpage-row-show').hide();
+  jQuery('.tog-dark-row').hide();
+  jQuery('input[type="checkbox"]#tog-timing-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+      jQuery(this).parents("table").find('.tog-timing-row').hide();
     }
   });
-  $('input[type="checkbox"]#tog-lang-hide').each(function () {
-    if ($(this).prop('checked')) {
-     $(this).parents("table").find('.tog-lang-row').hide();
+  jQuery('input[type="checkbox"]#tog-lang-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+     jQuery(this).parents("table").find('.tog-lang-row').hide();
     }
   });
-  $('input[type="checkbox"]#tog-proplang-hide').each(function () {
-    if ($(this).prop('checked')) {
-     $(this).parents("table").find('.tog-proplang-row').hide();
-     $(this).parents("table").find('.proplang-note').show();
+  jQuery('input[type="checkbox"]#tog-proplang-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+     jQuery(this).parents("table").find('.tog-proplang-row').hide();
+     jQuery(this).parents("table").find('.proplang-note').show();
     }
   });
-  $('input[type="checkbox"]#tog-propdetailpage-hide').each(function () {
-    if ($(this).prop('checked')) {
-     $(this).parents("table").find('.tog-propdetailpage-row').hide();
-     $(this).parents("table").find('.tog-propdetailpage-row-show').show();
+  jQuery('input[type="checkbox"]#tog-propdetailpage-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+     jQuery(this).parents("table").find('.tog-propdetailpage-row').hide();
+     jQuery(this).parents("table").find('.tog-propdetailpage-row-show').show();
     }
   });
-  $('input[type="checkbox"]#tog-darklight-hide').each(function () {
-    if ($(this).prop('checked')) {
-     $(this).parents("table").find('.tog-light-row').hide();
-     $(this).parents("table").find('.tog-dark-row').show();
+  jQuery('input[type="checkbox"]#tog-darklight-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+     jQuery(this).parents("table").find('.tog-light-row').hide();
+     jQuery(this).parents("table").find('.tog-dark-row').show();
     }
   });
 	
   // Add toggle functionality for clicks
-  $('.switch input[type="checkbox"]').on("change", function () {
-    $(this).parent('.switch').toggleClass('active', $(this).prop('checked'));
+  jQuery('.mls-switch input[type="checkbox"]').on("change", function () {
+    jQuery(this).parent('.mls-switch').toggleClass('active', jQuery(this).prop('checked'));
   });
 	
 });
 
-jQuery(document).ready(function($) {
-	$('input[type="checkbox"]#tog-timing-hide').change(function() {
-        if($(this).is(':checked')) {
-  		    $(this).parents("table").find('.tog-timing-row').hide();
+jQuery(document).ready(function(jQuery) {
+  function updateFontFamilyVisibility() {
+    const selectedValue = jQuery('.mls-custom-radio input[type="radio"]:checked').val();
+    if (selectedValue === 'google') {
+      jQuery('.mls-gfonts-wrap').show();
+      jQuery('.mls-cfonts-wrap').hide();
+    } else if (selectedValue === 'custom') {
+      jQuery('.mls-gfonts-wrap').hide();
+      jQuery('.mls-cfonts-wrap').show();
+    } else if (selectedValue === 'Default') {
+      jQuery('.mls-gfonts-wrap').hide();
+      jQuery('.mls-cfonts-wrap').hide();
+    }
+  }
+
+  // Run the function on page load
+  updateFontFamilyVisibility();
+
+  // Update visibility on radio button change
+  jQuery('.mls-custom-radio input[type="radio"]').change(function() {
+    updateFontFamilyVisibility();
+  });
+	jQuery('input[type="checkbox"]#tog-timing-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('.tog-timing-row').hide();
 		} else {
-  		    $(this).parents("table").find('.tog-timing-row').show();
+  		    jQuery(this).parents("table").find('.tog-timing-row').show();
 		}
 	});
-	$('input[type="checkbox"]#tog-lang-hide').change(function() {
-        if($(this).is(':checked')) {
-  		    $(this).parents("table").find('.tog-lang-row').hide();
+	jQuery('input[type="checkbox"]#tog-lang-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('.tog-lang-row').hide();
 		} else {
-  		    $(this).parents("table").find('.tog-lang-row').show();
+  		    jQuery(this).parents("table").find('.tog-lang-row').show();
 		}
 	});
-	$('input[type="checkbox"]#tog-proplang-hide').change(function() {
-        if($(this).is(':checked')) {
-  		    $(this).parents("table").find('.tog-proplang-row').hide();
-            $(this).parents("table").find('.proplang-note').show();
+	jQuery('input[type="checkbox"]#tog-proplang-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('.tog-proplang-row').hide();
+            jQuery(this).parents("table").find('.proplang-note').show();
 		} else {
-  		    $(this).parents("table").find('.tog-proplang-row').show();
-            $(this).parents("table").find('.proplang-note').hide();
+  		    jQuery(this).parents("table").find('.tog-proplang-row').show();
+            jQuery(this).parents("table").find('.proplang-note').hide();
 		}
 	});
-	$('input[type="checkbox"]#tog-propdetailpage-hide').change(function() {
-        if($(this).is(':checked')) {
-  		    $(this).parents("table").find('.tog-propdetailpage-row').hide();
-            $(this).parents("table").find('.tog-propdetailpage-row-show').show();
+	jQuery('input[type="checkbox"]#tog-propdetailpage-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('.tog-propdetailpage-row').hide();
+            jQuery(this).parents("table").find('.tog-propdetailpage-row-show').show();
 		} else {
-  		    $(this).parents("table").find('.tog-propdetailpage-row').show();
-            $(this).parents("table").find('.tog-propdetailpage-row-show').hide();
+  		    jQuery(this).parents("table").find('.tog-propdetailpage-row').show();
+            jQuery(this).parents("table").find('.tog-propdetailpage-row-show').hide();
 		}
 	});
-	$('input[type="checkbox"]#tog-darklight-hide').change(function() {
-        if($(this).is(':checked')) {
-  		    $(this).parents("table").find('.tog-light-row').hide();
-            $(this).parents("table").find('.tog-dark-row').show();
+	jQuery('input[type="checkbox"]#tog-darklight-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('.tog-light-row').hide();
+            jQuery(this).parents("table").find('.tog-dark-row').show();
 		} else {
-  		    $(this).parents("table").find('.tog-light-row').show();
-            $(this).parents("table").find('.tog-dark-row').hide();
+  		    jQuery(this).parents("table").find('.tog-light-row').show();
+            jQuery(this).parents("table").find('.tog-dark-row').hide();
 		}
 	});
 });
@@ -462,4 +512,25 @@ document.addEventListener('click', function (e) {
             }, 2000);
         }
     }
+});
+
+jQuery(document).ready(function($){
+jQuery(document).on('click', 'a[data-plugin-deactivate="mls-plugin"]', function(e) {
+                e.preventDefault();
+                jQuery('#mls-plugin-deactivate-popup').fadeIn();
+            });
+
+            jQuery('#mls-plugin-cancel-deactivate').on('click', function() {
+                jQuery('#mls-plugin-deactivate-popup').fadeOut();
+            });
+
+			jQuery('#mls-plugin-confirm-deactivate').on('click', function() {
+    const deleteData = jQuery('#mls-plugin-deactivate-form input[name="delete_data"]:checked').val();
+    jQuery.post(ajaxurl, {
+        action: 'mls_plugin_handle_deactivation',
+        delete_data: deleteData,
+    }, function() {
+        window.location.href = mlsPluginAdmin.pluginsPageUrl;
+    });
+});       
 });

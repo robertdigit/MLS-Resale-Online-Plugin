@@ -3,7 +3,7 @@
  * Plugin Name: Resales Online MLS Plugin
  * Plugin URI: https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/
  * Description: Seamlessly connect all your ReSales Online properties to your website. This plugin, designed for estate agents, simplifies linking your ReSales Online listings with your site..
- * Version: 1.2.3
+ * Version: 1.2.4
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author: Clark Digital
@@ -41,8 +41,8 @@ function mls_plugin_enqueue_scripts() {
 	$plugin_data = get_file_data(__FILE__, array('Version' => 'Version'));
     $plugin_version = $plugin_data['Version'];
 	
-    wp_enqueue_style( 'style', plugin_dir_url(__FILE__) . 'assets/css/style.css', array(), $plugin_version );
-    wp_enqueue_style( 'responsive-style', plugin_dir_url(__FILE__) . 'assets/css/responsive.css', array(), $plugin_version );
+    wp_enqueue_style( 'mls-style', plugin_dir_url(__FILE__) . 'assets/css/style.css', array(), $plugin_version );
+    wp_enqueue_style( 'mls-responsive-style', plugin_dir_url(__FILE__) . 'assets/css/responsive.css', array(), $plugin_version );
     wp_enqueue_style( 'slick-css', plugin_dir_url(__FILE__) . 'assets/css/slick.css', array(), '1.0.0' );
     wp_enqueue_style( 'slick-theme', plugin_dir_url(__FILE__) . 'assets/css/slick-theme.css', array(), '1.0.0' );
     wp_enqueue_style( 'lightgallery-css', plugin_dir_url(__FILE__) . 'assets/css/lightgallery.css', array(), '1.0.0' );
@@ -261,7 +261,8 @@ function mls_plugin_enqueue_admin_assets() {
         'mls-plugin-admin-script', 
         'mlsPluginAdmin', 
         array(
-            'ajax_url' => admin_url('admin-ajax.php')
+            'ajax_url' => admin_url('admin-ajax.php'),
+			'pluginsPageUrl' => admin_url('plugins.php'),
         )
     );
 }
@@ -296,6 +297,47 @@ function mls_plugin_enqueue_color_picker($hook_suffix) {
     ');
 }
 
+function mls_plugin_enqueue_google_font() {
+	
+	$mls_plugin_fontfamily = get_option('mls_plugin_fontfamily');
+	if($mls_plugin_fontfamily == 'google'){
+		
+    $selected_font = get_option('mls_plugin_google_font', '');
+    if ($selected_font) {
+        $font_url = "https://fonts.googleapis.com/css2?family=" . urlencode($selected_font) . ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+        wp_enqueue_style('mls-plugin-google-font', $font_url, [], null);
+    }
+	
+	}elseif($mls_plugin_fontfamily == 'custom'){
+		
+	$custom_font_url = get_option('mls_custom_font_file', '');
+    if ($custom_font_url) {
+        $custom_font_name = 'CustomFont'; // Assign a generic name
+        $font_face_css = "
+            @font-face {
+                font-family: '{$custom_font_name}';
+                src: url('{$custom_font_url}') format('woff2'), 
+                     url('{$custom_font_url}') format('woff'), 
+                     url('{$custom_font_url}') format('truetype');
+            }
+        ";
+		wp_enqueue_style('mls-plugin-custom-font', '.', '', false);
+        wp_add_inline_style('mls-plugin-custom-font', $font_face_css);
+    }
+		
+	}
+	
+}
+add_action('wp_enqueue_scripts', 'mls_plugin_enqueue_google_font');
+
+function mls_plugin_allow_font_uploads($mime_types) {
+    $mime_types['woff'] = 'font/woff';
+    $mime_types['woff2'] = 'font/woff2';
+    $mime_types['ttf'] = 'font/ttf';
+    $mime_types['otf'] = 'font/otf';
+    return $mime_types;
+}
+add_filter('upload_mimes', 'mls_plugin_allow_font_uploads');
 
 function mls_add_rewrite_rules() {
 	$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
@@ -431,11 +473,43 @@ function mls_plugin_is_license_valid() {
 
     // Check if the validation was successful
     if (isset($data['success']) && $data['success']) {
-        return $data;
+        // Save the validation status in the database
+        update_option('mls_plugin_license_status', 'valid');
+        return true;
     } else {
+        // Save the validation status in the database
+        update_option('mls_plugin_license_status', 'invalid');
         return false;
     }
   }
+
+function mls_plugin_check_license_status() {
+    // Get the saved license status from the database
+    $license_status = get_option('mls_plugin_license_status', 'invalid');
+
+    // Return true if the status is valid
+    return $license_status === 'valid';
+}
+
+// Register a custom REST API endpoint
+add_action('rest_api_init', function () {
+    register_rest_route('mls-plugin/v1', '/update-license-status', array(
+        'methods'  => 'POST',
+        'callback' => 'mls_plugin_update_license_status',
+        'permission_callback' => '__return_true', // Add proper authentication in production
+    ));
+});
+
+// Callback function to update the license status
+function mls_plugin_update_license_status(WP_REST_Request $request) {
+    $parameters = $request->get_json_params();
+    $status = isset($parameters['status']) ? sanitize_text_field($parameters['status']) : 'invalid';
+
+    // Update the license status in the database
+    update_option('mls_plugin_license_status', $status);
+
+    return new WP_REST_Response(array('success' => true, 'status' => $status), 200);
+}
 
 // Changelog from github
 function mls_plugin_fetch_changelog() {
@@ -476,7 +550,7 @@ function mls_plugin_fetch_changelog() {
 add_action('admin_init', 'mls_plugin_init');
 
 function mls_plugin_init() {
-    if (mls_plugin_is_license_valid()) {
+    if (mls_plugin_check_license_status()) {
         add_filter('pre_set_site_transient_update_plugins', 'mls_plugin_check_for_update');
     }else{ delete_site_transient('update_plugins'); }
 }
@@ -655,7 +729,7 @@ include(plugin_dir_path(__FILE__) . 'includes/mls-plugin-settings.php');
 include(plugin_dir_path(__FILE__) . 'includes/mls-plugin-search.php');
 // Include the fetch properties functionality file.
 include(plugin_dir_path(__FILE__) . 'includes/mls-plugin-fetch-properties.php');
-if (mls_plugin_is_license_valid()) {
+if (mls_plugin_check_license_status()) {
 	// Include the lead form functionality file.
 	include(plugin_dir_path(__FILE__) . 'includes/mls_plugin_lead_form.php');
 }
@@ -703,11 +777,198 @@ function mls_plugin_activate() {
     flush_rewrite_rules();
 	
     mls_plugin_create_lead_form_table();
-	if (mls_plugin_is_license_valid()) {
+	if (mls_plugin_check_license_status()) {
         mls_plugin_check_for_update('');
     }
 }
 
 register_activation_hook(__FILE__, 'mls_plugin_activate');
+
+/*Remove plugin data on plugin uninstall*/
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'mls_plugin_add_deactivate_link');
+function mls_plugin_add_deactivate_link($links) {
+    $links['deactivate'] = '<a href="#" data-plugin-deactivate="mls-plugin" style="color: red;">' . __('Deactivate', 'mls-plugin') . '</a>';
+    return $links;
+}
+
+add_action('admin_footer', 'mls_plugin_add_deactivation_popup');
+function mls_plugin_add_deactivation_popup() {
+    // Ensure the popup is only added on the Plugins page.
+    if (get_current_screen()->id !== 'plugins') {
+        return;
+    }
+
+    ?>
+    <div id="mls-plugin-deactivate-popup" style="display: none;">
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 400px; text-align: center;">
+                <h3><?php _e('Confirm Deactivation', 'mls-plugin'); ?></h3>
+                <p><?php _e('Do you want to delete all plugin data from the database?', 'mls-plugin'); ?></p>
+                <form id="mls-plugin-deactivate-form">
+					<div class="da-form-list">
+    <label>
+        <input type="radio" name="delete_data" value="1">
+        <?php _e('Yes, remove all data on plugin deletion', 'mls-plugin'); ?>
+    </label>
+    <label>
+        <input type="radio" name="delete_data" value="0" checked>
+        <?php _e('No, keep all plugin data, Just deactivate', 'mls-plugin'); ?>
+    </label>
+					</div>
+					<div class="da-form-btn">
+    <button type="button" id="mls-plugin-confirm-deactivate" class="button button-primary">
+        <?php _e('Confirm and Deactivate', 'mls-plugin'); ?>
+    </button>
+    <button type="button" id="mls-plugin-cancel-deactivate" class="button">
+        <?php _e('Cancel', 'mls-plugin'); ?>
+    </button>
+					</div>
+</form>
+
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+add_action('wp_ajax_mls_plugin_handle_deactivation', 'mls_plugin_handle_deactivation');
+
+function mls_plugin_handle_deactivation() {
+    // Check if the user wants to delete data.
+    $delete_data = isset($_POST['delete_data']) && $_POST['delete_data'] == 1;
+
+    // Save the user's preference in the database.
+    update_option('mls_plugin_delete_data', $delete_data);
+
+    // Deactivate the plugin.
+    deactivate_plugins(plugin_basename(__FILE__));
+
+    wp_send_json_success();
+}
+
+register_uninstall_hook(__FILE__, 'mls_plugin_cleanup');
+function mls_plugin_cleanup() {
+    $delete_data = get_option('mls_plugin_delete_data', false);
+
+    if ($delete_data) {
+        global $wpdb;
+
+        // Delete custom tables.
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}mls_plugin_lead_form");
+
+        // Delete plugin options.
+        
+        delete_option('mls_plugin_delete_data');
+	delete_option('mls_plugin_api_key');
+    delete_option('mls_plugin_client_id');
+    delete_option('mls_plugin_filter_id_sales');
+    delete_option('mls_plugin_filter_id_short_rentals');
+    delete_option('mls_plugin_filter_id_long_rentals');
+    delete_option('mls_plugin_filter_id_features');
+    delete_option('mls_plugin_style_propdetailpagehide');
+    delete_option('mls_plugin_style_proplanghide');
+    delete_option('mls_plugin_property_detail_page_slug');
+    delete_option('mls_plugin_property_detail_page_id');
+    delete_option('mls_plugin_property_types');
+		
+	
+    // General Colors
+    delete_option('mls_plugin_primary_color');
+    delete_option('mls_plugin_secondary_color');
+    delete_option('mls_plugin_text_color');
+    delete_option('mls_plugin_black_color');
+    delete_option('mls_plugin_bg_grey_color');
+    delete_option('mls_plugin_bg_white_color');
+    delete_option('mls_plugin_bg_dark_color');
+    delete_option('mls_plugin_border_color');
+    delete_option('mls_plugin_border_dark_color');
+    delete_option('mls_plugin_link_color');
+    delete_option('mls_plugin_link_hover_color');
+    delete_option('mls_plugin_button_color');
+    delete_option('mls_plugin_button_bg_color');
+    delete_option('mls_plugin_button_border_color');
+    delete_option('mls_plugin_button_hover_color');
+    delete_option('mls_plugin_button_bg_hover_color');
+    delete_option('mls_plugin_button_border_hover_color');
+    delete_option('mls_plugin_banner_search_color');
+    delete_option('mls_plugin_banner_search_bg_color');
+    delete_option('mls_plugin_banner_search_btn_color');
+    delete_option('mls_plugin_banner_search_btn_bg_color');
+    delete_option('mls_plugin_banner_search_btn_hover_bg_color');
+
+    // Dark Theme Colors
+    delete_option('mls_plugin_dark_primary_color');
+    delete_option('mls_plugin_dark_secondary_color');
+    delete_option('mls_plugin_dark_text_color');
+    delete_option('mls_plugin_dark_black_color');
+    delete_option('mls_plugin_dark_bg_grey_color');
+    delete_option('mls_plugin_dark_bg_white_color');
+    delete_option('mls_plugin_dark_bg_dark_color');
+    delete_option('mls_plugin_dark_border_color');
+    delete_option('mls_plugin_dark_border_dark_color');
+    delete_option('mls_plugin_dark_link_color');
+    delete_option('mls_plugin_dark_link_hover_color');
+    delete_option('mls_plugin_dark_button_color');
+    delete_option('mls_plugin_dark_button_bg_color');
+    delete_option('mls_plugin_dark_button_border_color');
+    delete_option('mls_plugin_dark_button_hover_color');
+    delete_option('mls_plugin_dark_button_bg_hover_color');
+    delete_option('mls_plugin_dark_button_border_hover_color');
+    delete_option('mls_plugin_dark_banner_search_color');
+    delete_option('mls_plugin_dark_banner_search_bg_color');
+    delete_option('mls_plugin_dark_banner_search_btn_color');
+    delete_option('mls_plugin_dark_banner_search_btn_bg_color');
+    delete_option('mls_plugin_dark_banner_search_btn_hover_bg_color');
+
+    // Layout and Styles
+    delete_option('mls_def_prop_layout');
+    delete_option('mls_plugin_style_breadcrumbhide');
+    delete_option('mls_plugin_style_darklighthide');
+    delete_option('mls_plugin_prop_detailsidebaroffset');
+    delete_option('mls_plugin_tabs_to_display');
+
+    // Font Settings
+    delete_option('mls_plugin_google_font');
+    delete_option('mls_custom_font_file');
+    delete_option('mls_plugin_fontfamily');
+    delete_option('mls_plugin_paragraph_fontsize');
+    delete_option('mls_plugin_lg_fontsize');
+    delete_option('mls_plugin_md_fontsize');
+    delete_option('mls_plugin_sm_fontsize');
+    delete_option('mls_plugin_button_fontsize');
+    delete_option('mls_plugin_filter_form_heading');
+    delete_option('mls_plugin_property_list_heading');
+    delete_option('mls_plugin_property_list_price_heading');
+    delete_option('mls_plugin_property_single_heading');
+    delete_option('mls_plugin_property_single_section_heading');
+    delete_option('mls_plugin_property_single_price_heading');
+    
+delete_option('mls_plugin_available_timings');
+delete_option('mls_plugin_leadformvideohide');
+delete_option('mls_plugin_languages');
+delete_option('mls_plugin_custom_languages');
+delete_option('mls_plugin_leadformheading');
+delete_option('mls_plugin_leadformscheduledatehide');
+delete_option('mls_plugin_leadformlanghide');
+delete_option('mls_plugin_leadformbuyersellerhide');
+
+delete_option('mls_plugin_leadformtomail');
+delete_option('mls_plugin_leadformccmail');
+delete_option('mls_plugin_leadformmailsubject');
+delete_option('mls_plugin_leadformmailheadertext');
+delete_option('mls_plugin_leadformmailfootertext');
+delete_option('mls_plugin_leadformmailheaderlogo');
+		
+delete_option('mls_plugin_maphide');
+delete_option('mls_plugin_map_provider');
+		
+delete_option('mls_plugin_prop_language');
+delete_option('mls_plugin_style_proplanghide');
+
+    }
+}
+
+
 
 ?>

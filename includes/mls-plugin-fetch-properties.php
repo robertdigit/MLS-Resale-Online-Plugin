@@ -65,7 +65,10 @@ function mls_plugin_fetch_currency() {
     if (json_last_error() !== JSON_ERROR_NONE) {
         return "Error: Could not decode JSON response.";
     }
-
+	
+	if (is_array($results) && isset($results['Property']) && is_array($results['Property'])) {  
+	$results = $results['Property'][0]['Currency'];  }
+	
     return $results;
 	
 }
@@ -101,7 +104,7 @@ function mls_plugin_get_cached_currencies() {
 		// Check if currency property array is valid and not empty
         if ( !empty($currency) ) {
             // Cache the results for 12 hours only if data is valid
-            set_transient('mls_plugin_currency', $locations, 12 * HOUR_IN_SECONDS);
+            set_transient('mls_plugin_currency', $currency, 12 * HOUR_IN_SECONDS);
         } else {
             // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
             set_transient('mls_plugin_currency', [], 5 * MINUTE_IN_SECONDS);
@@ -283,7 +286,7 @@ function mls_plugin_property_type_filter_callback_multilang($language) {
      return $property_types;
 }
 
-function mls_plugin_get_cached_propertytype_multilang($language) {
+/*function mls_plugin_get_cached_propertytype_multilang($language) {
     // Try to get locations from transient
     $propertytype_multilang = get_transient('mls_plugin_propertytype_multilang');
 	
@@ -301,7 +304,33 @@ function mls_plugin_get_cached_propertytype_multilang($language) {
     }
 
     return $propertytype_multilang;
+}*/
+
+
+function mls_plugin_get_cached_propertytype_multilang($language) {
+    // Create a unique transient key based on the language
+    $transient_key = 'mls_plugin_propertytype_multilang_' . sanitize_key($language);
+    
+    // Try to get property types from the transient
+    $propertytype_multilang = get_transient($transient_key);
+    
+    if ($propertytype_multilang === false) {
+        // If transient does not exist, fetch from API
+        $propertytype_multilang = mls_plugin_property_type_filter_callback_multilang($language);
+        
+        // Check if property type array is valid and not empty
+        if (!empty($propertytype_multilang) && !empty($propertytype_multilang['PropertyTypes']['PropertyType'])) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient($transient_key, $propertytype_multilang, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient($transient_key, [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $propertytype_multilang;
 }
+
 
 // Function to check connection status using the Resales Online API.
 function check_mls_connection() {
@@ -359,7 +388,7 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 	if (!get_option('mls_plugin_style_proplanghide')) {
         $language = get_option('mls_plugin_prop_language');
     }
-// 	echo "lang: ". $language. "<br>";
+// 	echo "p_sorttype: ". $p_sorttype. "<br>";
 // 	echo $keyword. "<br>";
 
 	if ($filter_type === 'short_rentals') {
@@ -374,6 +403,14 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
     } else {
         $filter_id = $mls_plugin_filter_id_sales; // Default to sales filter ID
     }
+	
+// 	Page Size based on the layout
+	$mls_def_prop_layout = get_option('mls_def_prop_layout');
+	if($mls_def_prop_layout == 'cols5'){ $pagesize = '15'; }
+	elseif($mls_def_prop_layout == 'cols4'){ $pagesize = '12'; }
+	elseif($mls_def_prop_layout == 'cols3'){ $pagesize = '9'; }
+	elseif($mls_def_prop_layout == 'cols2'){ $pagesize = '6'; }
+	else{ $pagesize = '9'; }
 	
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getProperties']; // Replace with actual API endpoint
 
@@ -391,8 +428,8 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
         'P_Max' => $max_price ? urlencode($max_price) : '',
         'P_RefId' => $keyword ? urlencode($keyword) : '',
 		'P_Lang' => $language,
-        'P_PageSize' => '9',
-        'P_SortType' => $p_sorttype ? urlencode($p_sorttype) : '0',
+        'P_PageSize' => $pagesize,
+        'P_SortType' => isset($p_sorttype) ? $p_sorttype : '1',
         // 'p_images' => '4',
 //         'P_IncludeRented' => '1',
 		'p_new_devs' => $newdevelopment,
@@ -406,7 +443,7 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 
     $baseurl = add_query_arg($query_args, $endpoint);
 
-//     echo 'base url' . $baseurl . '<br>';
+//     echo 'base url: ' . $baseurl . '<br>';
 //     die('tst-end');
 
     // Make the API request.
@@ -516,6 +553,39 @@ function mls_plugin_fetch_searchfeatures() {
 	
     // Return the locations if available
     return $results;
+}
+
+// Function to fetch google fonts using the google fonts API
+
+function mls_plugin_google_fonts_dropdown() {
+    $api_key = 'AIzaSyCDBN66lhXaKAOgQ1xYczU7jI7rAAgDUmY'; // Replace with your API Key
+    $fonts = mls_plugin_fetch_google_fonts($api_key);
+    $selected_font = get_option('mls_plugin_google_font', '');
+
+    if (is_wp_error($fonts)) {
+        echo '<p>Unable to fetch fonts. Please check your API key.</p>';
+        return;
+    }
+
+    echo '<select name="mls_plugin_google_font">';
+	echo "<option value=''>Select the font</option>";
+    foreach ($fonts as $font) {
+        $font_family = $font['family'];
+        $selected = ($selected_font === $font_family) ? 'selected' : '';
+        echo "<option value='$font_family' $selected>$font_family</option>";
+    }
+    echo '</select>';
+}
+
+function mls_plugin_fetch_google_fonts($api_key) {
+    $response = wp_remote_get("https://www.googleapis.com/webfonts/v1/webfonts?key=$api_key");
+    if (is_wp_error($response)) {
+        return $response;
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    return $data['items'] ?? [];
 }
 
 ?>

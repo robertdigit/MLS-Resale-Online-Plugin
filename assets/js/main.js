@@ -13,10 +13,6 @@ jQuery(document).ready(function(){
       jQuery(this).parents(".layout-filter").find(".active").removeClass("active");
       jQuery(this).addClass("active");
     });
-    jQuery(".mls-dropdown").hide();
-    jQuery(".price-range-iput-block").click(function(){
-      jQuery(this).parents(".mls-form-group").find(".mls-dropdown").toggle();
-    });
     jQuery(".tour-info-toggle").hide();
     jQuery(".tour-info").hover(function(){
       jQuery(this).parents(".mls-form-group").find(".tour-info-toggle").toggle();
@@ -29,9 +25,9 @@ jQuery(document).ready(function(){
     jQuery('.loc a').attr('href', 'javascript:void(0);');
 });
 
-jQuery(document).ready(function($){
-	var sourceValue = $('.styledSelect').html();
-	$(this).parent("td").find(".easySelect-option-area").html(sourceValue);
+jQuery(document).ready(function(jQuery){
+	var sourceValue = jQuery('.styledSelect').html();
+	jQuery(this).parent("td").find(".easySelect-option-area").html(sourceValue);
 })
 
 jQuery(document).ready(function(){
@@ -223,7 +219,7 @@ jQuery(document).ready(function(jQuery)
 });
 
 
-jQuery(document).ready(function ($) {
+jQuery(document).ready(function (jQuery) {
         // Initialize LightGallery
         //const videoGallery = lightGallery(document.getElementById('video-gallery'), {
 			lightGallery(document.getElementById('open-video-tour-pop'), {
@@ -239,11 +235,11 @@ jQuery(document).ready(function ($) {
 				counter : false
         });
 	
-	$('#open-video-tour').on('click', function() {
-	   $('#open-video-tour-pop iframe').trigger('click');
+	jQuery('#open-video-tour').on('click', function() {
+	   jQuery('#open-video-tour-pop iframe').trigger('click');
 	});
-	$('#open-virtual-tour').on('click', function() {
-	   $('#open-virtual-tour-pop iframe').trigger('click');
+	jQuery('#open-virtual-tour').on('click', function() {
+	   jQuery('#open-virtual-tour-pop iframe').trigger('click');
 	});
 	
 //         jQuery('a#open-video-tour').on('click', function () {
@@ -344,28 +340,7 @@ jQuery(document).ready(function(){
      width: '100%',
      dropdownMaxHeight: '350px',
  })
-//  jQuery("#mls_search_area_ban").easySelect({
-//      buttons: true,
-//      search: true,
-//      placeholder: 'Area',
-//      placeholderColor: '',
-//      selectColor: '#524781',
-//      itemTitle: 'Car selected',
-//      showEachItem: true,
-//      width: '100%',
-//      dropdownMaxHeight: '350px',
-//  })
-//  jQuery("#mls_search_type_ban").easySelect({
-//      buttons: true, 
-//      search: true,
-//      placeholder: 'Type',
-//      placeholderColor: '',
-//      selectColor: '#524781',
-//      itemTitle: 'Car selected',
-//      showEachItem: true,
-//      width: '100%',
-//      dropdownMaxHeight: '350px',
-//  })
+
 });
 
 
@@ -433,64 +408,160 @@ jQuery(document).ready(function(){
 //});
 
 
-jQuery(document).ready(function(){
-    
-	jQuery("#min_price,#max_price").on('change', function () {
-	  jQuery('#price-range-submit').show();
-	  var min_price_range = parseInt(jQuery("#min_price").val());
-	  var max_price_range = parseInt(jQuery("#max_price").val());
-	  if (min_price_range > max_price_range) {
-		jQuery('#max_price').val(min_price_range);
-	  }
-	  jQuery("#slider-range").slider({
-		values: [min_price_range, max_price_range]
-	  });
-	});
+jQuery(document).ready(function () {
+  // Initialize sliders for each instance
+  jQuery(".slider-range-wrapper").each(function () {
+    var sliderWrapper = jQuery(this);
+    var defaultMinPrice = parseInt(sliderWrapper.data("min")) || 0; // Default min price
+    var defaultMaxPrice = parseInt(sliderWrapper.data("max")) || 10000000; // Default max price
+    var currency = sliderWrapper.data("currency") || "EUR"; // Get currency from data-currency attribute
 
-	jQuery("#min_price,#max_price").on("paste keyup", function () {                                        
-	  var min_price_range = parseInt(jQuery("#min_price").val());
-	  var max_price_range = parseInt(jQuery("#max_price").val());
-	  if(min_price_range == max_price_range){
-			max_price_range = min_price_range + 100;
-			jQuery("#min_price").val(min_price_range);		
-			jQuery("#max_price").val(max_price_range);
-	  }
-	  jQuery("#slider-range").slider({
-		values: [min_price_range, max_price_range]
-	  });
-	});
+    // Currency symbols and formatting options
+    var currencyFormats = {
+      EUR: { symbol: "€", code: "EUR", locale: "de-DE" }, // Euro
+      GBP: { symbol: "£", code: "GBP", locale: "en-GB" }, // British Pound
+      USD: { symbol: "$", code: "USD", locale: "en-US" }, // US Dollar
+      RUB: { symbol: "₽", code: "RUB", locale: "ru-RU" }, // Russian Ruble
+      TRY: { symbol: "₺", code: "TRY", locale: "tr-TR" }, // Turkish Lira
+      SAR: { symbol: "ر.س", code: "SAR", locale: "ar-SA" }, // Saudi Riyal
+    };
 
-	jQuery(function () {
-	  jQuery("#slider-range").slider({
-		range: true,
-		orientation: "horizontal",
-		min: 0,
-		max: 10000,
-		values: [0, 10000],
-		step: 100,
-		slide: function (event, ui) {
-		  if (ui.values[0] == ui.values[1]) {
-			  return false;
-		  }
-		  jQuery("#min_price").val(ui.values[0]);
-		  jQuery("#max_price").val(ui.values[1]);
-		}
-	  });
+    var currencyFormat = currencyFormats[currency] || currencyFormats.EUR; // Fallback to EUR if currency is not found
 
-	  jQuery("#min_price").val(jQuery("#slider-range").slider("values", 0));
-	  jQuery("#max_price").val(jQuery("#slider-range").slider("values", 1));
-	});
+    var sliderRange = sliderWrapper.find(".slider-range");
+    var minInput = sliderWrapper.closest(".mls-form-group").find(".min_price");
+    var maxInput = sliderWrapper.closest(".mls-form-group").find(".max_price");
+    var priceRangeResults = sliderWrapper.closest(".mls-form-group").find(".pricerangeResults");
+    var priceRangeDisplay = sliderWrapper.closest(".mls-form-group").find(".pricerangeDisplay");
 
-	jQuery("#slider-range,#price-range-submit").click(function () {
-	  var min_price = jQuery('#min_price').val();
-	  var max_price = jQuery('#max_price').val();
-	  jQuery("#pricerangeResults").val("jQuery" + min_price  +" "+ "to" + " "+ max_price);
-	  jQuery("#pricerangeDisplay").val("jQuery" + min_price  +" "+ "to" + " "+ max_price);
-	});
-    jQuery("#price-range-reset").click(function () {
-	  jQuery("#slider-range").slider('option',{min: 0, max: 10000});
+    // Get user-selected values from inputs (if any)
+    var userMinPrice = parseInt(minInput.val()) || defaultMinPrice;
+    var userMaxPrice = parseInt(maxInput.val()) || defaultMaxPrice;
+
+    // Ensure user values are within the default range
+    userMinPrice = Math.max(userMinPrice, defaultMinPrice);
+    userMaxPrice = Math.min(userMaxPrice, defaultMaxPrice);
+
+	// =================================================
+    // NEW CODE: Clear input fields if values are default
+    // =================================================
+    if (userMinPrice === defaultMinPrice) {
+      minInput.val(""); // Set min input to empty if it matches default
+    }
+    if (userMaxPrice === defaultMaxPrice) {
+      maxInput.val(""); // Set max input to empty if it matches default
+    }
+	
+	
+    // Initialize slider with default range but user-selected markers
+    sliderRange.slider({
+      range: true,
+      orientation: "horizontal",
+      min: defaultMinPrice,
+      max: defaultMaxPrice,
+      values: [userMinPrice, userMaxPrice], // Set user-selected values as markers
+      step: 100,
+      slide: function (event, ui) {
+        if (ui.values[0] == ui.values[1]) {
+          return false;
+        }
+        minInput.val(ui.values[0]);
+        maxInput.val(ui.values[1]);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+      }
     });
 
+    // Set initial values in inputs
+   /* minInput.val(userMinPrice);
+    maxInput.val(userMaxPrice);*/
+	  
+	// Set initial values in inputs (if not default)
+
+    if (userMinPrice !== defaultMinPrice) {
+      minInput.val(userMinPrice);
+    }
+    if (userMaxPrice !== defaultMaxPrice) {
+      maxInput.val(userMaxPrice);
+    }
+    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+
+    // Handle input changes with a delay
+    var timeout;
+    minInput.add(maxInput).on('input', function () {
+      clearTimeout(timeout); // Clear previous timeout
+      timeout = setTimeout(function () {
+        var minVal = parseInt(minInput.val()) || defaultMinPrice;
+        var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
+
+        // Ensure values are within the default range
+        minVal = Math.max(minVal, defaultMinPrice);
+        maxVal = Math.min(maxVal, defaultMaxPrice);
+
+        // Ensure min <= max
+        if (minVal > maxVal) {
+          if (jQuery(this).hasClass("min_price")) {
+            minVal = maxVal;
+          } else {
+            maxVal = minVal;
+          }
+        }
+
+        // Update inputs and slider
+        minInput.val(minVal);
+        maxInput.val(maxVal);
+        sliderRange.slider("values", [minVal, maxVal]);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+      }, 1000); // 1000ms delay
+    });
+
+    // Handle blur events to set default values if inputs are empty
+    minInput.add(maxInput).on('blur', function () {
+      var minVal = parseInt(minInput.val()) || defaultMinPrice;
+      var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
+
+      // Ensure values are within the default range
+      minVal = Math.max(minVal, defaultMinPrice);
+      maxVal = Math.min(maxVal, defaultMaxPrice);
+
+      // Update inputs and slider
+      minInput.val(minVal);
+      maxInput.val(maxVal);
+      sliderRange.slider("values", [minVal, maxVal]);
+      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+    });
+
+    // Reset functionality
+    sliderWrapper.closest(".mls-form-group").find(".price-range-reset").click(function (e) {
+		e.preventDefault();
+      minInput.val(defaultMinPrice);
+      maxInput.val(defaultMaxPrice);
+      sliderRange.slider("values", [defaultMinPrice, defaultMaxPrice]);
+      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+    });
+	  
+  });
+
+  // Function to update price range display with currency formatting
+  function updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat) {
+    var minPrice = parseInt(minInput.val()) || 0;
+    var maxPrice = parseInt(maxInput.val()) || 10000000;
+
+    // Format numbers as currency
+    var formattedMinPrice = minPrice.toLocaleString(currencyFormat.locale, {
+      style: "currency",
+      currency: currencyFormat.code,
+      maximumFractionDigits: 0,
+    });
+    var formattedMaxPrice = maxPrice.toLocaleString(currencyFormat.locale, {
+      style: "currency",
+      currency: currencyFormat.code,
+      maximumFractionDigits: 0,
+    });
+
+    // Update display fields
+    priceRangeResults.val(formattedMinPrice + " to " + formattedMaxPrice);
+    priceRangeDisplay.val(formattedMinPrice + " to " + formattedMaxPrice);
+  }
 });
 
 jQuery(window).scroll(function(){
@@ -504,7 +575,7 @@ jQuery(window).scroll(function(){
 
  jQuery(document).ready(function() {
 	let stickyHeaderHeight = parseInt(mlsTranslations.mls_plugin_prop_detailsidebaroffset, 10);
-	 console.log(mlsTranslations.mls_plugin_prop_detailsidebaroffset);
+	 
    jQuery('.mls-prj-sidebar').stickySidebar({
         topSpacing: stickyHeaderHeight,
         container: '.mls-prj-detail-full',
@@ -599,12 +670,12 @@ jQuery(document).ready(function() {
     });
 });
 
-jQuery(document).ready(function($) {
-    $(document).ready(function() {
-		$('input.mulpitply_checkbox_style').on('change', function() {
-//			if ($(this).is(':checked')) {
-				$('input.searchInputeasySelect').val(''); // Clear the search box value
-				$('.scrolableDiv > li').show();
+jQuery(document).ready(function(jQuery) {
+    jQuery(document).ready(function() {
+		jQuery('input.mulpitply_checkbox_style').on('change', function() {
+//			if (jQuery(this).is(':checked')) {
+				jQuery('input.searchInputeasySelect').val(''); // Clear the search box value
+				jQuery('.scrolableDiv > li').show();
 //			}
 		});
 	});
@@ -637,7 +708,7 @@ jQuery(document).ready(function(jQuery) {
 		
 		// Reset error messages
         jQuery('.error-message').text('');
-		var phonenumbercode = $('.iti__selected-dial-code').text();
+		var phonenumbercode = jQuery('.iti__selected-dial-code').text();
         var isValid = true;
         var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         var phonePattern = /^\d{4,15}$/; // Example for a 9,15-digit phone number
@@ -678,7 +749,6 @@ jQuery(document).ready(function(jQuery) {
 		
         var formData = jQuery(this).serialize(); // Serialize form data
 		formData += '&phonenumbercode=' + encodeURIComponent(phonenumbercode);
-		console.log(formData);
         jQuery.ajax({
             url: mls_ajax_obj.ajax_url, // AJAX handler
             type: 'POST',
@@ -714,24 +784,34 @@ jQuery(document).ready(function() {
    }));        
 });
 
-jQuery(document).ready(function($) {
-	$("ul.srh-tab-nav").each(function(){
-        var countLi = $(this).find("li").length;
+jQuery(document).ready(function(jQuery) {
+	jQuery("ul.srh-tab-nav").each(function(){
+        var countLi = jQuery(this).find("li").length;
         if(countLi == 4 ){
-           $(this).parents("form").find("ul.srh-tab-nav").addClass("c4");
+           jQuery(this).parents("form").find("ul.srh-tab-nav").addClass("c4");
          }
         if(countLi == 3 ){
-           $(this).parents("form").find("ul.srh-tab-nav").addClass("c3");
+           jQuery(this).parents("form").find("ul.srh-tab-nav").addClass("c3");
          }
         if(countLi == 2 ){
-           $(this).parents("form").find("ul.srh-tab-nav").addClass("c2");
+           jQuery(this).parents("form").find("ul.srh-tab-nav").addClass("c2");
          }
         if(countLi == 1 ){
-           $(this).parents("form").find("ul.srh-tab-nav").addClass("c1");
+           jQuery(this).parents("form").find("ul.srh-tab-nav").addClass("c1");
          }
     });
-
 });
+
+jQuery(window).on('load', function () {
+    // Get the current day index
+    const targetIndex = jQuery('.currentdaycls');
+
+    // Focus on the slide if it exists
+    if (targetIndex !== -1) {
+        jQuery('.schedule-date-slider').slick('slickGoTo', targetIndex);
+    }
+});
+
 function updateDateSlider() {
     const monthSelect = document.getElementById('month-select');
     const yearSelect = document.getElementById('year-select');
@@ -744,7 +824,7 @@ function updateDateSlider() {
         dateSlider.html('<p>Please select both Month and Year.</p>');
         return;
     }
-
+	jQuery('.date-field.dmy').addClass('updatedateloading');
     // AJAX request using jQuery
     jQuery.ajax({
         url: mls_ajax_obj.ajax_url,
@@ -764,7 +844,7 @@ function updateDateSlider() {
             dateSlider.html(response);
 
             // Reinitialize the slick slider
-            dateSlider.slick({
+        dateSlider.slick({
         dots: false,
         infinite: true,
         slidesToShow: 8,
@@ -830,9 +910,71 @@ function updateDateSlider() {
               }
             ]	
       });
+	jQuery('.date-field.dmy').removeClass('updatedateloading');
+		// Find the index of the current date (element with class 'currentdaycls')
+const currentDayElement = jQuery('.currentdaycls');
+
+if (currentDayElement.length > 0) {
+    // Get the `data-slick-index` value of the element
+    const currentIndex = currentDayElement.closest('.slick-slide').data('slick-index');
+
+    if (currentIndex !== undefined) {
+        dateSlider.slick('slickGoTo', currentIndex); // Navigate to the correct slide
+    } else {
+        console.log('The current date does not have a valid slick index.');
+    }
+} else {
+    console.log('No current day found in the loaded dates.');
+}
+
+			
         },
         error: function () {
             console.error('Failed to fetch dates');
+			jQuery('.date-field.dmy').removeClass('updatedateloading');
         }
     });
 }
+
+jQuery(document).ready(function () {
+    jQuery(".mls-dropdown").hide();
+	
+    jQuery(".price-range-iput-block").click(function (event) {
+        jQuery(this).parents(".mls-form-group").find(".mls-dropdown").toggle(); // Toggle dropdown visibility
+        event.stopPropagation(); // Prevent click from propagating to document
+    });
+
+    jQuery(document).click(function (event) {
+        if (!jQuery(event.target).closest(".mls-dropdown, input.price-range-iput-block").length) {
+            jQuery(".mls-dropdown").hide(); // Hide dropdown if click is outside
+        }
+    });
+	 jQuery(".price-range-done").click(function (event) {
+        jQuery(this).closest(".mls-form-group").find(".mls-dropdown").hide();
+		 event.stopPropagation();
+      });
+	
+});
+
+// Sort Order type form Scripts
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all elements with the class 'order_search'
+    var orderSearchElements = document.querySelectorAll('.order_search');
+    
+    // Loop through each 'order_search' element
+    orderSearchElements.forEach(function(orderSearch) {
+        var searchForm = document.querySelector('.mls-proplist-search-form');
+        var searchFormSortType = searchForm.querySelector('.search_form_sorttype');
+        var submitButton = searchForm.querySelector('input[type="submit"]');
+
+        if (orderSearch && searchFormSortType && searchForm && submitButton) {
+            orderSearch.addEventListener('change', function() {
+                // Update the hidden field in the search form with the selected value
+                searchFormSortType.value = this.value;
+
+                // Trigger the submit button click
+                submitButton.click();
+            });
+        }
+    });
+});

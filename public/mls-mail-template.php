@@ -1,6 +1,12 @@
 <?php
    // Set the background color, using the dynamic color or default if not set
    $purchase_url = 'https://clarkdigital.es/resales-online-plugin/#contactplugin';
+   $dark_light_hide = get_option('mls_plugin_style_darklighthide');
+	if ($dark_light_hide) { 
+   $headerfooter_bgcolor = get_option('mls_plugin_dark_primary_color', '#0073e1');
+   }else{
+   $headerfooter_bgcolor = get_option('mls_plugin_primary_color', '#0073e1');
+   }
    ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
@@ -21,7 +27,7 @@
          <table align="center" border="0" cellpadding="0" cellspacing="0" style="border: 1px solid #f2f2f2;background: #ffffff;" width="600">
             <tbody>
                <tr>
-                  <td align="center" colspan="3" style="line-height:1px; font-size:1px; background-color: #0073e1; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px; " valign="top">
+                  <td align="center" colspan="3" style="line-height:1px; font-size:1px; background-color: <?php echo $headerfooter_bgcolor; ?>; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px; " valign="top">
                      <table align="center" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin: 0">
                         <tr>
                            <td align="center" height="30">
@@ -88,7 +94,7 @@
             <td height="30"></td>
           </tr>
                <tr>
-                  <td align="center" colspan="3" height="30" style="color: #ffffff; background: #0073e1; font-size: 14px;font-family: Arial, Helvetica, sans-serif; padding: 15px " valign="middle">
+                  <td align="center" colspan="3" height="30" style="color: #ffffff; background: <?php echo $headerfooter_bgcolor; ?>; font-size: 14px;font-family: Arial, Helvetica, sans-serif; padding: 15px " valign="middle">
                      <?php echo esc_html($mls_plugin_leadformmailfootertext); ?>
                   </td>
                </tr>

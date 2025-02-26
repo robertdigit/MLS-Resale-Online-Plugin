@@ -26,6 +26,7 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 		  
 <!-- 	Start of Sort type & layout option   -->
 		  <?php if($total_properties > 1) { ?>
+		  
             <div class="mls-list-filter">
                 <div class="layout-filter">
     <span class="grid"><img src="<?php echo esc_url( plugins_url('assets/images/pixels.png', __DIR__) ); ?>" alt="" /></span>
@@ -34,9 +35,10 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 
            <?php if ($includesorttype == '1') : ?>
     <div class="sorttype mls-form">
+		<div class="mls-prop-count"><img src="<?php echo esc_url( plugins_url('assets/images/property_count.png', __DIR__) ); ?>" alt="" /> <?php echo $total_properties . " properties found.";  ?></div>
         <form id="sort_form"  method="get">
             <span class="sb-label"><?php echo mls_plugin_translate('labels','sort_by'); ?></span>
-            <select name="p_sorttype" id="order_search" onchange="this.form.submit()">
+            <select name="p_sorttype" id="order_search" class="order_search" >
     <option value="0" <?php selected($p_sorttype === '0'); ?>><?php echo mls_plugin_translate('options','sort_lowest_price'); ?></option>
     <option value="1" <?php selected($p_sorttype === '1'); ?>><?php echo mls_plugin_translate('options','sort_highest_price'); ?></option>
     <option value="2" <?php selected($p_sorttype === '2'); ?>><?php echo mls_plugin_translate('options','sort_location'); ?></option>
@@ -49,7 +51,7 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
     foreach ($_GET as $key => $value) {
         // Keep all parameters except 'p_sorttype', set 'query_id' value to an empty string if it exists
         if ($key === 'query_id' || $key === 'page_num') {
-            echo '<input type="hidden" name="query_id" value="">';
+            echo '<input type="hidden" name="query_id" value="'. $query_id .'">';
 			 echo '<input type="hidden" name="page_num" value="1">';
         } elseif ($key !== 'p_sorttype') {
             echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
@@ -180,7 +182,8 @@ $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_re
 									<?php $price = $property['Price'];
 									if(!$price){ $price = $property['RentalPrice1']; }
 									$rentalpriceperiod = $property['RentalPeriod'] ?? mls_plugin_translate('general','month'); ?>
-                                    <h3><?php echo esc_html( RESALES_ONLINE_API_CURRENCY[$property['Currency']] ) . ' ' . esc_html( format_price( $price ) ); if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
+                                    
+									<h3><?php echo esc_html( RESALES_ONLINE_API_CURRENCY[$property['Currency']] ) . ' ' . esc_html( format_prices( $price, $property['Currency'] ) ); if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
 									</h3>
                                     <p>
 										<?php echo esc_html( wp_trim_words( wpautop( esc_html( $property['Description'] ) ), 25, '...' ) ); ?>
@@ -254,7 +257,7 @@ $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_re
 }
 
 // Pagination Function
-function mls_plugin_pagination($current_page, $total_pages, $query_id) {
+/*function mls_plugin_pagination($current_page, $total_pages, $query_id) {
     if ($total_pages <= 1) return;
 
     $pagination_html = '<ul class="mls-pagination-list">';
@@ -306,15 +309,55 @@ function mls_plugin_pagination($current_page, $total_pages, $query_id) {
     
     // Escape the output before printing
     echo wp_kses_post($pagination_html);
-}
+}*/
 
+function mls_plugin_pagination($current_page, $total_pages, $query_id) {
+    if ($total_pages <= 1) return;
+
+    $pagination_html = '<ul class="mls-pagination-list">';
+
+    // Define the pagination range (e.g., 10 pages at a time)
+    $range = 10;
+    $start_page = floor(($current_page - 1) / $range) * $range + 1;
+    $end_page = min($start_page + $range - 1, $total_pages);
+
+    // Add "Previous" link
+    if ($current_page > 1) {
+        $pagination_html .= '<li class="prev"><a href="' . esc_url(add_query_arg(array(
+            'page_num' => $current_page - 1,
+            'query_id' => $query_id
+        ))) . '">&laquo; Previous</a></li>';
+    }
+
+    // Show the subset of pages
+    for ($i = $start_page; $i <= $end_page; $i++) {
+        $class = ($i == $current_page) ? 'class="active"' : '';
+        $pagination_html .= '<li ' . $class . '><a href="' . esc_url(add_query_arg(array(
+            'page_num' => $i,
+            'query_id' => $query_id
+        ))) . '">' . esc_html($i) . '</a></li>';
+    }
+
+    // Add "Next" link
+    if ($current_page < $total_pages) {
+        $pagination_html .= '<li class="next"><a href="' . esc_url(add_query_arg(array(
+            'page_num' => $current_page + 1,
+            'query_id' => $query_id
+        ))) . '">Next &raquo;</a></li>';
+    }
+
+    $pagination_html .= '</ul>';
+    
+    // Escape the output before printing
+    echo wp_kses_post($pagination_html);
+}
 
 
 function social_share_function( $property_link ) {
     $social_icons = array(
         'facebook' => 'https://www.facebook.com/sharer.php?u=' . $property_link,
         'twitter' => 'https://twitter.com/intent/tweet?url=' . $property_link,
-        'whatsapp' => 'whatsapp://send?text=' . $property_link . ' (Shared from ' . get_bloginfo( 'name' ) . ')', // Check for WhatsApp app first
+        'whatsapp' => 'https://web.whatsapp.com/send?text=' . urlencode($property_link . ' (Shared from ' . get_bloginfo('name') . ')'), // WhatsApp Web link
         'linkedin' => 'https://www.linkedin.com/shareArticle?mini=true&url=' . $property_link
     );
 
@@ -329,6 +372,26 @@ function social_share_function( $property_link ) {
     return $output;
 }
 
+/*function social_share_function( $property_link, $property_image_url ) {
+    $social_icons = array(
+        'facebook' => 'https://www.facebook.com/sharer.php?u=' . $property_link . '&picture=' . urlencode($property_image_url),
+        'twitter' => 'https://twitter.com/intent/tweet?url=' . $property_link, // Twitter does not support image URLs in the share link
+         'whatsapp' => 'https://web.whatsapp.com/send?text=' . urlencode($property_link . ' (Shared from ' . get_bloginfo('name') . ')'), // WhatsApp Web link
+        'linkedin' => 'https://www.linkedin.com/shareArticle?mini=true&url=' . $property_link . '&media=' . urlencode($property_image_url)
+    );
+
+    $output = '<div class="social-share-buttons">';
+    foreach ( $social_icons as $network => $url ) {
+        $output .= '<a href="' . $url . '" target="_blank" rel="noopener noreferrer">
+    <img src="' . plugin_dir_url(__DIR__ ) . 'assets/images/social-icons/' . $network . '.png' . '" alt="' . ucfirst( $network ) . '">
+</a>';
+    }
+    $output .= '</div>';
+	 $output .= '<div></div>';
+
+    return $output;
+}*/
+
 function format_price($price) {
     // Check if the price is a range
     if (strpos($price, '-') !== false) {
@@ -338,6 +401,69 @@ function format_price($price) {
     } else {
         // Handle single price
         return number_format($price);
+    }
+}
+
+function format_prices($price, $currency = 'EUR') {
+    // Define currency formats
+    $currencyFormats = [
+        'EUR' => ['symbol' => '€', 'locale' => 'de_DE'], // Euro (German format)
+        'GBP' => ['symbol' => '£', 'locale' => 'en_GB'], // British Pound (UK format)
+        'USD' => ['symbol' => '$', 'locale' => 'en_US'], // US Dollar (US format)
+        'RUB' => ['symbol' => '₽', 'locale' => 'ru_RU'], // Russian Ruble (Russian format)
+        'TRY' => ['symbol' => '₺', 'locale' => 'tr_TR'], // Turkish Lira (Turkish format)
+        'SAR' => ['symbol' => 'ر.س', 'locale' => 'ar_SA'], // Saudi Riyal (Arabic format)
+    ];
+
+    // Fallback to EUR if currency is not found
+    $currencyFormat = $currencyFormats[$currency] ?? $currencyFormats['EUR'];
+
+    // Define locale-specific number formatting rules
+    $localeFormats = [
+        'de_DE' => ['thousands_sep' => '.', 'decimal_sep' => ','], // German (dots for thousands)
+        'en_GB' => ['thousands_sep' => ',', 'decimal_sep' => '.'], // British (commas for thousands)
+        'en_US' => ['thousands_sep' => ',', 'decimal_sep' => '.'], // US (commas for thousands)
+        'ru_RU' => ['thousands_sep' => ' ', 'decimal_sep' => ','], // Russian (spaces for thousands)
+        'tr_TR' => ['thousands_sep' => '.', 'decimal_sep' => ','], // Turkish (dots for thousands)
+        'ar_SA' => ['thousands_sep' => ',', 'decimal_sep' => '.'], // Arabic (commas for thousands)
+    ];
+
+    // Get the formatting rules for the locale
+    $formatRules = $localeFormats[$currencyFormat['locale']] ?? $localeFormats['de_DE'];
+
+    // Check if the price is a range
+    if (strpos($price, '-') !== false) {
+        // Handle range pricing
+        $price_range = explode('-', $price); // Split the price range
+        $minPrice = trim($price_range[0]);
+        $maxPrice = trim($price_range[1]);
+
+        // Format each part of the range
+        $formattedMinPrice = number_format(
+            $minPrice,
+            0,
+            $formatRules['decimal_sep'],
+            $formatRules['thousands_sep']
+        );
+        $formattedMaxPrice = number_format(
+            $maxPrice,
+            0,
+            $formatRules['decimal_sep'],
+            $formatRules['thousands_sep']
+        );
+
+        // Add currency symbol and return formatted range
+        return $formattedMinPrice . ' ' . $currencyFormat['symbol'] . ' - ' . $formattedMaxPrice . ' ' . $currencyFormat['symbol'];
+    } else {
+        // Handle single price
+        $formattedPrice = number_format(
+            $price,
+            0,
+            $formatRules['decimal_sep'],
+            $formatRules['thousands_sep']
+        );
+        return $formattedPrice;
+// 		return $formattedPrice . ' ' . $currencyFormat['symbol'];
     }
 }
 
