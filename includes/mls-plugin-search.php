@@ -126,6 +126,8 @@ $locations = mls_plugin_get_cached_locations();
     <input type="hidden" name="includesorttype" value="<?php echo esc_attr($includesorttype); ?>">
     <input type="hidden" name="language" value="<?php echo esc_attr($language); ?>">
     <input type="hidden" name="newdevelopment" value="<?php echo esc_attr($newdevelopment); ?>">
+	<input type="hidden" name="defaultminprice" value="<?php echo esc_attr($min_price); ?>">
+	<input type="hidden" name="defaultmaxprice" value="<?php echo esc_attr($max_price); ?>">
 
 <!--	sales, rental & new development tab in banner search form	 -->
 <?php
@@ -167,7 +169,6 @@ if (count($selected_tabs) === 1) {
     <?php
 }
 ?>
-
 		
     <div class="mls-form-group">
         <label for="mls_search_area"><?php echo mls_plugin_translate('labels','area'); ?></label>
@@ -326,9 +327,25 @@ function mls_plugin_handle_form_submission() {
         $baths = sanitize_text_field($_POST['mls_search_baths']);
         $min_price = sanitize_text_field($_POST['mls_search_minprice']);
         $max_price = sanitize_text_field($_POST['mls_search_maxprice']);
+		$defaultminprice = sanitize_text_field($_POST['defaultminprice']);
+		$defaultmaxprice = sanitize_text_field($_POST['defaultmaxprice']);
 		$min_prices = sanitize_text_field($_POST['min_price']);
-        $max_prices = sanitize_text_field($_POST['max_price']);
-		$min_max_price = $min_prices . ' to ' . $max_prices;
+		$max_prices = sanitize_text_field($_POST['max_price']);
+
+		// Set min and max price to empty if they match the default values
+		$min_prices = ($min_prices === $defaultminprice) ? '' : $min_prices;
+		$max_prices = ($max_prices === $defaultmaxprice) ? '' : $max_prices;
+
+		// Determine min_max_price
+		if ($min_prices === '' && $max_prices === '') {
+			$min_max_price = 'Select a price range';  // Both values are empty
+		} elseif ($min_prices === '') {
+			$min_max_price = ' Upto ' . $max_prices; // Only max price is set
+		} elseif ($max_prices === '') {
+			$min_max_price = ' Starts from ' . $min_prices; // Only min price is set
+		} else {
+			$min_max_price = $min_prices . ' to ' . $max_prices; // Both values are set
+		}
         
 //         echo $min_prices . ' - ' . $max_prices; die('test');
         

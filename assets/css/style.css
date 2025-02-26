@@ -905,7 +905,7 @@ span.mls-share-social-fn {cursor: pointer;}
 .mls-list-filter .layout-filter {order: 2; min-width: 75px; line-height: 1;}
 .mls-list-filter .sorttype {order: 1; width: 100%; /*max-width: 290px;*/ display: flex; flex-flow: row nowrap; align-items: center; justify-content: space-between; gap: 20px;}
 .mls-list-filter .sorttype > div.mls-prop-count {width: 300px; font-size: var(--mls-lg-fontsize); color: var(--mls-Text-color); text-align: left;}
-.mls-list-filter .sorttype > div.mls-prop-count img {height: 25px; width: auto; margin-right: 5px;}
+.mls-list-filter .sorttype > div.mls-prop-count img {height: 25px; width: auto; margin-right: 5px; vertical-align: bottom;}
 .mls-list-filter .sorttype form
 {
 	width: calc(100% - 300px);
@@ -1374,7 +1374,7 @@ input[type="text"].price-range-iput-block
     width: 100%;
 }
 .mls-dropdown label {font-weight: 500;}
-.price-range-display {font-size: var(--mls-sm-fontsize); font-weight: 600; color: var(--mls-Text-color); display: flex; flex-flow: row wrap; align-items: center; justify-content: space-between; gap: 5px;}
+.price-range-display {font-size: var(--mls-sm-fontsize); font-weight: 600; color: var(--mls-Text-color); display: flex; flex-flow: row wrap; align-items: center; gap: 5px;}
 .price-range-display input
 {
 	width: calc(100% - 80px);

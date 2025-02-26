@@ -77,14 +77,14 @@ function mls_plugin_shortcodes_page() {
                 <tr>
                     <td><code>min_pricefilter</code></td>
                     <td>Defines a comma-separated list of minimum price values available in the filter.</td>
-                    <td><code>100000,250000</code></td>
-                    <td><code>[mls_property_search min_pricefilter="150000,300000"]</code></td>
+                    <td><code>0</code></td>
+                    <td><code>[mls_property_search min_pricefilter="150000"]</code></td>
                 </tr>
                 <tr>
                     <td><code>max_pricefilter</code></td>
                     <td>Defines a comma-separated list of maximum price values available in the filter.</td>
-                    <td><code>250000,1000000</code></td>
-                    <td><code>[mls_property_search max_pricefilter="500000,2000000"]</code></td>
+                    <td><code>10000000</code></td>
+                    <td><code>[mls_property_search max_pricefilter="2000000"]</code></td>
                 </tr>
                 <tr>
                     <td><code>includesorttype</code></td>
@@ -108,7 +108,7 @@ function mls_plugin_shortcodes_page() {
                     <td><code>p_sorttype</code></td>
                     <td>Pre-defines a sorting type for the properties (e.g., by price or by date). Values are <code>0 => Order By price (ascending), 1 => Order By price (descending), 2 => Order By location,
 3 => Order By last updated date (most recent first), 4 => Order By last updated date (oldest first)</code></td>
-                    <td><code>''</code> (empty)</td>
+                    <td><code>'1'</code> </td>
                     <td><code>[mls_property_search p_sorttype="0"]</code></td>
                 </tr>
 				<tr>
@@ -199,14 +199,14 @@ function mls_plugin_shortcodes_page() {
                 <tr>
                     <td><code>min_pricefilter</code></td>
                     <td>Defines a comma-separated list of minimum price values available in the search filter.</td>
-                    <td><code>100000,250000</code></td>
-                    <td><code>[mls_property_list min_pricefilter="150000,300000"]</code></td>
+                    <td><code>0</code></td>
+                    <td><code>[mls_property_list min_pricefilter="150000"]</code></td>
                 </tr>
                 <tr>
                     <td><code>max_pricefilter</code></td>
                     <td>Defines a comma-separated list of maximum price values available in the search filter.</td>
-                    <td><code>250000,1000000</code></td>
-                    <td><code>[mls_property_list max_pricefilter="500000,2000000"]</code></td>
+                    <td><code>10000000</code></td>
+                    <td><code>[mls_property_list max_pricefilter="2000000"]</code></td>
                 </tr>
                 <tr>
                     <td><code>includesorttype</code></td>
@@ -230,7 +230,7 @@ function mls_plugin_shortcodes_page() {
                     <td><code>p_sorttype</code></td>
                     <td>Pre-defines a sorting type for the properties (e.g., by price or by date). Values are <code>0 => Order By price (ascending), 1 => Order By price (descending), 2 => Order By location,
 3 => Order By last updated date (most recent first), 4 => Order By last updated date (oldest first)</code></td>
-                    <td><code>''</code> (empty)</td>
+                    <td><code>'1'</code> </td>
                     <td><code>[mls_property_list p_sorttype="0"]</code></td>
                 </tr>
 				<tr>
@@ -314,14 +314,14 @@ function mls_plugin_shortcodes_page() {
             <tr>
                 <td><code>min_pricefilter</code> (attribute)</td>
                 <td>Sets the minimum price range for property listings.</td>
-                <td><code>100000,250000</code></td>
-                <td><code>[mls_search_results min_pricefilter="50000,150000"]</code></td>
+                <td><code>0</code></td>
+                <td><code>[mls_search_results min_pricefilter="50000"]</code></td>
             </tr>
             <tr>
                 <td><code>max_pricefilter</code> (attribute)</td>
                 <td>Sets the maximum price range for property listings.</td>
-                <td><code>250000,1000000</code></td>
-                <td><code>[mls_search_results max_pricefilter="500000,2000000"]</code></td>
+                <td><code>10000000</code></td>
+                <td><code>[mls_search_results max_pricefilter="2000000"]</code></td>
             </tr>
             <tr>
                 <td><code>includesorttype</code> (attribute)</td>
@@ -345,7 +345,7 @@ function mls_plugin_shortcodes_page() {
                     <td><code>p_sorttype</code></td>
                     <td>Pre-defines a sorting type for the properties (e.g., by price or by date). Values are <code>0 => Order By price (ascending), 1 => Order By price (descending), 2 => Order By location,
 3 => Order By last updated date (most recent first), 4 => Order By last updated date (oldest first)</code></td>
-                    <td><code>''</code> (empty)</td>
+                    <td><code>'1'</code> </td>
                     <td><code>[mls_search_results p_sorttype="0"]</code></td>
                 </tr>
 			<tr>
@@ -514,14 +514,14 @@ function mls_plugin_shortcodes_page() {
             <tr>
                 <td><code>min_pricefilter</code></td>
                 <td>Defines a comma-separated list of minimum price values available in the filter.</td>
-                <td><code>100000,250000</code></td>
-                <td><code>[mls_banner_searchform min_pricefilter="150000,300000"]</code></td>
+                <td><code>0</code></td>
+                <td><code>[mls_banner_searchform min_pricefilter="150000"]</code></td>
             </tr>
             <tr>
                 <td><code>max_pricefilter</code></td>
                 <td>Defines a comma-separated list of maximum price values available in the filter.</td>
-                <td><code>250000,1000000</code></td>
-                <td><code>[mls_banner_searchform max_pricefilter="500000,2000000"]</code></td>
+                <td><code>10000000</code></td>
+                <td><code>[mls_banner_searchform max_pricefilter="2000000"]</code></td>
             </tr>
 			<tr>
     <td><code>language</code></td>

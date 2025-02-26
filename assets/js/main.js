@@ -467,7 +467,7 @@ jQuery(document).ready(function () {
         }
         minInput.val(ui.values[0]);
         maxInput.val(ui.values[1]);
-        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
       }
     });
 
@@ -483,7 +483,7 @@ jQuery(document).ready(function () {
     if (userMaxPrice !== defaultMaxPrice) {
       maxInput.val(userMaxPrice);
     }
-    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
 
     // Handle input changes with a delay
     var timeout;
@@ -510,7 +510,7 @@ jQuery(document).ready(function () {
         minInput.val(minVal);
         maxInput.val(maxVal);
         sliderRange.slider("values", [minVal, maxVal]);
-        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
       }, 1000); // 1000ms delay
     });
 
@@ -527,41 +527,64 @@ jQuery(document).ready(function () {
       minInput.val(minVal);
       maxInput.val(maxVal);
       sliderRange.slider("values", [minVal, maxVal]);
-      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
     });
 
     // Reset functionality
     sliderWrapper.closest(".mls-form-group").find(".price-range-reset").click(function (e) {
 		e.preventDefault();
-      minInput.val(defaultMinPrice);
-      maxInput.val(defaultMaxPrice);
+      minInput.val('');
+      maxInput.val('');
       sliderRange.slider("values", [defaultMinPrice, defaultMaxPrice]);
-      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat);
+      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
     });
 	  
   });
 
-  // Function to update price range display with currency formatting
-  function updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat) {
+// Function to update price range display with currency formatting
+function updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice) {
     var minPrice = parseInt(minInput.val()) || 0;
     var maxPrice = parseInt(maxInput.val()) || 10000000;
 
-    // Format numbers as currency
-    var formattedMinPrice = minPrice.toLocaleString(currencyFormat.locale, {
-      style: "currency",
-      currency: currencyFormat.code,
-      maximumFractionDigits: 0,
-    });
-    var formattedMaxPrice = maxPrice.toLocaleString(currencyFormat.locale, {
-      style: "currency",
-      currency: currencyFormat.code,
-      maximumFractionDigits: 0,
-    });
+    // Convert default prices to numbers for comparison
+    var defaultMin = parseInt(defaultMinPrice) || 0;
+    var defaultMax = parseInt(defaultMaxPrice) || 10000000;
+	
+    // Set min and max price to empty if they match the default values
+    var displayMinPrice = (minPrice === defaultMin) ? "" : minPrice;
+    var displayMaxPrice = (maxPrice === defaultMax) ? "" : maxPrice;
+
+    // Format numbers as currency if not empty
+    var formattedMinPrice = displayMinPrice ? displayMinPrice.toLocaleString(currencyFormat.locale, {
+        style: "currency",
+        currency: currencyFormat.code,
+        maximumFractionDigits: 0
+    }) : "";
+
+    var formattedMaxPrice = displayMaxPrice ? displayMaxPrice.toLocaleString(currencyFormat.locale, {
+        style: "currency",
+        currency: currencyFormat.code,
+        maximumFractionDigits: 0
+    }) : "";
+
+    // Determine the display text
+    var minMaxPriceText = "Please select a price range";
+    if (!formattedMinPrice && !formattedMaxPrice) {
+        minMaxPriceText = "Select a price range";
+    } else if (!formattedMinPrice) {
+        minMaxPriceText = "Up to " + formattedMaxPrice;
+    } else if (!formattedMaxPrice) {
+        minMaxPriceText = "Starts from " + formattedMinPrice;
+    } else {
+        minMaxPriceText = formattedMinPrice + " to " + formattedMaxPrice;
+    }
 
     // Update display fields
-    priceRangeResults.val(formattedMinPrice + " to " + formattedMaxPrice);
-    priceRangeDisplay.val(formattedMinPrice + " to " + formattedMaxPrice);
-  }
+    priceRangeResults.val(minMaxPriceText);
+    priceRangeDisplay.val(minMaxPriceText);
+}
+
+
 });
 
 jQuery(window).scroll(function(){
@@ -941,6 +964,7 @@ jQuery(document).ready(function () {
 	
     jQuery(".price-range-iput-block").click(function (event) {
         jQuery(this).parents(".mls-form-group").find(".mls-dropdown").toggle(); // Toggle dropdown visibility
+		jQuery(this).parents(".mls-form").find("ul.options").hide();
         event.stopPropagation(); // Prevent click from propagating to document
     });
 
@@ -953,6 +977,10 @@ jQuery(document).ready(function () {
         jQuery(this).closest(".mls-form-group").find(".mls-dropdown").hide();
 		 event.stopPropagation();
       });
+    jQuery(".styledSelect").click(function () {
+        jQuery(this).parents(".mls-form").find(".mls-dropdown").hide(); // Toggle dropdown visibility
+    });
+	
 	
 });
 
