@@ -23,6 +23,7 @@ jQuery("span.list").click(function(){
     jQuery(this).parent(".property-schedule-singledate-wrapper").toggleClass("check");
   });
   jQuery('.loc a').attr('href', 'javascript:void(0);');
+  
 });
 
 jQuery(document).ready(function(jQuery){
@@ -323,8 +324,8 @@ jQuery(".mls_area_sel").easySelect({
    search: true,
    placeholder: mlsTranslations.search_area,
    placeholderColor: '',
-   selectColor: '#524781',
-   itemTitle: 'Car selected',
+  //  selectColor: '#524781',
+  //  itemTitle: 'Car selected',
    showEachItem: true,
    width: '100%',
    dropdownMaxHeight: '350px',
@@ -334,11 +335,20 @@ jQuery(".mls_type_sel").easySelect({
    search: true,
    placeholder: mlsTranslations.search_property_type,
    placeholderColor: '',
-   selectColor: '#524781',
-   itemTitle: 'Car selected',
+  //  selectColor: '#524781',
+  //  itemTitle: 'Car selected',
    showEachItem: true,
    width: '100%',
    dropdownMaxHeight: '350px',
+})
+
+jQuery(".feature_sel").easySelect({
+buttons: true,
+placeholder: "Select options",
+search: true,
+showEachItem: true,
+width: '100%',
+dropdownMaxHeight: '350px',
 })
 
 });
@@ -408,184 +418,286 @@ jQuery(".mls_type_sel").easySelect({
 //});
 
 
+// price field filter script start
 jQuery(document).ready(function () {
-// Initialize sliders for each instance
-jQuery(".slider-range-wrapper").each(function () {
-  var sliderWrapper = jQuery(this);
-  var defaultMinPrice = parseInt(sliderWrapper.data("min")) || 0; // Default min price
-  var defaultMaxPrice = parseInt(sliderWrapper.data("max")) || 10000000; // Default max price
-  var currency = sliderWrapper.data("currency") || "EUR"; // Get currency from data-currency attribute
+  // Initialize sliders for each instance
+  jQuery(".slider-range-wrapper").each(function () {
+    var sliderWrapper = jQuery(this);
+    var defaultMinPrice = parseInt(sliderWrapper.data("min")) || 0;
+    var defaultMaxPrice = parseInt(sliderWrapper.data("max")) || 10000000;
+    var currency = sliderWrapper.data("currency") || "EUR";
+    
+    // Add error styling
+    jQuery('head').append(`
+      <style>
+        .price-range-invalid { border: 2px solid #ff9800 !important; transition: border-color 0.3s !important; }
+        .price-range-error {
+          color: #d9534f;
+          font-size: 12px;
+          margin-top: 5px;
+          display: none;
+        }
+      </style>
+    `);
 
-  // Currency symbols and formatting options
-  var currencyFormats = {
-    EUR: { symbol: "€", code: "EUR", locale: "de-DE" }, // Euro
-    GBP: { symbol: "£", code: "GBP", locale: "en-GB" }, // British Pound
-    USD: { symbol: "$", code: "USD", locale: "en-US" }, // US Dollar
-    RUB: { symbol: "₽", code: "RUB", locale: "ru-RU" }, // Russian Ruble
-    TRY: { symbol: "₺", code: "TRY", locale: "tr-TR" }, // Turkish Lira
-    SAR: { symbol: "ر.س", code: "SAR", locale: "ar-SA" }, // Saudi Riyal
-  };
+    // Currency symbols and formatting options
+    var currencyFormats = {
+      EUR: { symbol: "€", code: "EUR", locale: "de-DE" },
+      GBP: { symbol: "£", code: "GBP", locale: "en-GB" },
+      USD: { symbol: "$", code: "USD", locale: "en-US" },
+      RUB: { symbol: "₽", code: "RUB", locale: "ru-RU" },
+      TRY: { symbol: "₺", code: "TRY", locale: "tr-TR" },
+      SAR: { symbol: "ر.س", code: "SAR", locale: "ar-SA" },
+    };
 
-  var currencyFormat = currencyFormats[currency] || currencyFormats.EUR; // Fallback to EUR if currency is not found
+    var currencyFormat = currencyFormats[currency] || currencyFormats.EUR;
 
-  var sliderRange = sliderWrapper.find(".slider-range");
-  var minInput = sliderWrapper.closest(".mls-form-group").find(".min_price");
-  var maxInput = sliderWrapper.closest(".mls-form-group").find(".max_price");
-  var priceRangeResults = sliderWrapper.closest(".mls-form-group").find(".pricerangeResults");
-  var priceRangeDisplay = sliderWrapper.closest(".mls-form-group").find(".pricerangeDisplay");
+    var sliderRange = sliderWrapper.find(".slider-range");
+    var priceInputField = sliderWrapper.closest(".mls-form-group").find(".price-input");
+	 var minInput = sliderWrapper.closest(".mls-form-group").find(".min_price");
+    var maxInput = sliderWrapper.closest(".mls-form-group").find(".max_price");
+    var priceRangeResults = sliderWrapper.closest(".mls-form-group").find(".pricerangeResults");
+    var priceRangeDisplay = sliderWrapper.closest(".mls-form-group").find(".pricerangeDisplay");
 
-  // Get user-selected values from inputs (if any)
-  var userMinPrice = parseInt(minInput.val()) || defaultMinPrice;
-  var userMaxPrice = parseInt(maxInput.val()) || defaultMaxPrice;
-
-  // Ensure user values are within the default range
-  userMinPrice = Math.max(userMinPrice, defaultMinPrice);
-  userMaxPrice = Math.min(userMaxPrice, defaultMaxPrice);
-
-// =================================================
-  // NEW CODE: Clear input fields if values are default
-  // =================================================
-  if (userMinPrice === defaultMinPrice) {
-    minInput.val(""); // Set min input to empty if it matches default
-  }
-  if (userMaxPrice === defaultMaxPrice) {
-    maxInput.val(""); // Set max input to empty if it matches default
-  }
+    // Add error message elements
+    priceInputField.after('<div class="price-range-error min-error"></div>');
+    priceInputField.after('<div class="price-range-error max-error"></div>');
+    var errorElements = priceInputField.nextAll('.price-range-error');
+	var minError = errorElements.filter('.min-error');
+	var maxError = errorElements.filter('.max-error');
 
 
-  // Initialize slider with default range but user-selected markers
-  sliderRange.slider({
-    range: true,
-    orientation: "horizontal",
-    min: defaultMinPrice,
-    max: defaultMaxPrice,
-    values: [userMinPrice, userMaxPrice], // Set user-selected values as markers
-    step: 100,
-    slide: function (event, ui) {
-      if (ui.values[0] == ui.values[1]) {
-        return false;
+    // Set placeholders
+    minInput.attr("placeholder", defaultMinPrice.toLocaleString(currencyFormat.locale, {
+      style: "currency",
+      currency: currencyFormat.code,
+      maximumFractionDigits: 0
+    }));
+    maxInput.attr("placeholder", defaultMaxPrice.toLocaleString(currencyFormat.locale, {
+      style: "currency",
+      currency: currencyFormat.code,
+      maximumFractionDigits: 0
+    }));
+
+    // Get user-selected values from inputs (if any)
+    var userMinPrice = parseInt(minInput.val()) || defaultMinPrice;
+    var userMaxPrice = parseInt(maxInput.val()) || defaultMaxPrice;
+
+    // Ensure user values are within the default range
+    userMinPrice = Math.max(userMinPrice, defaultMinPrice);
+    userMaxPrice = Math.min(userMaxPrice, defaultMaxPrice);
+
+    // Clear input fields if values are default
+    if (userMinPrice === defaultMinPrice) {
+      minInput.val("");
+    }
+    if (userMaxPrice === defaultMaxPrice) {
+      maxInput.val("");
+    }
+
+    // Initialize slider
+    sliderRange.slider({
+      range: true,
+      orientation: "horizontal",
+      min: defaultMinPrice,
+      max: defaultMaxPrice,
+      values: [userMinPrice, userMaxPrice],
+      step: 1,
+      slide: function (event, ui) {
+        if (ui.values[0] == ui.values[1]) {
+          return false;
+        }
+        minInput.val(ui.values[0]);
+        maxInput.val(ui.values[1]);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice);
       }
-      minInput.val(ui.values[0]);
-      maxInput.val(ui.values[1]);
-      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
+    });
+
+    // Set initial values in inputs (if not default)
+    if (userMinPrice !== defaultMinPrice) {
+      minInput.val(userMinPrice);
+    }
+    if (userMaxPrice !== defaultMaxPrice) {
+      maxInput.val(userMaxPrice);
+    }
+    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice);
+
+    // NEW INPUT HANDLER - Removed instant validation between fields
+    minInput.add(maxInput).on('input', function () {
+      var input = jQuery(this);
+      var isMinInput = input.hasClass("min_price");
+      var currentVal = input.val();
+      
+      // Clear errors while typing
+      input.removeClass('price-range-invalid');
+      isMinInput ? minError.hide() : maxError.hide();
+
+      if (currentVal === "") {
+        return;
+      }
+
+      // Auto-correct if beyond absolute min/max
+      var numVal = parseInt(currentVal) || (isMinInput ? defaultMinPrice : defaultMaxPrice);
+      var corrected = false;
+      
+//       if (isMinInput && numVal < defaultMinPrice) {
+//         numVal = defaultMinPrice;
+//         corrected = true;
+//       } else if (!isMinInput && numVal > defaultMaxPrice) {
+//         numVal = defaultMaxPrice;
+//         corrected = true;
+//       }
+      
+//       if (corrected) {
+//         input.val(numVal);
+//         input.addClass('input-corrected');
+//         setTimeout(function() {
+//           input.removeClass('input-corrected');
+//         }, 1000);
+//       }
+    });
+
+    // Validate on blur (only absolute min/max, not cross-field)
+    minInput.add(maxInput).on('blur', function () {
+      var input = jQuery(this);
+      var isMinInput = input.hasClass("min_price");
+      var currentVal = input.val();
+      
+      if (currentVal === "") {
+        updateSliderAndDisplay();
+        return;
+      }
+
+      var numVal = parseInt(currentVal) || (isMinInput ? defaultMinPrice : defaultMaxPrice);
+      
+//       if (isMinInput && numVal < defaultMinPrice) {
+//         input.val(defaultMinPrice);
+//       } else if (!isMinInput && numVal > defaultMaxPrice) {
+//         input.val(defaultMaxPrice);
+//       }
+      
+      updateSliderAndDisplay();
+    });
+
+    // NEW VALIDATION FUNCTION FOR DONE BUTTON
+    function validatePriceRange() {
+      var minVal = parseInt(minInput.val()) || defaultMinPrice;
+      var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
+      var isValid = true;
+
+      // Clear previous errors
+      minInput.removeClass('price-range-invalid');
+      maxInput.removeClass('price-range-invalid');
+      minError.hide();
+      maxError.hide();
+
+      // Validate against absolute min/max
+      if (minVal < defaultMinPrice) {
+        minInput.addClass('price-range-invalid');
+        minError.text(`* Minimum cannot be less than ${defaultMinPrice.toLocaleString(currencyFormat.locale, {
+          style: "currency",
+          currency: currencyFormat.code,
+          maximumFractionDigits: 0
+        })}`).show();
+        isValid = false;
+      }
+
+      if (maxVal > defaultMaxPrice) {
+        maxInput.addClass('price-range-invalid');
+        maxError.text(`* Maximum cannot exceed ${defaultMaxPrice.toLocaleString(currencyFormat.locale, {
+          style: "currency",
+          currency: currencyFormat.code,
+          maximumFractionDigits: 0
+        })}`).show();
+        isValid = false;
+      }
+
+      // Validate min <= max only if absolute checks passed
+      if (isValid && minVal > maxVal) {
+        minInput.addClass('price-range-invalid');
+        maxInput.addClass('price-range-invalid');
+        minError.text('* Minimum cannot exceed maximum').show();
+        isValid = false;
+      }
+	  if(isValid == false) {
+  		jQuery("input[type='submit']").prop('disabled', true);
+	  }
+
+      if (isValid) {
+        sliderRange.slider("values", [minVal, maxVal]);
+        updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice);
+      }
+      
+      return isValid;
+    }
+
+    // Update Done button handler
+    jQuery(".price-range-done").click(function(event) {
+      event.stopPropagation();
+      var validate = validatePriceRange();
+      if (validate == true) {
+        jQuery(this).closest(".mls-form-group").find(".mls-dropdown").hide();
+		jQuery("input[type='submit']").prop('disabled', false);
+      }
+    });
+
+    // Reset functionality
+    sliderWrapper.closest(".mls-form-group").find(".price-range-reset").click(function (e) {
+      e.preventDefault();
+      minInput.val("");
+      maxInput.val("");
+      minError.hide();
+      maxError.hide();
+      updateSliderAndDisplay();
+    });
+
+    function updateSliderAndDisplay() {
+      var minVal = parseInt(minInput.val()) || defaultMinPrice;
+      var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
+      
+      // Update slider
+      sliderRange.slider("values", [minVal, maxVal]);
+      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice);
     }
   });
 
-  // Set initial values in inputs
- /* minInput.val(userMinPrice);
-  maxInput.val(userMaxPrice);*/
-  
-// Set initial values in inputs (if not default)
+  // Price range display function (unchanged)
+  function updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice) {
+    var minPrice = parseInt(minInput.val()) || defaultMinPrice;
+    var maxPrice = parseInt(maxInput.val()) || defaultMaxPrice;
+    var defaultMin = parseInt(defaultMinPrice);
+    var defaultMax = parseInt(defaultMaxPrice);
+    var displayMinPrice = (minPrice === defaultMin) ? "" : minPrice;
+    var displayMaxPrice = (maxPrice === defaultMax) ? "" : maxPrice;
 
-  if (userMinPrice !== defaultMinPrice) {
-    minInput.val(userMinPrice);
+    var formattedMinPrice = displayMinPrice ? displayMinPrice.toLocaleString(currencyFormat.locale, {
+        style: "currency",
+        currency: currencyFormat.code,
+        maximumFractionDigits: 0
+    }) : "";
+
+    var formattedMaxPrice = displayMaxPrice ? displayMaxPrice.toLocaleString(currencyFormat.locale, {
+        style: "currency",
+        currency: currencyFormat.code,
+        maximumFractionDigits: 0
+    }) : "";
+
+    var minMaxPriceText = "Please select a price range";
+    if (!formattedMinPrice && !formattedMaxPrice) {
+        minMaxPriceText = "Select a price range";
+    } else if (!formattedMinPrice) {
+        minMaxPriceText = "Up to " + formattedMaxPrice;
+    } else if (!formattedMaxPrice) {
+        minMaxPriceText = "Starts from " + formattedMinPrice;
+    } else {
+        minMaxPriceText = formattedMinPrice + " to " + formattedMaxPrice;
+    }
+
+    priceRangeResults.val(minMaxPriceText);
+    priceRangeDisplay.val(minMaxPriceText);
   }
-  if (userMaxPrice !== defaultMaxPrice) {
-    maxInput.val(userMaxPrice);
-  }
-  updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
-
-  // Handle input changes with a delay
-  var timeout;
-  minInput.add(maxInput).on('input', function () {
-    clearTimeout(timeout); // Clear previous timeout
-    timeout = setTimeout(function () {
-      var minVal = parseInt(minInput.val()) || defaultMinPrice;
-      var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
-
-      // Ensure values are within the default range
-      minVal = Math.max(minVal, defaultMinPrice);
-      maxVal = Math.min(maxVal, defaultMaxPrice);
-
-      // Ensure min <= max
-      if (minVal > maxVal) {
-        if (jQuery(this).hasClass("min_price")) {
-          minVal = maxVal;
-        } else {
-          maxVal = minVal;
-        }
-      }
-
-      // Update inputs and slider
-      minInput.val(minVal);
-      maxInput.val(maxVal);
-      sliderRange.slider("values", [minVal, maxVal]);
-      updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
-    }, 1000); // 1000ms delay
-  });
-
-  // Handle blur events to set default values if inputs are empty
-  minInput.add(maxInput).on('blur', function () {
-    var minVal = parseInt(minInput.val()) || defaultMinPrice;
-    var maxVal = parseInt(maxInput.val()) || defaultMaxPrice;
-
-    // Ensure values are within the default range
-    minVal = Math.max(minVal, defaultMinPrice);
-    maxVal = Math.min(maxVal, defaultMaxPrice);
-
-    // Update inputs and slider
-    minInput.val(minVal);
-    maxInput.val(maxVal);
-    sliderRange.slider("values", [minVal, maxVal]);
-    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
-  });
-
-  // Reset functionality
-  sliderWrapper.closest(".mls-form-group").find(".price-range-reset").click(function (e) {
-  e.preventDefault();
-    minInput.val('');
-    maxInput.val('');
-    sliderRange.slider("values", [defaultMinPrice, defaultMaxPrice]);
-    updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat,defaultMinPrice, defaultMaxPrice);
-  });
-  
 });
-
-// Function to update price range display with currency formatting
-function updatePriceRangeDisplay(minInput, maxInput, priceRangeResults, priceRangeDisplay, currencyFormat, defaultMinPrice, defaultMaxPrice) {
-  var minPrice = parseInt(minInput.val()) || defaultMinPrice;
-  var maxPrice = parseInt(maxInput.val()) || defaultMaxPrice;
-
-  // Convert default prices to numbers for comparison
-  var defaultMin = parseInt(defaultMinPrice);
-  var defaultMax = parseInt(defaultMaxPrice);
-
-  // Set min and max price to empty if they match the default values
-  var displayMinPrice = (minPrice === defaultMin) ? "" : minPrice;
-  var displayMaxPrice = (maxPrice === defaultMax) ? "" : maxPrice;
-
-  // Format numbers as currency if not empty
-  var formattedMinPrice = displayMinPrice ? displayMinPrice.toLocaleString(currencyFormat.locale, {
-      style: "currency",
-      currency: currencyFormat.code,
-      maximumFractionDigits: 0
-  }) : "";
-
-  var formattedMaxPrice = displayMaxPrice ? displayMaxPrice.toLocaleString(currencyFormat.locale, {
-      style: "currency",
-      currency: currencyFormat.code,
-      maximumFractionDigits: 0
-  }) : "";
-
-  // Determine the display text
-  var minMaxPriceText = "Please select a price range";
-  if (!formattedMinPrice && !formattedMaxPrice) {
-      minMaxPriceText = "Select a price range";
-  } else if (!formattedMinPrice) {
-      minMaxPriceText = "Up to " + formattedMaxPrice;
-  } else if (!formattedMaxPrice) {
-      minMaxPriceText = "Starts from " + formattedMinPrice;
-  } else {
-      minMaxPriceText = formattedMinPrice + " to " + formattedMaxPrice;
-  }
-
-  // Update display fields
-  priceRangeResults.val(minMaxPriceText);
-  priceRangeDisplay.val(minMaxPriceText);
-}
-
-
-});
+// price field filter script ends
 
 jQuery(window).scroll(function(){
 if (jQuery(window).scrollTop() >= 200) {
@@ -973,10 +1085,10 @@ jQuery(document).ready(function () {
           jQuery(".mls-dropdown").hide(); // Hide dropdown if click is outside
       }
   });
- jQuery(".price-range-done").click(function (event) {
-      jQuery(this).closest(".mls-form-group").find(".mls-dropdown").hide();
-   event.stopPropagation();
-    });
+//  jQuery(".price-range-done").click(function (event) {
+//       jQuery(this).closest(".mls-form-group").find(".mls-dropdown").hide();
+//    event.stopPropagation();
+//     });
   jQuery(".styledSelect").click(function () {
       jQuery(this).parents(".mls-form").find(".mls-dropdown").hide(); // Toggle dropdown visibility
   });
@@ -993,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function() {
   orderSearchElements.forEach(function(orderSearch) {
       var searchForm = document.querySelector('.mls-proplist-search-form');
       var searchFormSortType = searchForm.querySelector('.search_form_sorttype');
-      var submitButton = searchForm.querySelector('input[type="submit"]');
+      var submitButton = searchForm.querySelector('input[name="mls_search_submit"]');
 
       if (orderSearch && searchFormSortType && searchForm && submitButton) {
           orderSearch.addEventListener('change', function() {
@@ -1005,4 +1117,163 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       }
   });
+});
+
+jQuery(document).ready(function () {
+jQuery(".mls-add-feat-btn").click(function () {
+  // event.stopPropagation();
+      jQuery(this).parents("form").find(".mls-search-features-dropdown").toggleClass("active");
+      jQuery(this).parents("form").find(".mls-search-features-dropdown-bg").toggleClass("active");
+      jQuery(this).parents("form").find(".mls-af-accordian").toggle();
+      jQuery(this).parents("form").find(".options").hide();
+      jQuery(this).parents("form").find(".mls-feat-top-search").show();
+      jQuery(this).parents("body").toggleClass("mls-sfd-of");
+  });
+});
+
+jQuery(document).ready(function(){
+jQuery('#mls-navtabs1').scrollTabs();
+});
+
+
+///////////Accordian///////////////
+
+/*jQuery.fn.ashCordian = function() {
+var container = jQuery(this);
+container.find('h2.mls-af-accodian-title').click(function() {
+  if(jQuery(this).siblings('.mls-af-accodian-cnts').css('display') == 'block'){
+     container.find('.mls-af-accodian-cnts').slideUp(150);
+  } else {
+    container.find('.mls-af-accodian-cnts').slideUp(150);
+     jQuery(this).siblings('.mls-af-accodian-cnts').slideDown(150);
+  }
+});
+};
+
+jQuery('#mls-af-accord1').ashCordian();
+
+jQuery(document).ready(function(){
+  jQuery(".mls-af-accordian div:first-child .mls-af-accodian-title").addClass('active');
+  jQuery(".mls-af-accordian div:first-child .mls-af-accodian-cnts").css('display','block');
+  jQuery(".mls-af-accodian-title").click(function(){
+      if(jQuery(this).hasClass("active"))
+      {
+          jQuery(this).removeClass("active");
+      }
+      else
+      {
+          jQuery(this).parents(".mls-af-accordian").find(".mls-af-accodian-title").removeClass("active");
+          jQuery(this).toggleClass("active");
+      }
+  })
+})*/
+
+jQuery(document).ready(function(){
+  jQuery(".mls-af-accodian-title").click(function(){
+    var thiss = jQuery(this);
+    var content = thiss.next(".mls-af-accodian-cnts");
+
+    if(content.is(":visible")){
+      content.slideUp();
+      thiss.removeClass("active");
+    } else {
+      jQuery(".mls-af-accodian-cnts").slideUp();
+      jQuery(".mls-af-accodian-title").removeClass("active");
+      content.slideDown();
+      thiss.addClass("active");
+    }
+  });
+
+  // Open first
+  jQuery(".mls-af-accodian-title").first().addClass("active").next(".mls-af-accodian-cnts").show();
+});
+
+jQuery(document).ready(function () {
+// Function to handle close button clicks
+function handleCloseButtonClick() {
+    let label = jQuery(this).parent(); // Get the label
+    let checkboxValue = label.attr("data-value"); // Get the unique identifier
+    let parentContainer = label.closest(".mls-af-sel-wrap"); // Get the parent container
+
+    label.remove(); // Remove the label
+    parentContainer.find(`.mls-af-checkbox[value="${checkboxValue}"]`).prop("checked", false); // Uncheck the checkbox
+}
+
+// Bind close button functionality to initial labels
+jQuery(".mls-af-selected-labels .mls-af-close-btn").on("click", handleCloseButtonClick);
+
+// Handle checkbox changes
+jQuery(document).on("change", ".mls-af-checkbox", function () {
+    let parentContainer = jQuery(this).closest(".mls-af-sel-wrap"); // Get closest parent container
+    let selectedLabelsContainer = parentContainer.find(".mls-af-selected-labels");
+
+    // Clear only the label corresponding to the changed checkbox
+    let checkboxValue = jQuery(this).val();
+    selectedLabelsContainer.find(`[data-value="${checkboxValue}"]`).remove();
+
+    // If the checkbox is checked, add its label
+    if (jQuery(this).is(":checked")) {
+        let labelText = jQuery(this).next("label").text();
+        let label = jQuery("<span>")
+            .addClass("mls-af-label-badge")
+            .attr("data-value", checkboxValue) // Use a unique identifier
+            .append(labelText);
+
+        // Create Close Button
+        let closeBtn = jQuery("<span>")
+            .addClass("mls-af-close-btn")
+            .attr("aria-label", "Remove " + labelText) // Accessibility
+            .html("&times;")
+            .on("click", handleCloseButtonClick); // Bind close button functionality
+
+        label.append(closeBtn);
+        selectedLabelsContainer.append(label);
+    }
+});
+});
+
+jQuery(document).ready(function () {
+  // Add a click event listener to the "Done" button
+  jQuery('input[name="mls_search_features_donebtn"]').click(function (event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get all selected checkboxes
+      const selectedLabels = [];
+      jQuery('.mls-af-checkbox:checked').each(function () {
+          const label = jQuery('label[for="' + jQuery(this).attr('id') + '"]');
+          if (label.length) {
+              selectedLabels.push(label.text().trim());
+          }
+      });
+
+      // Clear and update the selected features div
+      const selectedFeaturesDiv = jQuery('.mls_selected_features');
+      selectedFeaturesDiv.empty();
+
+      if (selectedLabels.length > 0) {
+          selectedLabels.forEach(label => {
+              selectedFeaturesDiv.append(jQuery('<span>').text(label));
+          });
+      }
+  
+      jQuery(this).parents("form").find(".mls-search-features-dropdown").toggleClass("active");
+      jQuery(this).parents("form").find(".mls-search-features-dropdown-bg").toggleClass("active");
+      jQuery(this).parents("form").find(".mls-af-accordian").toggle();
+      jQuery(this).parents("form").find(".options").hide();
+      jQuery(this).parents("body").toggleClass("mls-sfd-of");
+      jQuery(this).parents("form").find(".mls-feat-top-search").hide();
+  
+  });
+
+// Reset Button
+  jQuery('input[name="mls_search_features_resetbtn"]').click(function (event) {
+      event.preventDefault();
+
+      jQuery('.mls-af-checkbox').prop('checked', false);
+      jQuery('.mls_selected_features').empty();
+       jQuery('.mls-af-selected-labels').empty();
+  });
+
+	
+
 });

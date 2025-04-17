@@ -3,7 +3,7 @@
  * Plugin Name: Resales Online MLS Plugin
  * Plugin URI: https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/
  * Description: Seamlessly connect all your ReSales Online properties to your website. This plugin, designed for estate agents, simplifies linking your ReSales Online listings with your site..
- * Version: 1.2.4
+ * Version: 1.2.5
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author: Clark Digital
@@ -36,6 +36,7 @@ function is_font_awesome_loaded() {
     return false;
 }
 
+
 function mls_plugin_enqueue_scripts() {
 	
 	$plugin_data = get_file_data(__FILE__, array('Version' => 'Version'));
@@ -43,20 +44,21 @@ function mls_plugin_enqueue_scripts() {
 	
     wp_enqueue_style( 'mls-style', plugin_dir_url(__FILE__) . 'assets/css/style.css', array(), $plugin_version );
     wp_enqueue_style( 'mls-responsive-style', plugin_dir_url(__FILE__) . 'assets/css/responsive.css', array(), $plugin_version );
-    wp_enqueue_style( 'slick-css', plugin_dir_url(__FILE__) . 'assets/css/slick.css', array(), '1.0.0' );
-    wp_enqueue_style( 'slick-theme', plugin_dir_url(__FILE__) . 'assets/css/slick-theme.css', array(), '1.0.0' );
-    wp_enqueue_style( 'lightgallery-css', plugin_dir_url(__FILE__) . 'assets/css/lightgallery.css', array(), '1.0.0' );
-    wp_enqueue_style( 'zoom-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-zoom.css', array(), '1.0.0' );
-    wp_enqueue_style( 'thumbnail-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-thumbnail.css', array(), '1.0.0' );
-    wp_enqueue_style( 'video-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-video.css', array(), '1.0.0' );
-    wp_enqueue_style( 'autoplay-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-autoplay.css', array(), '1.0.0' );
-    wp_enqueue_style( 'fullscreen-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-fullscreen.css', array(), '1.0.0' );
-    wp_enqueue_style( 'select-css', plugin_dir_url(__FILE__) . 'assets/css/easySelectStyle.css', array(), '1.0.0' );
-    wp_enqueue_style( 'tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0' );
-    wp_enqueue_style( 'tellinput-css', plugin_dir_url(__FILE__) . 'assets/css/intlTelInput.min.css', array(), '1.0.0' );
-    wp_enqueue_style( 'datepicker-css', plugin_dir_url(__FILE__) . 'assets/css/datepicker.min.css', array(), '1.0.0' );
-    if (!is_font_awesome_loaded()) { wp_enqueue_style( 'font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), '6.6.0' ); }
-    wp_enqueue_style( 'jqueryui-css', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css', array(), '1.12.1' );
+    wp_enqueue_style( 'mls-slick-css', plugin_dir_url(__FILE__) . 'assets/css/slick.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-slick-theme', plugin_dir_url(__FILE__) . 'assets/css/slick-theme.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-lightgallery-css', plugin_dir_url(__FILE__) . 'assets/css/lightgallery.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-zoom-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-zoom.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-thumbnail-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-thumbnail.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-video-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-video.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-autoplay-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-autoplay.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-fullscreen-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-fullscreen.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-select-css', plugin_dir_url(__FILE__) . 'assets/css/easySelectStyle.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-tellinput-css', plugin_dir_url(__FILE__) . 'assets/css/intlTelInput.min.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-datepicker-css', plugin_dir_url(__FILE__) . 'assets/css/datepicker.min.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-scrolltabs-css', plugin_dir_url(__FILE__) . 'assets/css/scrolltabs.css', array(), '1.0.0' );
+    if (!is_font_awesome_loaded()) { wp_enqueue_style( 'mls-font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), '6.6.0' ); }
+    wp_enqueue_style( 'mls-jqueryui-css', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css', array(), '1.12.1' );
 
     // Enqueue your custom JavaScript file
   
@@ -68,28 +70,42 @@ function mls_plugin_enqueue_scripts() {
         true
     );
     wp_enqueue_script(
-        'slick-script',
+        'mls-mousewheel-script',
+        plugin_dir_url(__FILE__) . 'assets/js/jquery.mousewheel.js',
+        array('jquery'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script(
+        'mls-scrolltab-script',
+        plugin_dir_url(__FILE__) . 'assets/js/jquery.scrolltabs.js',
+        array('jquery'),
+        '1.0.0',
+        true
+    );
+    wp_enqueue_script(
+        'mls-slick-script',
         plugin_dir_url(__FILE__) . 'assets/js/slick.min.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'lightgallery-script',
+        'mls-lightgallery-script',
         plugin_dir_url(__FILE__) . 'assets/js/lightgallery.min.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'thumbnail-script',
+        'mls-thumbnail-script',
         plugin_dir_url(__FILE__) . 'assets/js/lg-thumbnail.umd.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'zoom-script',
+        'mls-zoom-script',
         plugin_dir_url(__FILE__) . 'assets/js/lg-zoom.umd.js',
         array('jquery'),
         '1.0.0',
@@ -103,63 +119,70 @@ function mls_plugin_enqueue_scripts() {
         true
     );
     wp_enqueue_script(
-        'fullscreen-script',
+        'mls-fullscreen-script',
         plugin_dir_url(__FILE__) . 'assets/js/lg-fullscreen.umd.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'video-script',
+        'mls-video-script',
         plugin_dir_url(__FILE__) . 'assets/js/lg-video.umd.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'select-script',
+        'mls-select-script',
         plugin_dir_url(__FILE__) . 'assets/js/easySelect.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'tellinput-script',
+        'mls-tellinput-script',
         plugin_dir_url(__FILE__) . 'assets/js/intlTelInput.min.js',
         array('jquery'),
         '1.0.0',
         true
     );
     if (!is_font_awesome_loaded()) { wp_enqueue_script(
-        'font-awesome-script',
+        'mls-font-awesome-script',
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js',
         array('jquery'),
         '6.6.0',
         true
     ); }
     wp_enqueue_script(
-        'jquery-ui-script',
+        'mls-jquery-ui-script',
         'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
         array('jquery'),
         '1.12.1',
         true
     );
+	wp_enqueue_script(
+		'mls-jquery-touch-script',
+		'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js',
+		array('jquery'),
+		'1.12.1',
+		true
+	);
     wp_enqueue_script(
-        'tagsinput-script',
+        'mls-tagsinput-script',
         plugin_dir_url(__FILE__) . 'assets/js/jquery.tagsinput-revisited.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'sidebar-script',
+        'mls-sidebar-script',
         plugin_dir_url(__FILE__) . 'assets/js/jquery.sticky-sidebar.min.js',
         array('jquery'),
         '1.0.0',
         true
     );
     wp_enqueue_script(
-        'datepicker-script',
+        'mls-datepicker-script',
         plugin_dir_url(__FILE__) . 'assets/js/datepicker.min.js',
         array('jquery'),
         '1.0.0',
@@ -173,8 +196,8 @@ function mls_plugin_enqueue_scripts() {
         true
     );
 
-    wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css', array(), '1.7.1');
-    wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
+    wp_enqueue_style('mls-leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css', array(), '1.7.1');
+    wp_enqueue_script('mls-leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
 
 	// Get translations
     $translations = [
@@ -222,7 +245,7 @@ function mls_plugin_enqueue_admin_assets() {
     );
     wp_enqueue_style( 'mls-plugin-select-css', plugin_dir_url(__FILE__) . 'assets/css/easySelectStyle.css', array(), '1.0.0', 'all');
     wp_enqueue_style( 'mls-plugin-tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0', 'all');
-	wp_enqueue_style( 'font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), NULL );
+	wp_enqueue_style( 'mls-font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), NULL );
 
     // Enqueue admin scripts
     wp_enqueue_script(
@@ -247,13 +270,13 @@ function mls_plugin_enqueue_admin_assets() {
         true // Load the script in the footer
     );
 	wp_enqueue_script(
-        'font-awesome-script', // Handle of the script
+        'mls-font-awesome-script', // Handle of the script
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js', // Path to the JS file
         array('jquery'), // Dependencies
         '6.6.0', // Version number (optional)
         true // Load the script in the footer
     );
-	wp_enqueue_script('sweetalert', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', array('jquery'), null, true);
+	wp_enqueue_script('mls-sweetalert', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', array('jquery'), null, true);
 
 
     // Localize script if you need to pass PHP data to JS
@@ -329,6 +352,13 @@ function mls_plugin_enqueue_google_font() {
 	
 }
 add_action('wp_enqueue_scripts', 'mls_plugin_enqueue_google_font');
+
+function mls_exclude_scripts_on_beaver_builder() {
+    if (class_exists('FLBuilderModel') && FLBuilderModel::is_builder_active()) {
+        wp_dequeue_script('mls-jquery-ui-script');
+    }
+}
+add_action('wp_enqueue_scripts', 'mls_exclude_scripts_on_beaver_builder', PHP_INT_MAX);
 
 function mls_plugin_allow_font_uploads($mime_types) {
     $mime_types['woff'] = 'font/woff';
@@ -470,11 +500,15 @@ function mls_plugin_is_license_valid() {
     // Decode the response
     $response_body = wp_remote_retrieve_body($response);
     $data = json_decode($response_body, true);
-
+	
     // Check if the validation was successful
     if (isset($data['success']) && $data['success']) {
         // Save the validation status in the database
         update_option('mls_plugin_license_status', 'valid');
+		$trialenabled = isset($data['data']['trialenabled']) ? $data['data']['trialenabled'] : '';
+    	$expiration_date = isset($data['data']['expiration_date']) ? $data['data']['expiration_date'] : '';
+        update_option('mls_plugin_trialenabled', $trialenabled);
+		update_option('mls_plugin_expiration_date', $expiration_date);
         return true;
     } else {
         // Save the validation status in the database
@@ -504,11 +538,15 @@ add_action('rest_api_init', function () {
 function mls_plugin_update_license_status(WP_REST_Request $request) {
     $parameters = $request->get_json_params();
     $status = isset($parameters['status']) ? sanitize_text_field($parameters['status']) : 'invalid';
+	$trialenabled = isset($parameters['trialenabled']) ? $parameters['trialenabled'] : 0;
+	$expiration_date = isset($parameters['expiration_date']) ? sanitize_text_field($parameters['expiration_date']) : '';
 
     // Update the license status in the database
     update_option('mls_plugin_license_status', $status);
+	update_option('mls_plugin_trialenabled', $trialenabled);
+	update_option('mls_plugin_expiration_date', $expiration_date);
 
-    return new WP_REST_Response(array('success' => true, 'status' => $status), 200);
+    return new WP_REST_Response(array('success' => true, 'status' => $status, 'trialenabled' => $trialenabled, 'expiration_date' => $expiration_date), 200);
 }
 
 // Changelog from github
@@ -610,7 +648,7 @@ function mls_plugin_update_information($false, $action, $arg) {
 
         if (!is_wp_error($remote) && isset($remote['body'])) {
             $remote_body = json_decode($remote['body']);
-			$tested_up_to = "6.7.1";
+			$tested_up_to = "6.7.2";
 			$requires_php = "7.4";
 			$author = 'Clark Digital';
 			$author_profile = 'https://clarkdigital.es/resales-online-plugin/';

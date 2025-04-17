@@ -79,7 +79,7 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
 		if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') {
         $filter_name = mls_plugin_translate('labels','for_rent') ?? 'For Rent';
     } elseif ($filter_type === 'new_development') {
-       $filter_name = mls_plugin_translate('labels','for_rent') ?? 'For Rent';
+       $filter_name = mls_plugin_translate('labels','for_sale') ?? 'For Sale';
     } elseif ($filter_type === 'featured') {
         $filter_name = mls_plugin_translate('labels','featured') ?? 'Featured';
     } else {
@@ -99,24 +99,20 @@ function mls_plugin_display_propertiess($data, $maximage, $includesorttype, $p_s
                                 </div>
 
                                 <div class="mls-project-listing-slider lightgallery2" id="lightgallery2">
-									 <?php
-				$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
-    $prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
-$prpdetailpage = get_post($prpdetailpage_id);
-if (get_option('mls_plugin_style_proplanghide')) {
-$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
-}else{
-$prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
-}			
+<?php
+						
 $property_title = sanitize_title($property['PropertyType']['NameType'] . ' ' .
 (mls_plugin_translate('general','in') ?? 'in') . ' ' . $property['Location'] . ', ' . $property['Area'] . ', ' . $property['Country']);
-                                    $property_ref = $property['Reference'];
-                                    $property_filter_type = $data['QueryInfo']['ApiId'];
+$property_ref = $property['Reference'];
+$clean_property_ref = ltrim($property_ref, 'R');
+$property_filter_type = $data['QueryInfo']['ApiId'];
+				
 // Button Link with Multi-language condt
 if (get_option('mls_plugin_style_proplanghide')) {
-$view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}&lang={$language}");
+	$view_more_url =  mls_plugin_weblink_structure($property_title, $clean_property_ref, $property_filter_type, $language);
 }else{
-$view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}");	
+	$language = get_option('mls_plugin_prop_language', '1');
+	$view_more_url =  mls_plugin_weblink_structure($property_title, $clean_property_ref, $property_filter_type, $language);
 }
                                     ?>
 									

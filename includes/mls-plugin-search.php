@@ -1,11 +1,6 @@
 <?php
 
-// function mls_plugin_start_session() {
-//     if (!session_id()) {
-//         session_start();
-//     }
-// }
-// add_action('init', 'mls_plugin_start_session', 1);
+
 if (mls_plugin_check_license_status()) {
 
 add_shortcode('mls_property_search', 'mls_plugin_property_search_form');
@@ -153,24 +148,24 @@ if (count($selected_tabs) === 1) {
 } else {
     // Show the tabs
     ?>
-    <div class="mls-tab-container">
-		<ul class="srh-tab-nav">
+    <div class="mls-tab-container mls-f-order1">
+		<ul id="mls-navtabs1" class="scroll_tabs_theme_light custom-mls-tab">
         <?php foreach ($selected_tabs as $tab): ?>
-			<li>
+			<li class="custom-mls-tab-list">
             <input type="radio" id="tab_<?php echo esc_attr($tab); ?>" name="filter_type" value="<?php echo esc_attr($tab); ?>"
                    <?php echo ($active_filter === $tab) ? 'checked' : ''; ?>>
             <label class="tab" for="tab_<?php echo esc_attr($tab); ?>">
                 <?php echo mls_plugin_translate('labels', $tab); ?>
             </label>
-			</li>
+        </li>
         <?php endforeach; ?>
 		</ul>
     </div>
     <?php
 }
 ?>
-		
-    <div class="mls-form-group">
+	<?php //print_r($_SESSION['mls_search_filters']); ?>	
+    <div class="mls-form-group mls-f-order2">
         <label for="mls_search_area"><?php echo mls_plugin_translate('labels','area'); ?></label>
         <select id="mls_search_area" name="mls_search_area[]" class="mls_area_sel" multiple>
             <?php
@@ -188,7 +183,7 @@ if (count($selected_tabs) === 1) {
         </select>
         
         </div>
-		<div class="mls-form-group">
+		<div class="mls-form-group mls-f-order3">
 
         <label for="mls_search_type"><?php echo mls_plugin_translate('labels','property_type'); ?></label>
         
@@ -244,7 +239,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
             ?>
         
 
-        </div><div class="mls-form-group">
+        </div><div class="mls-form-group mls-f-order4">
 
         <label for="mls_search_keyword"><?php echo mls_plugin_translate('labels','reference_id'); ?></label>
         <!-- <input type="text" id="mls_search_keyword" value="<?php echo esc_attr($session_filters['keyword'] ?? ''); ?>" name="mls_search_keyword" /> -->
@@ -252,7 +247,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
         value="<?php echo esc_attr(($mls_search_performed && !empty($session_filters['keyword'])) ? $session_filters['keyword'] : ''); ?>" 
         name="mls_search_keyword" />
 
-        </div><div class="mls-form-group">
+        </div><div class="mls-form-group mls-f-order6">
         
         <label for="mls_search_beds"><?php echo mls_plugin_translate('labels','beds'); ?></label>
         <select id="mls_search_beds" name="mls_search_beds" class="sel-app">
@@ -260,7 +255,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
 			<?php echo wp_kses( generate_bed_bath_options($atts['bedsfilter'], '+', ($mls_search_performed && !empty($session_filters['beds'])) ? $session_filters['beds'] : ''), array( 'option' => array( 'value' => array(), 'selected' => array() ) ) ); ?>
         </select>
         
-        </div><div class="mls-form-group">
+        </div><div class="mls-form-group mls-f-order7">
         
         <label for="mls_search_baths"><?php echo mls_plugin_translate('labels','baths'); ?></label>
         <select id="mls_search_baths" name="mls_search_baths" class="sel-app">
@@ -270,7 +265,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
         
         </div>
 		
-		<div class="mls-form-group">
+		<div class="mls-form-group mls-f-order8">
 			<label><?php echo mls_plugin_translate('labels','price'); ?></label>
     <input type="text" class="pricerangeResults price-range-iput-block" 
         value="<?php echo isset($session_filters['price']) && $mls_search_performed ? $session_filters['price'] : $min_max_price; ?>" readonly>
@@ -302,14 +297,67 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
                 </div>
             </div>
         </div>
-		<div class="pr-btn-wrapper"><button class="price-range-reset"><?php echo mls_plugin_translate('buttons','reset'); ?></button> <button class="price-range-done" onclick="return false;">Done</button></div>
+		<div class="pr-btn-wrapper"><button class="price-range-reset"><?php echo mls_plugin_translate('buttons','reset'); ?></button> <button class="price-range-done" onclick="return false;"><?php echo mls_plugin_translate('buttons','done'); ?></button></div>
     </div>
 </div>
+<div class="mls-search-features-dropdown-bg"></div>
+<div class="mls-search-features-dropdown">
+    <div class="mls-feat-dropdown-top"><h4><?php echo mls_plugin_translate('general','additionalfeatures'); ?></h4><span class="mls-af-close">×</span></div>
+    <div class="mls-feat-top-search">
+	<div class="mls-feat-top-search-col1">
+	
 
+    <div class="mls-form-group mls-fts-sel">
+        <select id="mls_search_features_search_type" name="mls_search_features_search_type" class="sel-app">
+            <option disabled><?php echo mls_plugin_translate('labels','feature_search_type'); ?></option>
+            <option value="2" <?php echo ($mls_search_performed && isset($session_filters['mls_search_features_search_type']) && $session_filters['mls_search_features_search_type'] == '2') ? 'selected' : ''; ?>>
+                <?php echo mls_plugin_translate('options','musthavefeatures2'); ?>
+            </option>
+            <option value="1" <?php echo ($mls_search_performed && isset($session_filters['mls_search_features_search_type']) && $session_filters['mls_search_features_search_type'] == '1') ? 'selected' : ''; ?>>
+                <?php echo mls_plugin_translate('options','musthavefeatures1'); ?>
+            </option>            
+        </select>
+    </div>
+		</div>
+	<div class="mls-feat-top-search-col2">
 		<div class="mls-form-group">
+        <input type="submit" name="mls_search_features_resetbtn" value="<?php echo mls_plugin_translate('buttons','reset'); ?>" >
+		<input type="submit" class="done-btn"  name="mls_search_features_donebtn" value="<?php echo mls_plugin_translate('buttons','done'); ?>" >
+        </div>
+		</div>
+		
+    </div>
+
+	<?php echo mls_plugin_cached_searchfeatures_multilang($language); ?>
+</div>
+		<div class="mls-form-group mls-f-order9">
         <input type="submit" name="mls_search_submit" value="<?php echo mls_plugin_translate('buttons','search_properties'); ?>" style="background-color: <?php echo esc_attr($formbuttoncolor); ?>;border-color: <?php echo esc_attr($formbuttoncolor); ?>;"/>
         </div>
+		<div class="mls-form-group mls-add-feat-btn-wrapper mls-f-order5">
+          <button type="button" class="mls-add-feat-btn"><img src="<?php echo esc_url( plugins_url('assets/images/filter_light.png', __DIR__) ); ?>" alt="" /> <?php echo mls_plugin_translate('buttons','additionalfeatures'); ?></button>
+</div>
+
+		
+		
+		
     </form>
+		
+		<div class="mls-selected-labels">
+			<div class="mls_selected_features">
+				<?php if($mls_search_performed && isset($session_filters['additional_features'])){
+				foreach($session_filters['additional_features'] as $feature_key => $feature_values){
+					if (!empty($feature_values) && is_array($feature_values)) {
+            foreach ($feature_values as $key => $value) {
+                if (!empty($key)) { // Ensure the value is not empty
+                    echo '<span>'. $key .'</span>';
+                }
+            }
+        }
+				}
+			} ?>
+			</div>
+		</div>
+		
     </div>
     </div>
 </div>
@@ -346,8 +394,7 @@ function mls_plugin_handle_form_submission() {
 		} else {
 			$min_max_price = $min_prices . ' to ' . $max_prices; // Both values are set
 		}
-        
-//         echo $min_prices . ' - ' . $max_prices; die('test');
+
         
         $ownpageresult = isset($_POST['ownpageresult']) ? sanitize_text_field($_POST['ownpageresult']) : 'false';
         $filter_type = isset($_POST['filter_type']) ? sanitize_text_field($_POST['filter_type']) : '';
@@ -358,7 +405,51 @@ function mls_plugin_handle_form_submission() {
         $p_sorttype = isset($_GET['p_sorttype']) ? sanitize_text_field($_GET['p_sorttype']) : $_POST['p_sorttype'];
         $includesorttype = isset($_POST['includesorttype']) ? intval($_POST['includesorttype']) : 1;
         $language = isset($_POST['language']) ? intval($_POST['language']) : 1;
+		  $mls_search_features_search_type = sanitize_text_field($_POST['mls_search_features_search_type']);
+		
         
+        /*$feature_categories = [
+            'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+            'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+            'Category', 'Rentals', 'Plots'
+        ];
+        
+        $mls_search_features = [];
+        
+        foreach ($feature_categories as $category) {
+            $key = "mls_search_feature_{$category}";
+            $mls_search_features[$category] = isset($_POST[$key]) ? array_map('sanitize_text_field', (array) $_POST[$key]) : [];
+        }*/
+        
+		$feature_categories = [
+    'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+    'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+    'Category', 'Rentals', 'Plots'
+];
+
+$mls_search_features = [];
+
+foreach ($feature_categories as $category) {
+    $key = "mls_search_feature_{$category}";
+    if (isset($_POST[$key])) {
+        foreach ((array)$_POST[$key] as $feature_value) {
+            // Extract the label from the HTML structure
+            $label = '';
+            if (isset($_POST['mls_search_features_labels'][$feature_value])) {
+                $label = sanitize_text_field($_POST['mls_search_features_labels'][$feature_value]);
+            }
+            
+            if (!empty($label)) {
+                $mls_search_features[$category][$label] = sanitize_text_field($feature_value);
+            } else {
+                // Fallback if label isn't available
+                $mls_search_features[$category][] = sanitize_text_field($feature_value);
+            }
+        }
+    }
+}
+		
+//         print_r($mls_search_features); 
         // Store filter values in session
         $_SESSION['mls_search_filters'] = array(
             'area' => $area,
@@ -376,14 +467,16 @@ function mls_plugin_handle_form_submission() {
             'newdevelopment' => $newdevelopment,
             'maxthumbnail' => $maxthumbnail,
 			'ownpageresult' => $ownpageresult,
-            'page_num' => $page
+            'page_num' => $page,
+			'mls_search_features_search_type' => $mls_search_features_search_type, 
+			'additional_features' => $mls_search_features 
         );
 		
 		if (!isset($query_id)) {
 			$query_id = ''; // Default to an empty string or set a fallback value
 		}
 		
-        $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_prices, $max_prices, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment);
+        $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_prices, $max_prices, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $mls_search_features);
 
         if (isset($data['QueryInfo']['QueryId'])) {
             $query_id = $data['QueryInfo']['QueryId'];
@@ -434,7 +527,8 @@ function mls_plugin_display_search_results($atts = []) {
     // Display the search form if 'includesearch' is true
     if ( ($atts['includesearch'] === 'true' &&  !isset($_GET['mls_search_performed'])) || ($atts['includesearch'] === 'true' &&  $ownpageresult === 'false' ) ) {
         // Pass relevant attributes to the search shortcode
-       echo '<div class="mls-searchresult-form">'.do_shortcode('[mls_property_searchformcode filtertype="' . esc_attr($atts['filtertype']) . '" searchtitle="' . esc_attr($atts['searchtitle']) . '" maxthumbnail="' . esc_attr($atts['maxthumbnail']) . '" bedsfilter="' . esc_attr($atts['bedsfilter']) . '" bathsfilter="' . esc_attr($atts['bathsfilter']) . '" min_pricefilter="' . esc_attr($atts['min_pricefilter']) . '" max_pricefilter="' . esc_attr($atts['max_pricefilter']) . '" includesorttype="' . esc_attr($atts['includesorttype']) . '" language="' . esc_attr($atts['language']) . '" newdevelopment="' . esc_attr($atts['newdevelopment']) . '" formbackgroundcolor="' . esc_attr($atts['formbackgroundcolor']) . '" formbuttoncolor="' . esc_attr($atts['formbuttoncolor']) . '" p_sorttype="' . esc_attr($atts['p_sorttype']) . '"]').'</div>';
+       $search_output = '<div class="mls-searchresult-form">'.do_shortcode('[mls_property_searchformcode filtertype="' . esc_attr($atts['filtertype']) . '" searchtitle="' . esc_attr($atts['searchtitle']) . '" maxthumbnail="' . esc_attr($atts['maxthumbnail']) . '" bedsfilter="' . esc_attr($atts['bedsfilter']) . '" bathsfilter="' . esc_attr($atts['bathsfilter']) . '" min_pricefilter="' . esc_attr($atts['min_pricefilter']) . '" max_pricefilter="' . esc_attr($atts['max_pricefilter']) . '" includesorttype="' . esc_attr($atts['includesorttype']) . '" language="' . esc_attr($atts['language']) . '" newdevelopment="' . esc_attr($atts['newdevelopment']) . '" formbackgroundcolor="' . esc_attr($atts['formbackgroundcolor']) . '" formbuttoncolor="' . esc_attr($atts['formbuttoncolor']) . '" p_sorttype="' . esc_attr($atts['p_sorttype']) . '"]').'</div>';
+		if($atts['includesearch'] === 'true' &&  !isset($_GET['mls_search_performed'])) { return $search_output; }
     }
 
     // Check if search has been performed
@@ -462,11 +556,15 @@ function mls_plugin_display_search_results($atts = []) {
      			update_option('mls_temp_language_code', $language);
                 $p_sorttype = isset($_GET['p_sorttype']) ? sanitize_text_field($_GET['p_sorttype']) : $filters['p_sorttype'];
 				
+                $mls_search_features = isset($filters['additional_features']) ? $filters['additional_features'] : [];
+                
+                $mls_search_features_search_type = isset($filters['mls_search_features_search_type']) ? $filters['mls_search_features_search_type'] : '';
+
                 // Fetch properties with the stored filters and query ID
-                $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment);
+                $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $mls_search_features);
 
                 if ($data) {
-                    return '<div class="mls-search-results"><div class="mls-container">' . mls_plugin_display_propertiess($data, $maxthumbnail, $includesorttype, $p_sorttype, $language,$filter_type) . '</div></div>';
+                    return '<div class="mls-search-results"><div class="mls-container">' .$search_output . mls_plugin_display_propertiess($data, $maxthumbnail, $includesorttype, $p_sorttype, $language,$filter_type) . '</div></div>';
                 } else {
                     return '<div class="search-not-perform"><p>'.mls_plugin_translate("error","mls_nosearchresult").'</p></div>';
                 }
@@ -604,9 +702,9 @@ foreach ($stored_types_with_labels as $json_item) {
 	
     // Fetch the properties based on search parameters
     if (get_option('mls_plugin_style_proplanghide')) {
-        $data = mls_plugin_fetch_properties([''],[''],'','','','','', $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment);
+        $data = mls_plugin_fetch_properties([''],[''],'','','','','', $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment,'', ['']);
     }else{
-		$data = mls_plugin_fetch_properties([''],$propertyvalues,'','','','','', $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment);
+		$data = mls_plugin_fetch_properties([''],$propertyvalues,'','','','','', $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment,'', ['']);
 	}
     
     // Check if search was submitted and hide property list until results are shown
@@ -652,7 +750,7 @@ function mls_property_byrefs_shortcode($atts = []) {
 	
 	if($references){
     // Fetch the properties based on search parameters
-    $data = mls_plugin_fetch_properties([''],[''], $references,'','','','', $filter_type, '', '', '', $language, $newdevelopment);
+    $data = mls_plugin_fetch_properties([''],[''], $references,'','','','', $filter_type, '', '', '', $language, $newdevelopment,'', ['']);
 
     // Check if search was submitted and hide property list until results are shown
     if ($data) {
@@ -685,7 +783,8 @@ function mls_plugin_banner_search_form($atts = []) {
         'language' => '1',
         'newdevelopment' => 'include',
         'min_pricefilter' => '0',
-        'max_pricefilter' => '10000000'
+        'max_pricefilter' => '10000000',
+		'p_sorttype' => '1'
     ];
 
     // Merge provided attributes with defaults
@@ -704,7 +803,7 @@ if ($atts['searchtitle'] == 'searchtitle') {
     $searchtitle = $atts['searchtitle'];
     $maxthumbnail = $atts['maxthumbnail'];
 	$includesorttype = $atts['includesorttype'];
-    
+    $p_sorttype = isset($_GET['p_sorttype']) ? sanitize_text_field($_GET['p_sorttype']) : $atts['p_sorttype'];
     $newdevelopment = $atts['newdevelopment'];
     $min_price = $atts['min_pricefilter'];
 	$max_price = $atts['max_pricefilter'];
@@ -747,6 +846,9 @@ $locations = mls_plugin_get_cached_locations();
 		 $locations_array = $locations_array; }
 // 	else{ echo 'no location'; }
 
+	// Retrieve filter values from session
+    $session_filters = isset($_SESSION['mls_search_filters']) ? $_SESSION['mls_search_filters'] : [];
+    $mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_search_performed'] == '1';
 
 
     // Search form HTML
@@ -763,6 +865,9 @@ $locations = mls_plugin_get_cached_locations();
 					<input type="hidden" name="includesorttype" value="<?php echo esc_attr($includesorttype); ?>">
                     <input type="hidden" name="language" value="<?php echo esc_attr($language); ?>">
                     <input type="hidden" name="newdevelopment" value="<?php echo esc_attr($newdevelopment); ?>">
+                    <input type="hidden" name="defaultminprice" value="<?php echo esc_attr($min_price); ?>">
+	                <input type="hidden" name="defaultmaxprice" value="<?php echo esc_attr($max_price); ?>">
+					<input type="hidden" name="p_sorttype" id="search_form_sorttype" class="search_form_sorttype" value="<?php echo esc_attr($p_sorttype); ?>">
 					
 <!--	sales, rental & new development tab in banner search form	 -->
 <?php
@@ -788,16 +893,16 @@ if (count($selected_tabs) === 1) {
 } else {
     // Show the tabs
     ?>
-    <div class="mls-tab-container">
-		<ul class="srh-tab-nav">
+    <div class="mls-tab-container mls-f-order1">
+		<ul id="mls-navtabs1" class="scroll_tabs_theme_light custom-mls-tab">
         <?php foreach ($selected_tabs as $tab): ?>
-			<li>
+			<li class="custom-mls-tab-list">
             <input type="radio" id="tab_<?php echo esc_attr($tab); ?>" name="filter_type" value="<?php echo esc_attr($tab); ?>"
                    <?php echo ($active_filter === $tab) ? 'checked' : ''; ?>>
             <label class="tab" for="tab_<?php echo esc_attr($tab); ?>">
                 <?php echo mls_plugin_translate('labels', $tab); ?>
             </label>
-			</li>
+        </li>
         <?php endforeach; ?>
 		</ul>
     </div>
@@ -805,7 +910,7 @@ if (count($selected_tabs) === 1) {
 }
 ?>
 					
-                    <div class="mls-form-group">
+                    <div class="mls-form-group mls-f-order2">
         <label for="mls_search_area"><?php echo mls_plugin_translate('labels','area'); ?></label>
         <select id="mls_search_area_ban" name="mls_search_area[]" class="mls_area_sel" multiple>
             <?php
@@ -822,7 +927,7 @@ if (count($selected_tabs) === 1) {
         </select>
         
         </div>
-		<div class="mls-form-group">
+		<div class="mls-form-group mls-f-order3">
 
         <label for="mls_search_type"><?php echo mls_plugin_translate('labels','property_type'); ?></label>
         
@@ -878,7 +983,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
             ?>
         
 
-        </div><div class="mls-form-group">
+        </div><div class="mls-form-group mls-f-order4">
 
         <label for="mls_search_keyword"><?php echo mls_plugin_translate('labels','reference_id'); ?></label>
         <!-- <input type="text" id="mls_search_keyword" value="<?php echo esc_attr($session_filters['keyword'] ?? ''); ?>" name="mls_search_keyword" /> -->
@@ -888,7 +993,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
 
         </div>
 			
-					<div class="mls-form-group">
+					<div class="mls-form-group mls-f-order6">
     <label for="mls_search_beds"><?php echo mls_plugin_translate('labels','beds'); ?></label>
     <select id="mls_search_beds" name="mls_search_beds" class="sel-app">
         <option value=""><?php echo mls_plugin_translate('options','any'); ?></option>
@@ -896,7 +1001,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
     </select>
 </div>
 
-<div class="mls-form-group">
+<div class="mls-form-group mls-f-order7">
     <label for="mls_search_baths"><?php echo mls_plugin_translate('labels','baths'); ?></label>
     <select id="mls_search_baths" name="mls_search_baths" class="sel-app">
         <option value=""><?php echo mls_plugin_translate('options','any'); ?></option>
@@ -905,7 +1010,7 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
 </div>
 
 
-<div class="mls-form-group">
+<div class="mls-form-group mls-f-order8">
 			<label><?php echo mls_plugin_translate('labels','price'); ?></label>
     <input type="text" class="pricerangeResults price-range-iput-block" 
         value="<?php echo isset($session_filters['price']) && $mls_search_performed ? $session_filters['price'] : $min_max_price; ?>" readonly>
@@ -937,15 +1042,65 @@ echo '<option value="' . esc_attr($suboption_value) . '" ' . esc_attr($selected)
                 </div>
             </div>
         </div>
-		<div class="pr-btn-wrapper"><button class="price-range-reset"><?php echo mls_plugin_translate('buttons','reset'); ?></button> <button class="price-range-done" onclick="return false;">Done</button></div>
+		<div class="pr-btn-wrapper"><button class="price-range-reset"><?php echo mls_plugin_translate('buttons','reset'); ?></button> <button class="price-range-done" onclick="return false;"><?php echo mls_plugin_translate('buttons','done'); ?></button></div>
     </div>
 </div>
+<div class="mls-search-features-dropdown">
+    <div class="mls-feat-dropdown-top"><h4><?php echo mls_plugin_translate('general','additionalfeatures'); ?></h4><span class="mls-af-close">×</span></div>
+    <div class="mls-feat-top-search">
+	<div class="mls-feat-top-search-col1">
+	
+
+    <div class="mls-form-group mls-fts-sel">
+        <select id="mls_search_features_search_type" name="mls_search_features_search_type" class="sel-app">
+            <option disabled><?php echo mls_plugin_translate('labels','feature_search_type'); ?></option>
+            <option value="2" <?php echo ($mls_search_performed && isset($session_filters['mls_search_features_search_type']) && $session_filters['mls_search_features_search_type'] == '2') ? 'selected' : ''; ?>>
+                <?php echo mls_plugin_translate('options','musthavefeatures2'); ?>
+            </option>
+            <option value="1" <?php echo ($mls_search_performed && isset($session_filters['mls_search_features_search_type']) && $session_filters['mls_search_features_search_type'] == '1') ? 'selected' : ''; ?>>
+                <?php echo mls_plugin_translate('options','musthavefeatures1'); ?>
+            </option>            
+        </select>
+    </div>
+		</div>
+	<div class="mls-feat-top-search-col2">
+		<div class="mls-form-group">
+        <input type="submit" name="mls_search_features_resetbtn" value="<?php echo mls_plugin_translate('buttons','reset'); ?>" >
+		<input type="submit" class="done-btn"  name="mls_search_features_donebtn" value="<?php echo mls_plugin_translate('buttons','done'); ?>" >
+        </div>
+		</div>
+		
+    </div>
+
+	<?php echo mls_plugin_cached_searchfeatures_multilang($language); ?>
+</div>
+
 					
 
-		<div class="mls-form-group">
+		<div class="mls-form-group mls-f-order9">
                         <input type="submit" name="mls_banner_search_submit" value="<?php echo mls_plugin_translate('buttons','search_properties'); ?>" />
                     </div>
+	<div class="mls-form-group mls-add-feat-btn-wrapper mls-f-order5">
+          <button type="button" class="mls-add-feat-btn"><img src="<?php echo esc_url( plugins_url('assets/images/filter_light.png', __DIR__) ); ?>" alt="" /> <?php echo mls_plugin_translate('buttons','additionalfeatures'); ?></button>
+</div>
                 </form>
+
+                <div class="mls-selected-labels">
+			<div class="mls_selected_features">
+				<?php if($mls_search_performed && isset($session_filters['additional_features'])){
+				foreach($session_filters['additional_features'] as $feature_key => $feature_values){
+					if (!empty($feature_values) && is_array($feature_values)) {
+            foreach ($feature_values as $key => $value) {
+                if (!empty($key)) { // Ensure the value is not empty
+                    echo '<span>'. $key .'</span>';
+                }
+            }
+        }
+				}
+			} ?>
+			</div>
+		</div>
+        
             </div>
         </div>
     </section>
@@ -964,16 +1119,81 @@ function mls_plugin_handle_banner_form_submission() {
         $keyword = sanitize_text_field($_POST['mls_search_keyword']);
         $beds = sanitize_text_field($_POST['mls_search_beds']);
         $baths = sanitize_text_field($_POST['mls_search_baths']);
-        $min_prices = sanitize_text_field($_POST['mls_search_minprice']);
-        $max_prices = sanitize_text_field($_POST['mls_search_maxprice']);
-        $min_max_price = $min_prices . ' to ' . $max_prices;
+        
         $filter_type = isset($_POST['filter_type']) ? sanitize_text_field($_POST['filter_type']) : '';
         $newdevelopment = isset($_POST['newdevelopment']) ? sanitize_text_field($_POST['newdevelopment']) : '';
         $maxthumbnail = isset($_POST['maxthumbnail']) ? sanitize_text_field($_POST['maxthumbnail']) : '';
 		$includesorttype = isset($_POST['includesorttype']) ? intval($_POST['includesorttype']) : 1;
         $language = isset($_POST['language']) ? intval($_POST['language']) : 1;
+		$p_sorttype = isset($_GET['p_sorttype']) ? sanitize_text_field($_GET['p_sorttype']) : $_POST['p_sorttype'];
         $page = 1; // Always start at page 1 for new searches
 
+        $defaultminprice = sanitize_text_field($_POST['defaultminprice']);
+		$defaultmaxprice = sanitize_text_field($_POST['defaultmaxprice']);
+		$min_prices = sanitize_text_field($_POST['mls_search_minprice']);
+        $max_prices = sanitize_text_field($_POST['mls_search_maxprice']);
+
+		// Set min and max price to empty if they match the default values
+		$min_prices = ($min_prices === $defaultminprice) ? '' : $min_prices;
+		$max_prices = ($max_prices === $defaultmaxprice) ? '' : $max_prices;
+
+		// Determine min_max_price
+		if ($min_prices === '' && $max_prices === '') {
+			$min_max_price = 'Select a price range';  // Both values are empty
+		} elseif ($min_prices === '') {
+			$min_max_price = ' Upto ' . $max_prices; // Only max price is set
+		} elseif ($max_prices === '') {
+			$min_max_price = ' Starts from ' . $min_prices; // Only min price is set
+		} else {
+			$min_max_price = $min_prices . ' to ' . $max_prices; // Both values are set
+		}
+
+// 		Additional features
+$mls_search_features_search_type = sanitize_text_field($_POST['mls_search_features_search_type']);
+		
+        
+        /*$feature_categories = [
+            'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+            'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+            'Category', 'Rentals', 'Plots'
+        ];
+        
+        $mls_search_features = [];
+        
+        foreach ($feature_categories as $category) {
+            $key = "mls_search_feature_{$category}";
+            $mls_search_features[$category] = isset($_POST[$key]) ? array_map('sanitize_text_field', (array) $_POST[$key]) : [];
+        }*/
+
+        $feature_categories = [
+            'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+            'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+            'Category', 'Rentals', 'Plots'
+        ];
+        
+        $mls_search_features = [];
+        
+        foreach ($feature_categories as $category) {
+            $key = "mls_search_feature_{$category}";
+            if (isset($_POST[$key])) {
+                foreach ((array)$_POST[$key] as $feature_value) {
+                    // Extract the label from the HTML structure
+                    $label = '';
+                    if (isset($_POST['mls_search_features_labels'][$feature_value])) {
+                        $label = sanitize_text_field($_POST['mls_search_features_labels'][$feature_value]);
+                    }
+                    
+                    if (!empty($label)) {
+                        $mls_search_features[$category][$label] = sanitize_text_field($feature_value);
+                    } else {
+                        // Fallback if label isn't available
+                        $mls_search_features[$category][] = sanitize_text_field($feature_value);
+                    }
+                }
+            }
+        }
+
+		
         // Store filter values in session
         $_SESSION['mls_search_filters'] = array(
             'area' => $area,
@@ -989,10 +1209,17 @@ function mls_plugin_handle_banner_form_submission() {
 			'includesorttype' => $includesorttype,
             'language' => $language,
             'newdevelopment' => $newdevelopment,
-            'page_num' => $page
+			'p_sorttype' => $p_sorttype,
+            'page_num' => $page,
+			'mls_search_features_search_type' => $mls_search_features_search_type, 
+			'additional_features' => $mls_search_features 
         );
 
-        $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_prices, $max_prices, $filter_type, '', $page, '', $language, $newdevelopment);
+		if (!isset($query_id)) {
+			$query_id = ''; // Default to an empty string or set a fallback value
+		}
+		
+        $data = mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_prices, $max_prices, $filter_type, $p_sorttype , $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $mls_search_features);
 
         if (isset($data['QueryInfo']['QueryId'])) {
             $query_id = $data['QueryInfo']['QueryId'];

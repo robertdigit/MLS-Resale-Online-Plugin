@@ -139,13 +139,28 @@ function mls_plugin_get_cached_mls_connection() {
 add_action('wp_ajax_mls_refresh_locations', 'mls_plugin_refresh_locations');
 function mls_plugin_refresh_locations() {
     
+	// List of all language IDs
+    $language_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14];
+	
     // Clear the transient
     $location_deleted = delete_transient('mls_plugin_locations');
 $currency_deleted = delete_transient('mls_plugin_currency');
 $connectionsts_deleted = delete_transient('mls_plugin_connectionsts');
-$propertytype_multilang_deleted = delete_transient('mls_plugin_propertytype_multilang');
 
-if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propertytype_multilang_deleted) {
+	// Track deletion status for language-based transients
+    $propertytype_multilang_deleted = false;
+    $searchfeatures_multilang_deleted = false;
+
+    foreach ($language_ids as $lang_id) {
+        if (delete_transient('mls_plugin_propertytype_multilang_' . $lang_id)) {
+            $propertytype_multilang_deleted = true;
+        }
+        if (delete_transient('mls_plugin_searchfeatures_multilang_' . $lang_id)) {
+            $searchfeatures_multilang_deleted = true;
+        }
+    }
+
+if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propertytype_multilang_deleted || $searchfeatures_multilang_deleted) {
 		$current_time = current_time('mysql');
         update_option('mls_plugin_last_cache_refresh', $current_time);
 		mls_plugin_get_cached_locations();
@@ -160,7 +175,9 @@ if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propert
     if (!$location_deleted) $error_messages[] = 'Locations';
     if (!$currency_deleted) $error_messages[] = 'Currency';
     if (!$connectionsts_deleted) $error_messages[] = 'Connection Status';
-	if (!$propertytype_multilang_deleted) $error_messages[] = 'Property types Multi-language';
+	if (!$propertytype_multilang_deleted) $error_messages[] = 'Property Types (All Languages)';
+    if (!$searchfeatures_multilang_deleted) $error_messages[] = 'Search Features (All Languages)';
+
 	
     if (defined('DOING_AJAX') && DOING_AJAX) {
     wp_send_json_error('Failed to sync data for: ' . implode(', ', $error_messages));
@@ -374,7 +391,7 @@ function check_mls_connection() {
 }
 
 // Function to fetch properties using the Resales Online API.
-function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment) {
+function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $additional_features) {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
     $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
@@ -388,8 +405,7 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 	if (!get_option('mls_plugin_style_proplanghide')) {
         $language = get_option('mls_plugin_prop_language');
     }
-// 	echo "p_sorttype: ". $p_sorttype. "<br>";
-// 	echo $keyword. "<br>";
+
 
 	if ($filter_type === 'short_rentals') {
         $filter_id = $mls_plugin_filter_id_short_rentals;
@@ -416,7 +432,6 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 
     // Build the full URL with the passed parameters
     $query_args = array(
-//         'P_ApiId' => '58159',
 		'P_ApiId' => $filter_id,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
@@ -430,21 +445,33 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 		'P_Lang' => $language,
         'P_PageSize' => $pagesize,
         'P_SortType' => isset($p_sorttype) ? $p_sorttype : '1',
-        // 'p_images' => '4',
-//         'P_IncludeRented' => '1',
 		'p_new_devs' => $newdevelopment,
         'P_PageNo' => $page,
     );
 
     if ($query_id) {
-//         echo 'qus: ' . $query_id . "<br>";
         $query_args['P_QueryId'] = $query_id;
     }
+	
+// For Additional Features parameter
+if (!empty($additional_features) && is_array($additional_features) && !empty(array_filter($additional_features)) ) {
+	$query_args['P_MustHaveFeatures'] = $mls_search_features_search_type;
+    foreach ($additional_features as $feature_key => $feature_values) {
+        if (!empty($feature_values) && is_array($feature_values)) {
+            foreach ($feature_values as $value) {
+                if (!empty($value)) { // Ensure the value is not empty
+                    $query_args[$value] = '1';
+                }
+            }
+        }
+    }
+}
+
 
     $baseurl = add_query_arg($query_args, $endpoint);
 
 //     echo 'base url: ' . $baseurl . '<br>';
-//     die('tst-end');
+
 
     // Make the API request.
     $response = wp_remote_get($baseurl);
@@ -471,9 +498,9 @@ function mls_plugin_fetch_ref($reference, $type, $language, $newdevelopment) {
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
 	$mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
 	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
-    if (!get_option('mls_plugin_style_proplanghide')) {
-        $language = get_option('mls_plugin_prop_language');
-    }
+//     if (!get_option('mls_plugin_style_proplanghide')) {
+//         $language = get_option('mls_plugin_prop_language');
+//     }
 // 	echo "lang: ". $language. "<br>";
 	
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getProperty']; // Replace with the correct API endpoint for locations
@@ -517,11 +544,16 @@ function mls_plugin_fetch_ref($reference, $type, $language, $newdevelopment) {
 
 
 // Function to fetch property detail page using the Resales Online API
-function mls_plugin_fetch_searchfeatures() {
+function mls_plugin_fetch_searchfeatures($language) {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
 	$mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
-	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
+	
+	if (!get_option('mls_plugin_style_proplanghide')) {
+		$mls_language = get_option('mls_plugin_prop_language');
+	}else{
+		$mls_language = $language;
+	} 
     
     $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesFeatures']; // Replace with the correct API endpoint for locations
 
@@ -530,7 +562,7 @@ function mls_plugin_fetch_searchfeatures() {
         'P_ApiId' => $mls_plugin_filter_id_sales,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
-		'P_Lang' => $mls_plugin_prop_language,
+		'P_Lang' => $mls_language,
     ), $endpoint);
 
 //     echo 'base url' . $baseurl . '<br>';
@@ -543,16 +575,112 @@ function mls_plugin_fetch_searchfeatures() {
     }
 
     $body = wp_remote_retrieve_body($response);
-    $results = json_decode($body, true);
+    $data = json_decode($body, true);
 
     // Check for JSON decoding errors
     if (json_last_error() !== JSON_ERROR_NONE) {
         return [];
     }
 
+    // Return the API data
+    return $data;
+
 	
-    // Return the locations if available
-    return $results;
+}
+
+function mls_plugin_cached_searchfeatures_multilang($mls_language) {
+	
+	if (!get_option('mls_plugin_style_proplanghide')) {
+		$language = get_option('mls_plugin_prop_language');
+	}else{
+		$language = $mls_language;
+	} 
+	
+    // Create a unique transient key based on the language
+    $transient_key = 'mls_plugin_searchfeatures_multilang_' . sanitize_key($language);
+    
+    $searchfeatures_multilang = get_transient($transient_key);
+    
+    if ($searchfeatures_multilang === false) {
+        // If transient does not exist, fetch from API
+        $searchfeatures_multilang = mls_plugin_fetch_searchfeatures($language);
+        
+        if (!empty($searchfeatures_multilang) ) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient($transient_key, $searchfeatures_multilang, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient($transient_key, [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+// Retrieve filter values from session
+$session_filters = isset($_SESSION['mls_search_filters']) ? $_SESSION['mls_search_filters'] : [];
+$mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_search_performed'] == '1';
+
+  // Start building the accordion HTML
+   $html = '<div id="mls-af-accord1" class="mls-af-accordian">';
+
+	$feature_categories = [
+    'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+    'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+    'Category', 'Rentals', 'Plots'
+];
+	
+    // Loop through each category
+    foreach ($searchfeatures_multilang['FeaturesData']['Category'] as $index => $category) {
+        $categoryName = $category['@attributes']['Name'];
+		$categorySlug = $feature_categories[$index];
+        $options = '';
+		$selected_labels_html = '';
+
+        // Loop through each feature in the category
+        foreach ($category['Feature'] as $feature) {
+            $optionLabel = $feature['Name'];
+            $optionValue = $feature['ParamName'];
+            $optionId = 'mls-af-checkbox-' . sanitize_title($optionValue);
+			// Get selected labels for this category
+        $selected_labels = (isset($session_filters['additional_features'][$categorySlug]) && $mls_search_performed) ? $session_filters['additional_features'][$categorySlug] : [];
+        
+            // Check if the option should be checked
+            $checked = in_array($optionValue, $selected_labels) ? 'checked' : '';
+
+            // If checked, add to selected labels HTML
+            if ($checked) {
+                $selected_labels_html .= "
+                <span class='mls-af-label-badge' data-value='$optionValue'>
+                    $optionLabel
+                    <span class='mls-af-close-btn'>&times;</span>
+                </span>";
+            }
+
+            $options .= "
+            <li>
+                <input class='mls-af-checkbox' id='$optionId' type='checkbox' name='mls_search_feature_{$categorySlug}[]' value='$optionValue' $checked>
+                <label for='$optionId'>$optionLabel</label>
+				    <input type='hidden' name='mls_search_features_labels[$optionValue]' value='$optionLabel'>
+            </li>";
+        }
+
+        // Create the accordion section for the category
+        $html .= "
+        <div>
+            <h2 class='mls-af-accodian-title'>$categoryName</h2>
+            <section class='mls-af-accodian-cnts' style='display: none;'>
+                <div class='mls-af-sel-wrap'>
+                    <h3>Select Options:</h3>
+                    <div class='mls-af-selected-labels'>$selected_labels_html</div>
+                    <ul class='mls-af-wrap-list'>
+                        $options
+                    </ul>
+                </div>
+            </section>
+        </div>";
+    }
+
+    $html .= '</div>'; 
+	
+    return $html;
 }
 
 // Function to fetch google fonts using the google fonts API
@@ -588,4 +716,22 @@ function mls_plugin_fetch_google_fonts($api_key) {
     return $data['items'] ?? [];
 }
 
+function mls_plugin_weblink_structure($property_title, $property_ref, $property_filter_type, $language){
+$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
+$prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
+$prpdetailpage = get_post($prpdetailpage_id);
+if (get_option('mls_plugin_style_proplanghide')) {
+$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
+}else{
+$prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
+}
+
+$weblinkstructure = get_option('mls_plugin_weblink_structure', 'weblink_advanced');
+if ($weblinkstructure == 'weblink_advanced') {
+$view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}&lang={$language}");
+}else{	
+	$view_more_url = home_url("{$prpdetailpage_slug}/?id={$property_ref}&lang={$language}&type={$property_filter_type}");	
+}
+	return $view_more_url;
+}
 ?>

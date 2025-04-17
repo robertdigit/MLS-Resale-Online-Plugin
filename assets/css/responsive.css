@@ -32,6 +32,7 @@
     .mls-project-nav-slider {margin: 0 -2px;}
     .mls-project-nav-wrapper {margin: 0 2px;}
 	.mls-prj-feature {grid-template-columns: 4fr 4fr 4fr 4fr;}
+	.mls-search-features-dropdown {padding: 25px;}
 }
 
 @media (max-width: 1100px)
@@ -132,6 +133,7 @@
 	.mls-list-filter .sorttype > div.mls-prop-count {width: 200px;}
 	.mls-list-filter .sorttype form {width: calc(100% - 200px);}
 	
+	.mls-search-features-dropdown {padding: 20px;}
 }
 
 @media (max-width: 680px)

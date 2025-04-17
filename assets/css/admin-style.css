@@ -1293,3 +1293,8 @@ tr + tr.mls-row-heading th h2 {margin-top: 10px !important;}
     border-color: #2e2e33;
     color: #2e2e33;
 }
+
+.basadv-result {margin-top: 15px; min-height: 21px;}
+.basadv-col .basadv-result p {display: none; margin: 0;}
+.basadv-col.advanced .basadv-result p.mls_plugin_weblink_structure_advanced {display: block;}
+.basadv-col.basic .basadv-result p.mls_plugin_weblink_structure_basic {display: block;}

@@ -3,12 +3,28 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+if (!defined('CAL_GREGORIAN')) {
+    define('CAL_GREGORIAN', 0);
+}
+
+if (!function_exists('cal_days_in_month')) {
+    function cal_days_in_month($calendar, $month, $year) {
+        return date('t', mktime(0, 0, 0, $month, 1, $year));
+    }
+}
+
 function mls_property_details_shortcode() {
 	
-    $property_ref = get_query_var('property_ref');
-    $property_type = isset($_GET['type']) ? $_GET['type'] : '';
+	$weblinkstructure = get_option('mls_plugin_weblink_structure', 'weblink_advanced');
+	if ($weblinkstructure == 'weblink_advanced') { $property_ref = get_query_var('property_ref'); }
+	else{ $property_ref = isset($_GET['id']) ? $_GET['id'] : ''; }
+    
+    $property_type = isset($_GET['type']) ? $_GET['type'] : '';	
 	$property_lang = isset($_GET['lang']) ? $_GET['lang'] : '';
 	$view_more_url = home_url( add_query_arg( [], $_SERVER['REQUEST_URI'] ) );
+	
+	// Update option temporarily
+    update_option('mls_temp_language_code', $property_lang);
 	
 	// Map property types to their corresponding filters
 $filter_map = [
@@ -19,7 +35,6 @@ $filter_map = [
 ];
 	
 	if(isset($_SESSION['mls_search_filters']['newdevelopment']) ){ $newdevelopment = $_SESSION['mls_search_filters']['newdevelopment']; }
-// 	echo $newdevelopment . "<br>";
     if (!$property_ref || !$property_type) {
         return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_invalid_found') .'</p></div>';
     }
@@ -27,7 +42,7 @@ $filter_map = [
 // 	echo $property_type . "<br>";
     // Fetch property details using the reference and type
     $properties = mls_plugin_fetch_ref($property_ref, $property_type, $property_lang, $newdevelopment);
-$property_details = $properties['Property'];
+	$property_details = $properties['Property'];
     if (!$property_details) {
         return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_not_found') .'</p></div>';
     }
@@ -211,19 +226,14 @@ $property_details = $properties['Property'];
                  <div class="mls-prj-section mls-prj-lay mls-prjs5 show-xs">
                                <h4><?php echo mls_plugin_translate('prp_highlights','property_highlights'); ?></h4>
                                <div class="ltst-pst">
-                    <?php if (!empty($property_ref)): ?>
+                    <?php if (!empty($property_details['Reference'])): ?>
                         <div class="ltst">
                             <h4><?php echo mls_plugin_translate('prp_highlights','referenceid'); ?></h4>
-                            <p><?php echo esc_html($property_ref); ?></p>
+                            <p><?php echo esc_html($property_details['Reference']); ?></p>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
-                        <div class="ltst">
-                            <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
-                            <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></p>
-                        </div>
-                    <?php endif; ?>
+                    
 
                     <?php if (!empty($property_details['Location'])): ?>
                         <div class="ltst">
@@ -273,7 +283,7 @@ $property_details = $properties['Property'];
                      <div class="mls-prj-moredetail">
                          <ul>
             <?php $propertyFeatures = $property_details['PropertyFeatures'];
-            if($propertyFeatures){
+            if($propertyFeatures['Category']){
             foreach ($propertyFeatures['Category'] as $feature): ?>
                 <li>
                     <span class="mls-prjmd-title"><?php echo esc_html($feature['Type']); ?></span>
@@ -344,7 +354,7 @@ $property_details = $properties['Property'];
         }
     }
         ?>
-                     <h4>Amenities</h4>
+                     <h4><?php echo mls_plugin_translate('general','amenities'); ?></h4>
                     <div class="mls-prj-amenities">
             <?php if (!empty($matchingAmenities)): ?>
                 <?php foreach ($matchingAmenities as $amenityName => $amenityData): ?>
@@ -372,14 +382,35 @@ $property_details = $properties['Property'];
                         if ($map_provider === 'openstreetmap') {
 // Mapping array to convert locations
 $prplocation_mapping = [
-    "Calahonda" => "Sitio de Calahonda",
-    "New Golden Mile" => "Urb. Coto de la Serena",
-    "The Golden Mile" => "El Vicario"
+    "Calahonda" => [
+        "name" => "Sitio de Calahonda",
+    ],
+    "La Quinta" => [
+        "lng" => 36.516720,
+        "lat" => -4.997039
+    ],
+    "New Golden Mile" => [
+        "name" => "Urb. Coto de la Serena"
+    ],
+    "The Golden Mile" => [
+        "name" => "El Vicario"
+    ]
 ];
 
 // Check if $prplocation exists in the mapping array and replace it
 if (array_key_exists($prplocation, $prplocation_mapping)) {
-    $prplocation = $prplocation_mapping[$prplocation];
+    $location_data = $prplocation_mapping[$prplocation];
+    
+    // Update location name if 'name' exists
+    if (isset($location_data['name'])) {
+        $prplocation = $location_data['name'];
+    }
+    
+    // Update coordinates if they exist
+    if (isset($location_data['lat']) && isset($location_data['lng'])) {
+        $prpgeoX = $location_data['lat'];
+        $prpgeoY = $location_data['lng'];
+    }
 }
 							
                         mls_plugin_display_map($prptitle, $prpgeoX, $prpgeoY, $prplocation); 
@@ -416,7 +447,7 @@ $buyersellerhidecls = $classes['bsa-hide'];
                    <div class="mls-form <?php echo $videohidecls . " "; echo $scheduledatehidecls . " "; echo $langhidecls . " "; echo $buyersellerhidecls . " "; ?>">
                          <form id="mls-lead-form" method="POST">
                              <input type="hidden" name="action" value="mls_plugin_lead_form">
-                             <input type="hidden" name="property_ref" value="<?php echo esc_attr($property_ref); ?>">
+                             <input type="hidden" name="property_ref" value="<?php echo esc_attr($property_details['Reference']); ?>">
                              <?php
 // Get the current year, month, and day
 $currentYear = (int) date('Y');
@@ -560,7 +591,7 @@ if (!$scheduledatehidecls) {
                              </div>
 							 <?php } ?>
                              <div class="mls-form-group mls-c1 interest-field">
-                                 <?php $commentvalue = mls_plugin_translate('placeholders','comment'). "'" . $prptitle . " , Ref: " . $property_ref . "'"; ?>
+                                 <?php $commentvalue = mls_plugin_translate('placeholders','comment'). "'" . $prptitle . " , Ref: " . $property_details['Reference'] . "'"; ?>
                                 <textarea id="comments" name="comment" cols="45" rows="8"><?php echo esc_html($commentvalue); ?></textarea>
                              </div>
                              <div class="mls-form-group mls-c1 mls-pr">
@@ -606,19 +637,13 @@ if (!$scheduledatehidecls) {
                     <div class="mls-latest-post">
                        <h3><?php echo mls_plugin_translate('prp_highlights','property_highlights'); ?></h3>
                        <div class="ltst-pst">
-            <?php if (!empty($property_ref)): ?>
+            <?php if (!empty($property_details['Reference'])): ?>
                 <div class="ltst">
                     <h4><?php echo mls_plugin_translate('prp_highlights','referenceid'); ?></h4>
-                    <p><?php echo esc_html($property_ref); ?></p>
+                    <p><?php echo esc_html($property_details['Reference']); ?></p>
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($property_details['Price']) || !empty($property_details['RentalPrice1']) ): ?>
-                <div class="ltst">
-                    <h4><?php echo mls_plugin_translate('prp_highlights','price'); ?></h4>
-                    <p><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></p>
-                </div>
-            <?php endif; ?>
 
             <?php if (!empty($property_details['Location'])): ?>
                 <div class="ltst">
@@ -673,12 +698,6 @@ if (!$scheduledatehidecls) {
 
 
     <?php
-	
-	
-
-
-
-	
 	
     // Return the buffered content
     return ob_get_clean();

@@ -201,6 +201,11 @@ update_option('mls_plugin_fontfamily', sanitize_text_field($_POST['mls_plugin_fo
     }
 		
 	}
+	// advanced setting update code
+	elseif (isset($_POST['mls_plugin_save_advanced_settings'])) {
+    update_option('mls_plugin_weblink_structure', sanitize_text_field($_POST['mls_plugin_weblink_structure']));
+		
+	}
 // 	Language update code
 	elseif (isset($_POST['mls_plugin_save_prop_language_settings'])) {
     
@@ -225,6 +230,7 @@ update_option('mls_plugin_fontfamily', sanitize_text_field($_POST['mls_plugin_fo
             <a href="?page=mls_plugin_settings&tab=lead_form" class="nav-tab <?php if ($tab === 'lead_form'): ?>nav-tab-active<?php endif; ?>">Lead Form</a>
 			<a href="?page=mls_plugin_settings&tab=lead_form_email_config" class="nav-tab <?php if ($tab === 'lead_form_email_config'): ?>nav-tab-active<?php endif; ?>">Email Configuration</a>
             <a href="?page=mls_plugin_settings&tab=language" class="nav-tab <?php if ($tab === 'language'): ?>nav-tab-active<?php endif; ?>">Language</a>
+			<a href="?page=mls_plugin_settings&tab=advanced" class="nav-tab <?php if ($tab === 'advanced'): ?>nav-tab-active<?php endif; ?>">Advanced</a>
         </nav>
 
         <div class="tab-content">
@@ -1073,6 +1079,42 @@ case 'styles':
     </form>
     <?php
     break;
+		
+		case 'advanced':
+    ?>
+    <h2>Advanced Settings</h2>
+    <form method="post" action="">
+        <table class="form-table">
+			
+			<tr valign="top">
+    <th scope="row">Select Weblink Structure</th>
+    <td class="basadv-col">
+		<div class="mls-fz-col">
+		<?php $weblink_structure = get_option('mls_plugin_weblink_structure', 'weblink_advanced'); ?>
+		<label class="mls-custom-radio">Basic
+            <input type="radio" name="mls_plugin_weblink_structure" id="weblink_basic" value="weblink_basic" 
+            <?php echo ($weblink_structure === 'weblink_basic') ? 'checked' : ''; ?> /><span class="checkmark"></span>
+        </label>
+        <label class="mls-custom-radio">Advanced
+            <input type="radio" name="mls_plugin_weblink_structure" id="weblink_advanced" value="weblink_advanced" 
+            <?php echo ($weblink_structure === 'weblink_advanced') ? 'checked' : ''; ?> /><span class="checkmark"></span>
+        </label>
+		</div>
+		<div class="basadv-result">
+			<p class="mls_plugin_weblink_structure_advanced">https://site.com/page-slug/property-title/referenceID/?type=filterID&lang=LanguageID</p>
+			<p class="mls_plugin_weblink_structure_basic">https://site.com/page-slug/?id=referenceID&lang=LanguageID&type=filterID</p>
+		</div>
+		<p class="description note-style"><b>Note:</b> Make sure to clear permalink cache (under Settings >> Permalink >> click Save changes button without changing any option) once after changing the link structure. </p>
+    </td>
+</tr>
+
+        </table>
+		<p class="submit">
+        <input type="submit" name="mls_plugin_save_advanced_settings" value="Save Changes" class="button button-primary" />
+		</p>
+    </form>
+    <?php
+    break;
 
 
                 case 'lead_form':
@@ -1355,12 +1397,12 @@ case 'styles':
                             </td>
                         </tr>
                         <tr valign="top">
-                            <th scope="row">Default Filter ID Features</th>
+                            <th scope="row">Default Filter ID Featured</th>
                             <td><input type="text" name="mls_plugin_filter_id_features" value="<?php echo esc_attr(get_option('mls_plugin_filter_id_features')); ?>" />
                                 <div class="mls-admin-info-wrap">
                                 <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
                                 <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Provide Default Filter ID Features from Resale Online</p>
+                                     <p>Provide Default Filter ID Featured from Resale Online</p>
                                  </div>                            
                                 </div>
                             </td>
@@ -1753,8 +1795,8 @@ function create_mls_pages() {
             'import_id' => '7864',
             'label' => 'MLS Listing Page'
         ),
-        'property-detail' => array(
-            'title' => 'Property Detail',
+        'property-details' => array(
+            'title' => 'Property Details',
             'shortcode' => '[mls_property_details]',
             'import_id' => '7865',
             'label' => 'MLS Detail Page'
@@ -1823,10 +1865,10 @@ function mls_plugin_admin_notice() {
 	}
 	
 	/* Trial Period Notice */
-$trialperiodnotice = mls_plugin_is_license_valid();
+$trialperiodnotice = mls_plugin_check_license_status();
 if ($trialperiodnotice) {
-    $trialenabled = isset($trialperiodnotice['data']['trialenabled']) ? $trialperiodnotice['data']['trialenabled'] : '';
-    $expiration_date = isset($trialperiodnotice['data']['expiration_date']) ? $trialperiodnotice['data']['expiration_date'] : '';
+    $trialenabled = get_option('mls_plugin_trialenabled', '0'); 
+	$expiration_date = get_option('mls_plugin_expiration_date', ''); 
     if ($trialenabled && $expiration_date) {
         // Get the current date and time
         $current_date = new DateTime();

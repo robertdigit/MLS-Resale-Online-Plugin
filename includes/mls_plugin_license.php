@@ -82,7 +82,9 @@ function mls_plugin_license_page() {
                     </td>
                 </tr>
             </table>
-            <?php submit_button(); ?>
+            <p class="submit">
+        <input type="submit" name="verify_license" value="Save Changes" class="button button-primary" />
+		</p>
         </form>
 		</div>
     </div>

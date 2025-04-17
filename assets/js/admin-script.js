@@ -534,3 +534,26 @@ jQuery(document).on('click', 'a[data-plugin-deactivate="mls-plugin"]', function(
     });
 });       
 });
+
+
+jQuery(document).ready(function() {
+	
+if (jQuery("input#weblink_advanced").is(":checked")) {
+  jQuery("input#weblink_advanced").parents(".basadv-col").removeClass("basic").addClass("advanced");
+}
+
+else if (jQuery("input#weblink_basic").is(":checked")) {
+  jQuery("input#weblink_basic").parents(".basadv-col").removeClass("advanced").addClass("basic");
+}
+ });	
+	jQuery(document).ready(function() {
+  jQuery('input[name="mls_plugin_weblink_structure"]').change(function() {
+    var parent = jQuery(this).closest('.basadv-col');
+
+    if (jQuery(this).attr('id') === 'weblink_advanced') {
+      parent.removeClass('basic').addClass('advanced');
+    } else if (jQuery(this).attr('id') === 'weblink_basic') {
+      parent.removeClass('advanced').addClass('basic');
+    }
+  });
+});
