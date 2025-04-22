@@ -597,10 +597,10 @@ function mls_plugin_check_for_update($transient) {
     if (!is_object($transient)) {
         return $transient;
     }
-	$plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/mls-plugin/mls-plugin.php');
+	$plugin_data = get_plugin_data(__FILE__);
     $current_version = $plugin_data['Version'];
     $api_url = 'https://crm.clarkdigital.es/wp-json/updates/v1/updates';
-    $plugin_slug = 'mls-plugin/mls-plugin.php'; // Correct plugin slug
+    $plugin_slug = plugin_basename(__FILE__); // Correct plugin slug
     $domain = get_site_url();
     $parsed_url = wp_parse_url($domain);
     $domain = isset($parsed_url['host']) ? $parsed_url['host'] : $domain;
@@ -642,13 +642,14 @@ function mls_plugin_check_for_update($transient) {
 
 // Plugin Update extract
 function mls_plugin_update_information($false, $action, $arg) {
-    if (isset($arg->slug) && $arg->slug === 'mls-plugin/mls-plugin.php') {
+    $plugin_file = plugin_basename(__FILE__);
+    if (isset($arg->slug) && $arg->slug === $plugin_file) {
 		
         $remote = wp_remote_get('https://crm.clarkdigital.es/wp-json/updates/v1/updates'); // Same API endpoint used above
 
         if (!is_wp_error($remote) && isset($remote['body'])) {
             $remote_body = json_decode($remote['body']);
-			$tested_up_to = "6.7.2";
+			$tested_up_to = "6.8";
 			$requires_php = "7.4";
 			$author = 'Clark Digital';
 			$author_profile = 'https://clarkdigital.es/resales-online-plugin/';
@@ -691,7 +692,7 @@ function mls_plugin_update_check($upgrader_object, $options) {
             $current_version = get_option('mls_plugin_version');
 
             // Get the updated plugin version
-            $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/mls-plugin/mls-plugin.php');
+            $plugin_data = get_plugin_data(__FILE__);
             $new_version = $plugin_data['Version'];
 
             // Run the update if version has changed
@@ -1009,4 +1010,4 @@ delete_option('mls_plugin_style_proplanghide');
 
 
 
-?>
+?> 
