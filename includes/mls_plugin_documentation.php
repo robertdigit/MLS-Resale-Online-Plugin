@@ -40,7 +40,7 @@ function mls_plugin_shortcodes_page() {
             <tbody>
                 <tr>
                     <td><code>filtertype</code></td>
-                    <td>Defines the type of filter for the search. Common values are <code>sales,long_rentals, short_rentals, featured </code>.</td>
+                    <td>Defines the type of filter for the search. Common values are <code>sales,long_rentals, short_rentals, featured, new_development </code>.</td>
                     <td><code>sales</code></td>
                     <td><code>[mls_property_search filtertype="sales"]</code></td>
                 </tr>
@@ -123,6 +123,30 @@ function mls_plugin_shortcodes_page() {
     <td><code>'include'</code> (includes all properties)</td>
     <td><code>[mls_property_search newdevelopment="exclude"]</code></td>
 </tr>
+<tr>
+    <td><code>locations</code></td>
+    <td>Determines whether to include only properties from specific locations. Possible values: <code>'Marbella,Alhaurín de la Torre'</code> You should locations as it's in Resale Online CRM. You can copy & paste from the search form Area field.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_search locations="Marbella"]</code></td>
+</tr>
+<tr>
+    <td><code>propertytypes</code></td>
+    <td>Determines whether to include only properties from specific Property types. Possible values: <code>'1-1,1-2'</code> to include respective property types properties, you can get these property types ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_search propertytypes="2-2,2-17"]</code></td>
+</tr>
+<tr>
+    <td><code>filterid</code></td>
+    <td>You can add custom filter ID which work based on the custom options you set in the resale online CRM. Adding this filterid attribute will restrict the above 'filtertype', propertytypes' & 'locations' attributes. You can add filtertype attribute with the respective filtertype you set for this custom filterID to update the label (For Sale, For Rent, etc..) & other part of the function. But it wont take the filtertype ID's which you set in plugin setting page. </td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_search filterid="63337"]</code></td>
+</tr>
+<tr>
+    <td><code>pmustfeatures</code></td>
+    <td>Determines whether to include only properties from specific feature. Possible values: <code>'1Views12,1Setting6'</code> to include respective features properties, you can get these feature ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_search pmustfeatures="1Views12,1Setting6"]</code></td>
+</tr>				
             </tbody>
         </table>
         </div>
@@ -136,6 +160,9 @@ function mls_plugin_shortcodes_page() {
             <li>If no attributes are specified, the shortcode will use default values.</li>
             <li>The <code>filtertype</code> attribute determines the context of the search (e.g., sales, rentals).</li>
             <li>The form uses dynamic location and property type options fetched from the plugin settings.</li>
+			<li>If you use all <code>locations</code> <code>pmustfeatures</code> & <code>propertytypes</code> attribute, make sure the combination of these has properties.</li>
+			<li>For eg: If you add a new custom <code>filterid="your filter ID"</code> for short rental filter with specific locations & property types add <code>filtertype="short_rentals"</code> attribute, so the label in the property thumbnail show 'For Rent' and other part of functions works for the short rental filters. If not it'll show 'For Sale' label but the properties showing would be short rental.</li>
+			<li>For eg: <code>[mls_property_search ownpageresult="true" filtertype="short_rentals" filterid="63337" ]</code></li>
         </ul>
 		</div>
 		<div class="mls-innersection-style1">
@@ -162,7 +189,7 @@ function mls_plugin_shortcodes_page() {
                 </tr>
                 <tr>
                     <td><code>filtertype</code></td>
-                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured </code>.</td>
+                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured, new_development </code>.</td>
                     <td><code>sales</code></td>
                     <td><code>[mls_property_list filtertype="sales"]</code></td>
                 </tr>
@@ -245,6 +272,31 @@ function mls_plugin_shortcodes_page() {
     <td><code>'include'</code> (includes all properties)</td>
     <td><code>[mls_property_list newdevelopment="exclude"]</code></td>
 </tr>
+<tr>
+    <td><code>locations</code></td>
+    <td>Determines whether to include only properties from specific locations. Possible values: <code>'Marbella,Alhaurín de la Torre'</code> You should locations as it's in Resale Online CRM. You can copy & paste from the search form Area field.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_list locations="Marbella"]</code></td>
+</tr>
+<tr>
+    <td><code>propertytypes</code></td>
+    <td>Determines whether to include only properties from specific Property types. Possible values: <code>'1-1,1-2'</code> to include respective property types properties, you can get these property types ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_list propertytypes="2-2,2-17"]</code></td>
+</tr>
+<tr>
+    <td><code>filterid</code></td>
+    <td>You can add custom filter ID which work based on the custom options you set in the resale online CRM. Adding this filterid attribute will restrict the above 'filtertype', propertytypes' & 'locations' attributes. You can add filtertype attribute with the respective filtertype you set for this custom filterID to update the label (For Sale, For Rent, etc..) & other part of the function. But it wont take the filtertype ID's which you set in plugin setting page. </td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_list filterid="63337"]</code></td>
+</tr>
+<tr>
+    <td><code>pmustfeatures</code></td>
+    <td>Determines whether to include only properties from specific feature. Possible values: <code>'1Views12,1Setting6'</code> to include respective features properties, you can get these feature ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_list pmustfeatures="1Views12,1Setting6"]</code></td>
+</tr>
+				
             </tbody>
         </table>
 </div>
@@ -257,6 +309,9 @@ function mls_plugin_shortcodes_page() {
             <li>The <code>includesearch</code> attribute allows you to include a search form above the property list.</li>
             <li>If no attributes are provided, default values will be used for the shortcode.</li>
             <li>The <code>filtertype</code> attribute determines the context of the property search, whether for sales or rentals.</li>
+			<li>If you use both <code>locations</code> <code>pmustfeatures</code> & <code>propertytypes</code> attribute, make sure the combination of these has properties.</li>
+			<li>For eg: If you add a new custom <code>filterid="your filter ID"</code> for short rental filter with specific locations & property types add <code>filtertype="short_rentals"</code> attribute, so the label in the property thumbnail show 'For Rent' and other part of functions works for the short rental filters. If not it'll show 'For Sale' label but the properties showing would be short rental.</li>
+			<li>For eg: <code>[mls_property_list ownpageresult="true" filtertype="short_rentals" filterid="63337" ]</code></li>
         </ul>
 		</div>
 		<div class="mls-innersection-style1">
@@ -283,7 +338,7 @@ function mls_plugin_shortcodes_page() {
             </tr>
             <tr>
                     <td><code>filtertype</code></td>
-                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured </code>.</td>
+                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured, new_development </code>.</td>
                     <td><code>sales</code></td>
                     <td><code>[mls_property_list filtertype="sales"]</code></td>
             </tr>
@@ -360,6 +415,30 @@ function mls_plugin_shortcodes_page() {
     <td><code>'include'</code> (includes all properties)</td>
     <td><code>[mls_search_results newdevelopment="exclude"]</code></td>
 </tr>
+<tr>
+    <td><code>locations</code></td>
+    <td>Determines whether to include only properties from specific locations. Possible values: <code>'Marbella,Alhaurín de la Torre'</code> You should locations as it's in Resale Online CRM. You can copy & paste from the search form Area field.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_search_results locations="Marbella"]</code></td>
+</tr>
+<tr>
+    <td><code>propertytypes</code></td>
+    <td>Determines whether to include only properties from specific Property types. Possible values: <code>'1-1,1-2'</code> to include respective property types properties, you can get these property types ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_search_results propertytypes="2-2,2-17"]</code></td>
+</tr>
+<tr>
+    <td><code>filterid</code></td>
+    <td>You can add custom filter ID which work based on the custom options you set in the resale online CRM. Adding this filterid attribute will restrict the above 'filtertype', propertytypes' & 'locations' attributes. You can add filtertype attribute with the respective filtertype you set for this custom filterID to update the label (For Sale, For Rent, etc..) & other part of the function. But it wont take the filtertype ID's which you set in plugin setting page. </td>
+    <td><code>''</code></td>
+    <td><code>[mls_search_results filterid="63337"]</code></td>
+</tr>
+<tr>
+    <td><code>pmustfeatures</code></td>
+    <td>Determines whether to include only properties from specific feature. Possible values: <code>'1Views12,1Setting6'</code> to include respective features properties, you can get these feature ID in guide page. <a href="?page=mls_plugin_settings&tab=guide" target="_blank">Click here</a> to go guide page.</td>
+    <td><code>''</code></td>
+    <td><code>[mls_property_list pmustfeatures="1Views12,1Setting6"]</code></td>
+</tr>
             <tr>
                 <td><code>mls_search_performed</code> (URL parameter)</td>
                 <td>Must be set to <code>1</code> in the URL to indicate a search was performed.</td>
@@ -400,6 +479,8 @@ function mls_plugin_shortcodes_page() {
     <li>The search form must store the relevant filter values in the session or pass them via the URL.</li>
     <li>The parameters such as <code>query_id</code>, <code>page_num</code>, and <code>filter_type</code> are automatically handled by the search form submission.</li>
     <li>If no search has been performed, the shortcode will return an empty result.</li>
+	<li>For eg: If you add a new custom <code>filterid="your filter ID"</code> for short rental filter with specific locations & property types add <code>filtertype="short_rentals"</code> attribute, so the label in the property thumbnail show 'For Rent' and other part of functions works for the short rental filters. If not it'll show 'For Sale' label but the properties showing would be short rental.</li>
+	<li>For eg: <code>[mls_search_results ownpageresult="true" filtertype="short_rentals" filterid="63337" ]</code></li>
 </ul>
 		</div>
 		<div class="mls-innersection-style1">
@@ -422,7 +503,7 @@ function mls_plugin_shortcodes_page() {
                 
 				<tr>
                     <td><code>filtertype</code></td>
-                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured </code>.</td>
+                    <td>Defines the type of filter for the property list. Common values are <code>sales,long_rentals, short_rentals, featured, new_development </code>.</td>
                     <td><code>sales</code></td>
                     <td><code>[mls_property_byrefs filtertype="sales"]</code></td>
                 </tr>
@@ -483,7 +564,7 @@ function mls_plugin_shortcodes_page() {
         <tbody>
             <tr>
                 <td><code>filtertype</code></td>
-                <td>Defines the type of filter for the search. Common values are <code>sales, long_rentals, short_rentals, featured</code>.</td>
+                <td>Defines the type of filter for the search. Common values are <code>sales, long_rentals, short_rentals, featured, new_development</code>.</td>
                 <td><code>sales</code></td>
                 <td><code>[mls_banner_searchform filtertype="sales"]</code></td>
             </tr>

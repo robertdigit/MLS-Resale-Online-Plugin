@@ -153,6 +153,3 @@ $faq_content = '
     </div>
     <p>For further assistance or inquiries not covered here, feel free to contact our support team at <a href="mailto:support@clarkdigital.es">support@clarkdigital.es</a>.</p>
 </div>';
-
-
-?>

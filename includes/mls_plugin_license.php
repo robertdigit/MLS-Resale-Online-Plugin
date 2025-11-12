@@ -78,7 +78,7 @@ function mls_plugin_license_page() {
                             <div style="color:#d63638;" class="mls-lkv-msg"> Invalid License Key. Please check your entry or purchase a valid license to enable the MLS Plugin. </div>
                         <?php endif; ?>
 
-                        <p>If you have not purchased, Please <a href="https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/" target="_blank">Purchase Here </a>or <a href="http://34.199.212.7/resale-online-clarkdigital/mls-profile/" target="_blank">Manage Licenses</a></p>
+                        <p>If you have not purchased, Please <a href="https://resales-online-sync.es/download-resales-online-plugin/" target="_blank">Purchase Here </a>or <a href="https://crm.clarkdigital.es/mls-profile/" target="_blank">Manage Licenses</a></p>
                     </td>
                 </tr>
             </table>
@@ -103,5 +103,3 @@ function mls_plugin_deactivate_license() {
     // Return a response
     wp_send_json_success(['message' => 'License key removed from this website. The MLS Plugin is now deactivated.']);
 }
-
-

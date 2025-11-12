@@ -25,4 +25,3 @@ function mls_plugin_display_map($title, $geoX, $geoY, $location) {
     </script>
     <?php
 }
-?>

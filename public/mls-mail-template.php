@@ -33,9 +33,7 @@
                            <td align="center" height="30">
                               <span style="font-size: 32px; color: #fff;">
                               <?php if($mls_plugin_leadformmailheaderlogo){ ?>
-                              <a style="text-decoration: none;" href="[_site_url]" target="_blank" rel="noopener">
                               <img style="height:30px" src="<?php echo esc_url($mls_plugin_leadformmailheaderlogo); ?>" alt="logo" />
-                              </a>
                               <?php }else{ echo "Logo"; } ?>
                               </span>
                            </td>

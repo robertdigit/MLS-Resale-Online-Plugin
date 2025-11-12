@@ -15,12 +15,52 @@ if (!function_exists('cal_days_in_month')) {
 
 function mls_property_details_shortcode() {
 	
+	$mlsnormalized_get = array_change_key_case($_GET, CASE_LOWER);
+	
 	$weblinkstructure = get_option('mls_plugin_weblink_structure', 'weblink_advanced');
 	if ($weblinkstructure == 'weblink_advanced') { $property_ref = get_query_var('property_ref'); }
-	else{ $property_ref = isset($_GET['id']) ? $_GET['id'] : ''; }
+	else{ $property_ref = isset($mlsnormalized_get['id']) ? $mlsnormalized_get['id'] : ''; }
     
+$lang_map = [
+    '1' => 'en', '2' => 'es', '3' => 'de', '4' => 'fr', '5' => 'nl',
+    '6' => 'da', '7' => 'ru', '8' => 'sv', '9' => 'pl', '10' => 'no',
+    '11' => 'tr', '13' => 'fi', '14' => 'hu'
+];
+
+$code_to_id = array_flip($lang_map);
+
+$raw_lang = isset($mlsnormalized_get['lang']) ? trim($mlsnormalized_get['lang']) : '';
+
+if (array_key_exists($raw_lang, $lang_map)) { $property_lang = $raw_lang; } elseif (array_key_exists($raw_lang, $code_to_id)) { $property_lang = $code_to_id[$raw_lang]; } else { $property_lang = '1'; }
+
+if(isset($_SESSION['mls_search_filters']['newdevelopment']) ){ $newdevelopment = $_SESSION['mls_search_filters']['newdevelopment']; }
+	
     $property_type = isset($_GET['type']) ? $_GET['type'] : '';	
-	$property_lang = isset($_GET['lang']) ? $_GET['lang'] : '';
+	// Check if type is %7BApId%7D (URL-encoded {ApId})
+if ($property_type === '%7BApId%7D' || $property_type === '{ApId}' || $property_type === 'ApId') {
+	
+	// Define the filter IDs to try in order
+    $filter_ids = [
+        'sales' => get_option('mls_plugin_filter_id_sales'),
+        'short_rentals' => get_option('mls_plugin_filter_id_short_rentals'),
+        'long_rentals' => get_option('mls_plugin_filter_id_long_rentals'),
+        'features' => get_option('mls_plugin_filter_id_features')
+    ];
+
+    // Try each filter ID until we get a valid response
+    foreach ($filter_ids as $type => $filter_id) {
+        $properties = mls_plugin_fetch_ref($property_ref, $filter_id, $property_lang, $newdevelopment);
+        
+        // Check if we got valid property details
+        if (!empty($properties['Property'])) {
+            $property_type = $filter_id; // Set the successful filter ID as property_type
+            break; // Exit the loop once we find a working filter
+        }
+    }
+	if ($property_type === '%7BApId%7D' || $property_type === '{ApId}' || $property_type === 'ApId') { $property_type = ''; }
+    
+}
+	
 	$view_more_url = home_url( add_query_arg( [], $_SERVER['REQUEST_URI'] ) );
 	
 	// Update option temporarily
@@ -34,12 +74,10 @@ $filter_map = [
     mls_plugin_translate('labels','featured') ?? 'Featured' => get_option('mls_plugin_filter_id_features'),
 ];
 	
-	if(isset($_SESSION['mls_search_filters']['newdevelopment']) ){ $newdevelopment = $_SESSION['mls_search_filters']['newdevelopment']; }
     if (!$property_ref || !$property_type) {
         return '<div class="search-not-perform"><p>'.mls_plugin_translate('error','mls_propertdetail_invalid_found') .'</p></div>';
     }
-// echo $property_ref . "<br>";
-// 	echo $property_type . "<br>";
+
     // Fetch property details using the reference and type
     $properties = mls_plugin_fetch_ref($property_ref, $property_type, $property_lang, $newdevelopment);
 	$property_details = $properties['Property'];
@@ -163,7 +201,7 @@ $filter_map = [
                  <div class="mls-prj-section mls-prj-lay mls-prjs5 show-xs">
                     <div class="cn-post">
                         <div class="mls-prj-price cn-area">
-                           <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
+                           <div><a href="#contact-from" class="mls-button"><?php echo get_option("mls_plugin_leadformheading") ?: mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
                             <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
                         </div>
@@ -418,7 +456,11 @@ if (array_key_exists($prplocation, $prplocation_mapping)) {
                  </div>
 				 <?php } ?>
                  <div class="mls-prj-section mls-prj-lay mls-prjs6" id="contact-from">
-                     <h4><?php echo get_option("mls_plugin_leadformheading"); ?></h4>
+                     <h4><?php 
+						 $mls_plugin_leadformheading = get_option('mls_plugin_leadformheading', 'Book a Viewing');
+						 if (function_exists('icl_t')) { $translated_title = icl_t('resale-online-sync-plugin', 'Lead Form Title', $mls_plugin_leadformheading); } else { $translated_title = $mls_plugin_leadformheading; }
+echo esc_html($translated_title);?>
+					 </h4>
 					  <?php $videohide = get_option('mls_plugin_leadformvideohide');
 	$scheduledatehide = get_option('mls_plugin_leadformscheduledatehide');
 	$langhide = get_option('mls_plugin_leadformlanghide');
@@ -442,7 +484,8 @@ $videohidecls = $classes['videohidecls'];
 $scheduledatehidecls = $classes['date-time-hide'];
 $langhidecls = $classes['lang-hide'];
 $buyersellerhidecls = $classes['bsa-hide'];
-
+$enablethirdpartyform = get_option('mls_plugin_enable_thirdparty_form');
+if(!$enablethirdpartyform){
 					 ?>
                    <div class="mls-form <?php echo $videohidecls . " "; echo $scheduledatehidecls . " "; echo $langhidecls . " "; echo $buyersellerhidecls . " "; ?>">
                          <form id="mls-lead-form" method="POST">
@@ -623,13 +666,17 @@ if (!$scheduledatehidecls) {
                          </form>
                      <div id="form-response-message"></div>
                      </div>
+					 <?php }else{
+$mlsplugin_thirdpartyformcode = get_option('mls_plugin_thirdparty_formcode');
+if (!empty($mlsplugin_thirdpartyformcode)) { echo '<div class="mls-form">'. $mlsplugin_thirdpartyformcode . '</div>';  }
+} ?>
                  </div>
              </div>
              <div class="mls-prj-right mls-prj-sidebar hide-xs">
                  <div class="mls-prj-sidebar-inner">
                     <div class="mls-latest-post cn-post">
                         <div class="mls-prj-price cn-area">
-                           <div><a href="#contact-from" class="mls-button"><?php echo mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
+                           <div><a href="#contact-from" class="mls-button"><?php echo get_option("mls_plugin_leadformheading") ?: mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
                             <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
                         </div>

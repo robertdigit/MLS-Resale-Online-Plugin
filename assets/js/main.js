@@ -221,8 +221,8 @@ jQuery(document).ready(function(jQuery)
 
 
 jQuery(document).ready(function (jQuery) {
-      // Initialize LightGallery
-      //const videoGallery = lightGallery(document.getElementById('video-gallery'), {
+// Initialize LightGallery
+
     lightGallery(document.getElementById('open-video-tour-pop'), {
           selector: 'iframe',
           plugins: [lgVideo],
@@ -243,179 +243,18 @@ jQuery('#open-virtual-tour').on('click', function() {
    jQuery('#open-virtual-tour-pop iframe').trigger('click');
 });
 
-//         jQuery('a#open-video-tour').on('click', function () {
-//             jQuery(this).parents(".mls-virtual-btn").children('#open-video-gallery a:first-child').trigger('click'); 
-//         });
-  });
-
-      // Open the video on button click
-//         jQuery('#open-video-tour').on('click', function () {
-//             jQuery(this).parentsUntil(".wrapper").find('#video-gallery a:first-child').trigger('click'); 
-//         });
-
-// jQuery(document).on('click', '#open-video-tour', function(e) {
-//     jQuery('#open-video-gallery a:first-child').trigger('click');
-// 	alert('triggered download');
-// });
-
-// jQuery(document).ready(function($) {
-// $('#open-video-tour').on('click', function () {
-//     const videoLink = $(this).parents('.mls-prj-left').find('#video-gallery > a:first-child');
-//     console.log('Video link found:', videoLink.length > 0);
-//     videoLink.trigger('click');
-// });
-// });
-
-//jQuery(".img-count").on("click", function() {
-//    jQuery(this).parentsUntil(".mls-property-img").find("#lightgallery2 .mls-list-li-wrapper:first-child > img").trigger("click");
-//});
-
-
-//jQuery(document).ready(function() {
-//  const jQuerylg = jQuery('#lightgallery');
-//
-//  jQuerylg.lightGallery({ pager: true });
-//
-//  // Fired after the gallery has been closed
-//  jQuery('#lightgallery').on('onCloseAfter.lg',function(event){
-//    // Destroy old gallery and re-initialize with default settings:
-//    jQuerylg.data('lightGallery').destroy(true);
-//    jQuerylg.lightGallery({ pager: true });
-//  });
-//  
-//
-//  jQuery("li.img-count").on("click", function(){
-//
-//    // Destroy old gallery and initialize with autoplay === true
-//    jQuerylg.data('lightGallery').destroy(true);
-//    setTimeout(function(){
-//      jQuerylg.lightGallery({ autoplay: true });
-//      jQuery("#lightgallery a:first-child > img").trigger("click");
-//    },0)
-//    
-//  });
-//});
-
-/*Search Form Submit ajax functino*/
-//  jQuery(document).ready(function(jQuery) {
-//     jQuery('.mls-proplist-search-form').on('submit', function(e) {
-//         e.preventDefault(); // Prevent the form from submitting normally
-
-//         var formData = jQuery(this).serialize(); // Serialize the form data
-
-//         jQuery.ajax({
-//             type: 'POST',
-//             url: mls_ajax_obj.ajax_url, // Use the admin-ajax URL
-//             data: formData + '&action=mls_plugin_search_properties', // Append action to data
-//             success: function(response) {
-//                 // Display the result after the search container
-//                 jQuery('.search-results').html(response);
-//             },
-//             error: function(xhr, status, error) {
-//                 console.log('Error: ' + error);
-//             }
-//         });
-//     });
-// });
-
-jQuery(document).ready(function(){
-jQuery(".mls_area_sel").easySelect({
-   buttons: true,
-   search: true,
-   placeholder: mlsTranslations.search_area,
-   placeholderColor: '',
-  //  selectColor: '#524781',
-  //  itemTitle: 'Car selected',
-   showEachItem: true,
-   width: '100%',
-   dropdownMaxHeight: '350px',
-})
-jQuery(".mls_type_sel").easySelect({
-   buttons: true,
-   search: true,
-   placeholder: mlsTranslations.search_property_type,
-   placeholderColor: '',
-  //  selectColor: '#524781',
-  //  itemTitle: 'Car selected',
-   showEachItem: true,
-   width: '100%',
-   dropdownMaxHeight: '350px',
-})
-
-jQuery(".feature_sel").easySelect({
-buttons: true,
-placeholder: "Select options",
-search: true,
-showEachItem: true,
-width: '100%',
-dropdownMaxHeight: '350px',
-})
-
 });
 
 
-//jQuery(document).ready(function(){
-//const rangeInput = document.querySelectorAll(".range-input input"),
-//  priceInput = document.querySelectorAll(".price-input input"),
-//  priceeInput = document.querySelectorAll(".price-input1 input"),
-//  range = document.querySelector(".slider .progress");
-//let priceGap = 1000;
-//    
-//priceeInput.forEach((input) => {
-//  input.addEventListener("input", (e) => {
-//    let minPricee = parseInt(priceeInput[0].value),
-//      maxPricee = parseInt(priceeInput[1].value);
-//
-//    if (maxPrice - minPrice >= priceGap && maxPrice <= rangeInput[1].max) {
-//      if (e.target.className === "input-min1") {
-//        rangeInput[0].value = minPricee;
-//        range.style.left = (minPricee / rangeInput[0].max) * 100 + "%";
-//      } else {
-//        rangeInput[1].value = maxPricee;
-//        range.style.right = 100 - (maxPricee / rangeInput[1].max) * 100 + "%";
-//      }
-//    }
-//  });
-//});
-//
-//priceInput.forEach((input) => {
-//  input.addEventListener("input", (e) => {
-//    let minPrice = parseInt(priceInput[0].value),
-//      maxPrice = parseInt(priceInput[1].value);
-//
-//    if (maxPrice - minPrice >= priceGap && maxPrice <= rangeInput[1].max) {
-//      if (e.target.className === "input-min") {
-//        rangeInput[0].value = minPrice;
-//        range.style.left = (minPrice / rangeInput[0].max) * 100 + "%";
-//      } else {
-//        rangeInput[1].value = maxPrice;
-//        range.style.right = 100 - (maxPrice / rangeInput[1].max) * 100 + "%";
-//      }
-//    }
-//  });
-//});
-//    
-//    
-//rangeInput.forEach((input) => {
-//  input.addEventListener("input", (e) => {
-//    let minVal = parseInt(rangeInput[0].value),
-//      maxVal = parseInt(rangeInput[1].value);
-//
-//    if (maxVal - minVal < priceGap) {
-//      if (e.target.className === "range-min") {
-//        rangeInput[0].value = maxVal - priceGap;
-//      } else {
-//        rangeInput[1].value = minVal + priceGap;
-//      }
-//    } else {
-//      priceInput[0].value = minVal;
-//      priceInput[1].value = maxVal;
-//      range.style.left = (minVal / rangeInput[0].max) * 100 + "%";
-//      range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
-//    }
-//  });
-//});
-//});
+/*Search Form Submit ajax functino*/
+
+jQuery(function($){
+ if(window.MLSSelecttypes) MLSSelecttypes.init(".mls_type_sel");
+	if(window.MLSSelectLocation) {
+		MLSSelectLocation.init(".mls_area_sel");
+		MLSSelectLocation.init(".feature_sel")
+	};
+});
 
 
 // price field filter script start
@@ -540,6 +379,11 @@ jQuery(document).ready(function () {
       var numVal = parseInt(currentVal) || (isMinInput ? defaultMinPrice : defaultMaxPrice);
       var corrected = false;
       
+		var validate = validatePriceRange();
+      if (validate == true) {
+		jQuery("input[type='submit']").prop('disabled', false);
+      }
+	  
 //       if (isMinInput && numVal < defaultMinPrice) {
 //         numVal = defaultMinPrice;
 //         corrected = true;
@@ -577,6 +421,10 @@ jQuery(document).ready(function () {
 //       }
       
       updateSliderAndDisplay();
+	  var validate = validatePriceRange();
+      if (validate == true) {
+		jQuery("input[type='submit']").prop('disabled', false);
+      }
     });
 
     // NEW VALIDATION FUNCTION FOR DONE BUTTON
@@ -682,15 +530,15 @@ jQuery(document).ready(function () {
         maximumFractionDigits: 0
     }) : "";
 
-    var minMaxPriceText = "Please select a price range";
+    var minMaxPriceText = mlsTranslations.search_pricerange;
     if (!formattedMinPrice && !formattedMaxPrice) {
-        minMaxPriceText = "Select a price range";
+        minMaxPriceText = mlsTranslations.search_pricerange_select;
     } else if (!formattedMinPrice) {
-        minMaxPriceText = "Up to " + formattedMaxPrice;
+        minMaxPriceText = mlsTranslations.search_pricerange_upto + formattedMaxPrice;
     } else if (!formattedMaxPrice) {
-        minMaxPriceText = "Starts from " + formattedMinPrice;
+        minMaxPriceText = mlsTranslations.search_pricerange_startsfrom + formattedMinPrice;
     } else {
-        minMaxPriceText = formattedMinPrice + " to " + formattedMaxPrice;
+        minMaxPriceText = formattedMinPrice + mlsTranslations.search_pricerange_to + formattedMaxPrice;
     }
 
     priceRangeResults.val(minMaxPriceText);
@@ -716,7 +564,7 @@ let stickyHeaderHeight = parseInt(mlsTranslations.mls_plugin_prop_detailsidebaro
       container: '.mls-prj-detail-full',
       sidebarInner: '.mls-prj-sidebar-inner',
       callback: function() {
-          console.log('Sticky sidebar fired!');
+//           console.log('Sticky sidebar fired!');
       }
   });
 });
@@ -766,44 +614,7 @@ jQuery(document).ready(function(jQuery) {
   })
 })
 
-//jQuery(document).ready(function() {
-//  jQuery("input.searchInputeasySelect").on("keyup", function(e) {
-//      e.stopPropagation();
-//    var value = jQuery(this).val().toLowerCase();
-//
-//    jQuery(this).parents(".options").find(".scrolableDiv > li").show().filter(function() { 
-//      return jQuery(this).find('label').text().toLowerCase().indexOf(value) === -1;
-//    }).hide(); 
-//  });
-//});
 
-
-jQuery(document).ready(function() {
-  jQuery("input.searchInputeasySelect").keyup(function() {
-      var jQueryinput = jQuery(this);
-      var value = jQueryinput.val().toLowerCase();
-      var jQueryoptions = jQueryinput.parents(".options");
-      var jQuerylistItems = jQueryoptions.find(".scrolableDiv > li");
-      
-      jQueryoptions.find(".no_results").hide(); // Hide no results initially
-      var hasResults = false; // Flag to track if there are matching results
-
-      jQuerylistItems.each(function() {
-          var content = jQuery(this).find('label').text();
-          if (content.toLowerCase().indexOf(value) === -1) {
-              jQuery(this).hide(); // Hide non-matching item
-          } else {
-              jQuery(this).show(); // Show matching item
-              hasResults = true; // Set flag to true if there's a match
-          }
-      });
-
-      // Show no results message if no matches found
-      if (!hasResults) {
-          jQueryoptions.find(".no_results").show();
-      }
-  });
-});
 
 jQuery(document).ready(function(jQuery) {
   jQuery(document).ready(function() {
@@ -910,14 +721,29 @@ jQuery(document).ready(function(jQuery) {
   });
 });
 
+// jQuery(document).ready(function() {
+//  var input = document.querySelector(".phone-field #phone");
+//  window.intlTelInput(input,({
+//   countrySearch:true,
+//   initialCountry:"es",
+//   separateDialCode: true
+//  }));        
+// });
+
 jQuery(document).ready(function() {
- var input = document.querySelector(".phone-field #phone");
- window.intlTelInput(input,({
-  countrySearch:true,
-   initialCountry:"es",
-   separateDialCode: true
- }));        
+  var input = document.querySelector(".phone-field #phone");
+  if (input) {
+    window.intlTelInput(input, {
+      initialCountry: "es",
+      separateDialCode: true,
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js" // optional but recommended
+    });
+  } 
+//   else {
+//     console.error("Phone input field not found.");
+//   }
 });
+
 
 jQuery(document).ready(function(jQuery) {
 jQuery("ul.srh-tab-nav").each(function(){
@@ -1056,10 +882,10 @@ if (currentDayElement.length > 0) {
   if (currentIndex !== undefined) {
       dateSlider.slick('slickGoTo', currentIndex); // Navigate to the correct slide
   } else {
-      console.log('The current date does not have a valid slick index.');
+//       console.log('The current date does not have a valid slick index.');
   }
 } else {
-  console.log('No current day found in the loaded dates.');
+//   console.log('No current day found in the loaded dates.');
 }
 
     
@@ -1273,7 +1099,114 @@ jQuery(document).ready(function () {
       jQuery('.mls_selected_features').empty();
        jQuery('.mls-af-selected-labels').empty();
   });
-
-	
-
 });
+
+
+jQuery(document).ready(function($) {
+    'use strict';
+	
+    function MLSInitGroupedLocationSelection() {
+        var $container = $('.mls-location-group-container');
+        if ($container.length === 0) {
+            return;
+        }
+
+        var groups = $container.data('groups');
+        var selectedParent = $container.data('selected-parent');
+        var selectedChildren = $container.data('selected-children');
+        var $parentSelect = $('#mls_search_parent_area');
+        var $childSelect = $('#mls_search_child_area');
+        var $hiddenField = $('#mls_search_area_hidden');
+
+        var groupsMap = {};
+        $.each(groups, function(index, group) {
+            groupsMap[group.parent] = group.children;
+        });
+
+        // Parent change
+        $parentSelect.on('change', function() {
+            var parentArea = $(this).val();
+
+            $childSelect.find('option:not([value=""])').remove(); // clear children except placeholder
+            $hiddenField.val('');
+
+            if (parentArea && groupsMap[parentArea] && groupsMap[parentArea].length > 0) {
+                // Add placeholder again
+                $childSelect.append($('<option>', {
+                    value: '',
+                    text: '— All Areas —',
+                    disabled: true
+                }));
+
+                $.each(groupsMap[parentArea], function(index, child) {
+                    var isSelected = $.inArray(child, selectedChildren) !== -1;
+                    $childSelect.append($('<option>', {
+                        value: child,
+                        text: child,
+                        selected: isSelected
+                    }));
+                });
+            }
+			
+			if (window.MLSSelectLocation) {
+  window.MLSSelectLocation.init('.mls-multiselect');
+//   console.log('MLSSelect initialized on .mls-multiselect');
+}
+            updateHiddenAreaField();
+        });
+
+        // Child change
+        $childSelect.on('change', function() {
+            updateHiddenAreaField();
+        });
+
+        // Update hidden field with parent + children
+        function updateHiddenAreaField() {
+            var parentValue = $parentSelect.val() || '';
+            var childValues = $childSelect.val() || [];
+
+            var values = [];
+
+            if (parentValue) {
+                if (childValues.length > 0) {
+                    // ✅ Child selected → use children only
+                    values = childValues;
+                } else if (groupsMap[parentValue] && groupsMap[parentValue].length > 0) {
+                    // ✅ Parent only → use all children
+                    values = groupsMap[parentValue];
+                } else {
+                    // ✅ Parent with no children → use parent itself
+                    values.push(parentValue);
+                }
+            }
+
+            $hiddenField.val(values.join(','));
+        }
+
+        // Initial state
+        function handleInitialState() {
+            if (selectedParent) {
+                $parentSelect.val(selectedParent).trigger('change');
+            }
+
+            if (selectedChildren.length > 0) {
+                $childSelect.find('option').each(function() {
+                    if ($.inArray($(this).val(), selectedChildren) !== -1) {
+                        $(this).prop('selected', true);
+                    }
+                });
+            }
+
+            updateHiddenAreaField();
+        }
+
+        handleInitialState();
+    }
+
+    MLSInitGroupedLocationSelection();
+	
+	
+});
+
+
+

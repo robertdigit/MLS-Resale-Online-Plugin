@@ -15,7 +15,68 @@ function mls_plugin_fetch_locations() {
     ), $endpoint);
 
     // Make the API request
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
+
+    if (is_wp_error($response)) {
+        return [];
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $results = json_decode($body, true);
+
+    // Check for JSON decoding errors
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return [];
+    }
+
+	
+    // Return the locations if available
+    return $results;
+}
+
+function mls_plugin_debug_locations_shortcode( $atts = [] ) {
+	$default_atts = [
+		'filterid' => ''
+    ];
+
+    // Merge provided attributes with defaults
+    $atts = shortcode_atts($default_atts, $atts, 'mls_debug_locations');
+	$filterid = $atts['filterid'];
+    // 1. Call the existing helper.
+    $locations = mls_plugin_fetch_customfilterid_locations($filterid);
+
+    // 2. If nothing came back, show a friendly notice.
+    if ( empty( $locations ) ) {
+        return '<pre>No locations returned (empty array).</pre>';
+    }
+
+    // 3. Pretty‑print it.
+    ob_start();
+    echo '<pre>';
+    // Escaping JSON keeps things simple & safe in HTML.
+    echo esc_html( json_encode( $locations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    echo '</pre>';
+
+    return ob_get_clean();
+}
+add_shortcode( 'mls_debug_locations', 'mls_plugin_debug_locations_shortcode' );
+
+// Function to fetch locations for Custom Filter ID using the Resales Online API
+function mls_plugin_fetch_customfilterid_locations($mls_atts_filterid) {
+    $mls_plugin_api_key = get_option('mls_plugin_api_key');
+    $mls_plugin_client_id = get_option('mls_plugin_client_id');
+    
+    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getLocations']; // Replace with the correct API endpoint for locations
+
+    // Build the full URL with the necessary parameters
+    $baseurl = add_query_arg(array(
+        'P_ApiId' => $mls_atts_filterid,
+        'p1' => $mls_plugin_client_id,
+        'p2' => $mls_plugin_api_key,
+    ), $endpoint);
+
+    // Make the API request
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return [];
@@ -52,7 +113,7 @@ function mls_plugin_fetch_currency() {
     $baseurl = add_query_arg($query_args, $endpoint);
 
     // Make the API request.
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return "Error: " . $response->get_error_message();
@@ -89,6 +150,30 @@ function mls_plugin_get_cached_locations() {
         } else {
             // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
             set_transient('mls_plugin_locations', [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $locations;
+}
+
+function mls_plugin_get_cached_customfilterid_locations($mls_atts_filterid) {
+    // Create a unique transient key based on the language
+    $transient_key = 'mls_plugin_customfilterid_locations_' . sanitize_key($mls_atts_filterid);
+    
+    // Try to get property types from the transient
+    $locations = get_transient($transient_key);
+    
+    if ($locations === false) {
+        // If transient does not exist, fetch from API
+         $locations = mls_plugin_fetch_customfilterid_locations($mls_atts_filterid);
+        
+        // Check if property type array is valid and not empty
+        if (!empty($locations) && $locations['QueryInfo']['LocationCount'] > 0) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient($transient_key, $locations, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient($transient_key, [], 5 * MINUTE_IN_SECONDS);
         }
     }
 
@@ -135,32 +220,97 @@ function mls_plugin_get_cached_mls_connection() {
     return $mls_connection;
 }
 
-/***** Refresh Location cache through ajax call - To avoid making frequent API calls, we use WordPress transients to cache the locations temporarily:****/
-add_action('wp_ajax_mls_refresh_locations', 'mls_plugin_refresh_locations');
-function mls_plugin_refresh_locations() {
-    
-	// List of all language IDs
-    $language_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14];
-	
-    // Clear the transient
-    $location_deleted = delete_transient('mls_plugin_locations');
-$currency_deleted = delete_transient('mls_plugin_currency');
-$connectionsts_deleted = delete_transient('mls_plugin_connectionsts');
+add_action('mls_plugin_check_connection_cron', 'mls_plugin_monitor_connection');
 
-	// Track deletion status for language-based transients
-    $propertytype_multilang_deleted = false;
-    $searchfeatures_multilang_deleted = false;
+function mls_plugin_monitor_connection() {
+    // Check if notification is enabled
+    if (get_option('mls_plugin_adminnotificationerror') !== 'yes') {
+        return;
+    }
 
-    foreach ($language_ids as $lang_id) {
-        if (delete_transient('mls_plugin_propertytype_multilang_' . $lang_id)) {
-            $propertytype_multilang_deleted = true;
+    $last_status = get_option('mls_plugin_last_connection_status', '');
+    $connection  = check_mls_connection(); // Fetch live connection
+
+    // If connection data missing or malformed
+    if (empty($connection) || empty($connection['transaction']) || empty($connection['transaction']['status'])) {
+
+        // Notify admin that connection check failed
+        mls_plugin_send_status_notification(
+            $connection,
+            $last_status,
+            'unreachable'
+        );
+
+        // Update to mark as unreachable if not already
+        if ($last_status !== 'unreachable') {
+            update_option('mls_plugin_last_connection_status', 'unreachable');
         }
-        if (delete_transient('mls_plugin_searchfeatures_multilang_' . $lang_id)) {
-            $searchfeatures_multilang_deleted = true;
+
+        return;
+    }
+
+    // Connection seems valid, continue normally
+    $current_status = $connection['transaction']['status'];
+
+    if ($current_status !== $last_status) {
+        try {
+            mls_plugin_send_status_notification($connection, $last_status, $current_status);
+        } catch (Throwable $e) {
+            error_log('[Resales Online Sync Plugin] Email send failed: ' . $e->getMessage());
+        }
+
+        // Always update stored status
+        update_option('mls_plugin_last_connection_status', $current_status);
+    }
+}
+
+function mls_plugin_send_status_notification($connection, $last, $current) {
+    $admin_email = get_option('admin_email');
+    $subject = "Resales Online Sync Plugin Connection Status Changed: {$current}";
+
+    // Start message
+    $message  = "Hello,\n\n";
+    $message .= "The connection status of your Resales Online Sync Plugin has changed.\n\n";
+    $message .= "Previous Status: {$last}\n";
+    $message .= "Current Status: {$current}\n\n";
+
+    // Handle unreachable / unknown cases
+    if ($current === 'unreachable' || empty($connection)) {
+        $message .= "⚠️ The system could not validate the connection to the Resales Online API.\n";
+        $message .= "This may indicate an API outage, authentication problem, or server connection issue.\n\n";
+        $message .= "Please log in to your WordPress dashboard and check the connection status manually.\n";
+    } else {
+        if (!empty($connection['transaction']['datetime'])) {
+            $message .= "Date/Time: " . $connection['transaction']['datetime'] . "\n";
+        }
+
+        if (!empty($connection['transaction']['incomingIp'])) {
+            $message .= "Incoming IP: " . $connection['transaction']['incomingIp'] . "\n";
+        }
+
+        if (!empty($connection['transaction']['errordescription'])) {
+            $message .= "\nError Description:\n";
+            foreach ($connection['transaction']['errordescription'] as $code => $msg) {
+                $message .= " - {$code}: {$msg}\n";
+            }
         }
     }
 
-if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propertytype_multilang_deleted || $searchfeatures_multilang_deleted) {
+    // Send and handle errors safely
+    $sent = wp_mail($admin_email, $subject, $message);
+    if (!$sent) {
+        error_log('[Resales Online Sync Plugin] Failed to send connection status email to: ' . $admin_email);
+    }
+
+    return $sent;
+}
+
+
+/***** Refresh Location cache through ajax call - To avoid making frequent API calls, we use WordPress transients to cache the locations temporarily:****/
+add_action('wp_ajax_mls_refresh_locations', 'mls_plugin_refresh_locations');
+function mls_plugin_refresh_locations() {
+	$custom_deleted = mls_delete_all_transients_with_prefix('mls_plugin_');
+	if ($custom_deleted) {
 		$current_time = current_time('mysql');
         update_option('mls_plugin_last_cache_refresh', $current_time);
 		mls_plugin_get_cached_locations();
@@ -171,98 +321,43 @@ if ($location_deleted || $currency_deleted || $connectionsts_deleted || $propert
         }
 //         wp_send_json_success('Cache cleared & Resale Online data synced successfully.');
     } else {
-        $error_messages = [];
-    if (!$location_deleted) $error_messages[] = 'Locations';
-    if (!$currency_deleted) $error_messages[] = 'Currency';
-    if (!$connectionsts_deleted) $error_messages[] = 'Connection Status';
-	if (!$propertytype_multilang_deleted) $error_messages[] = 'Property Types (All Languages)';
-    if (!$searchfeatures_multilang_deleted) $error_messages[] = 'Search Features (All Languages)';
+        
 
 	
     if (defined('DOING_AJAX') && DOING_AJAX) {
-    wp_send_json_error('Failed to sync data for: ' . implode(', ', $error_messages));
+    wp_send_json_error('Failed to clear cache & sync data.' );
 		 } else {
             return false; 
         }
     }
 }
 
+function mls_delete_all_transients_with_prefix($prefix = 'mls_plugin_') {
+    global $wpdb;
 
-// Callback for the settings section.
-function mls_plugin_property_type_filter_callback() {
-    // Fetch the stored property types if any.
-    $stored_types = get_option('mls_plugin_property_types');
-//     print_r($stored_types);
-    // Get the API key, client ID, and other required options.
-    $mls_plugin_api_key = get_option('mls_plugin_api_key');
-    $mls_plugin_client_id = get_option('mls_plugin_client_id');
-	 $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
-	$mls_plugin_prop_language = get_option('mls_plugin_prop_language');
+    // Prepare patterns for option_name in wp_options table
+    $like_transient = '_transient_' . $prefix . '%';
+    $like_timeout = '_transient_timeout_' . $prefix . '%';
 
-    // Define the API endpoint.
-    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesTypes'];
+    // Delete transients
+    $deleted = false;
 
-    // Construct the API request URL with necessary parameters.
-    $url = add_query_arg(array(
-		'P_ApiId' => $mls_plugin_filter_id_sales,
-        'p1' => $mls_plugin_client_id,
-        'p2' => $mls_plugin_api_key,
-		'P_Lang' => $mls_plugin_prop_language,
-    ), $endpoint);
+    // Get all transient names with prefix
+    $transients = $wpdb->get_col($wpdb->prepare(
+        "SELECT option_name FROM $wpdb->options WHERE option_name LIKE %s OR option_name LIKE %s",
+        $like_transient,
+        $like_timeout
+    ));
 
-// 	echo $url; 
-	
-    // Fetch property types from the API.
-    $response = wp_remote_get($url);
-
-    if (is_wp_error($response)) {
-        echo "Error: " . esc_html($response->get_error_message());
-        return;
+    // Loop and delete each matching option
+    foreach ($transients as $option_name) {
+        delete_option($option_name);
+        $deleted = true;
     }
 
-    $body = wp_remote_retrieve_body($response);
-    $property_types = json_decode($body, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        echo "Error: Could not decode JSON response.";
-        return;
-    }
-    // Check if the property types are available.
-    if (isset($property_types['PropertyTypes']) && is_array($property_types['PropertyTypes'])) {
-		echo '<input type="hidden" name="mls_plugin_currency" value="" />';
-        echo '<div class="mls-multiSelects"><select name="mls_plugin_property_types[]" id="mls_property_types" multiple class="sel-app">';
-        
-        foreach ($property_types['PropertyTypes']['PropertyType'] as $type) {
-            $option_value = $type['OptionValue'];  // The value attribute
-            $option_label = $type['Type'];
-            $combined_option = [$option_label => $option_value]; // Store label => value.
-	$json_encoded_option = json_encode($combined_option);
-$selected = is_array($stored_types) && in_array($json_encoded_option, $stored_types) ? 'selected' : '';
-echo '<option value="' . esc_attr($json_encoded_option) . '" ' . esc_attr($selected) . '>' . esc_html($option_label) . '</option>';
-            $with_subtypes = false;
-
-            if (isset($type['SubType']) && count($type['SubType']) > 0) {
-                $with_subtypes = true;
-            }
-
-            if ($with_subtypes) { 
-                foreach ($type['SubType'] as $subtype) {
-                    $suboption_value = $subtype['OptionValue'];  // The value attribute
-                    $suboption_label = $subtype['Type'];
-                    $combined_suboption = [$suboption_label => $suboption_value]; // Store label => value.
-$json_encoded_suboption = json_encode($combined_suboption);
-$selected = is_array($stored_types) && in_array($json_encoded_suboption, $stored_types) ? 'selected' : '';
-echo '<option value="' . esc_attr($json_encoded_suboption) . '" ' . esc_attr($selected) . '>' . esc_html($suboption_label) . '</option>';
-                   
-                }
-            }
-        }
-
-        echo '</select></div>';
-    } else {
-        echo "No property types found.";
-    }
+    return $deleted;
 }
+
 
 // Property types for multi-language.
 function mls_plugin_property_type_filter_callback_multilang($language) {
@@ -280,13 +375,13 @@ function mls_plugin_property_type_filter_callback_multilang($language) {
 		'P_ApiId' => $mls_plugin_filter_id_sales,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
-		'P_Lang' => $language,
+		'P_Lang' => $language ? $language : '1',
     ), $endpoint);
 
 // 	echo $url; 
 	
     // Fetch property types from the API.
-    $response = wp_remote_get($url);
+    $response = wp_remote_get($url, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         echo "Error: " . esc_html($response->get_error_message());
@@ -303,26 +398,44 @@ function mls_plugin_property_type_filter_callback_multilang($language) {
      return $property_types;
 }
 
-/*function mls_plugin_get_cached_propertytype_multilang($language) {
-    // Try to get locations from transient
-    $propertytype_multilang = get_transient('mls_plugin_propertytype_multilang');
+// Property types for Custom Filter ID.
+function mls_plugin_property_type_filter_callback_customfilterid($mls_atts_filterid, $language) {
+
+    // Get the API key, client ID, and other required options.
+    $mls_plugin_api_key = get_option('mls_plugin_api_key');
+    $mls_plugin_client_id = get_option('mls_plugin_client_id');
+
+    // Define the API endpoint.
+    $endpoint = RESALES_ONLINE_BASE_API_URL_V6 . RESALES_ONLINE_API_ENDPOINTS_V6['getPropertiesTypes'];
+
+    // Construct the API request URL with necessary parameters.
+    $url = add_query_arg(array(
+		'P_ApiId' => $mls_atts_filterid,
+        'p1' => $mls_plugin_client_id,
+        'p2' => $mls_plugin_api_key,
+		'P_Lang' => $language ? $language : '1',
+    ), $endpoint);
+
+// 	echo $url; 
 	
-    if ($propertytype_multilang === false) {
-        // If transient does not exist, fetch from API
-        $propertytype_multilang = mls_plugin_property_type_filter_callback_multilang($language);
-        // Check if locations array is valid and not empty
-        if (!empty($propertytype_multilang) && $propertytype_multilang['PropertyTypes']['PropertyType'] > 0) {
-            // Cache the results for 12 hours only if data is valid
-            set_transient('mls_plugin_propertytype_multilang', $propertytype_multilang, 12 * HOUR_IN_SECONDS);
-        } else {
-            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
-            set_transient('mls_plugin_propertytype_multilang', [], 5 * MINUTE_IN_SECONDS);
-        }
+    // Fetch property types from the API.
+    $response = wp_remote_get($url, ['timeout' => '20','redirection' => 5]);
+
+    if (is_wp_error($response)) {
+        echo "Error: " . esc_html($response->get_error_message());
+        return;
     }
 
-    return $propertytype_multilang;
-}*/
+    $body = wp_remote_retrieve_body($response);
+    $property_types = json_decode($body, true);
 
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo "Error: Could not decode JSON response.";
+        return;
+    }
+	if (isset($property_types['PropertyTypes']) && is_array($property_types['PropertyTypes'])) { return $property_types; }
+	else{ $property_types = mls_plugin_property_type_filter_callback_multilang($language); return $property_types; }
+}
 
 function mls_plugin_get_cached_propertytype_multilang($language) {
     // Create a unique transient key based on the language
@@ -334,6 +447,30 @@ function mls_plugin_get_cached_propertytype_multilang($language) {
     if ($propertytype_multilang === false) {
         // If transient does not exist, fetch from API
         $propertytype_multilang = mls_plugin_property_type_filter_callback_multilang($language);
+        
+        // Check if property type array is valid and not empty
+        if (!empty($propertytype_multilang) && !empty($propertytype_multilang['PropertyTypes']['PropertyType'])) {
+            // Cache the results for 12 hours only if data is valid
+            set_transient($transient_key, $propertytype_multilang, 12 * HOUR_IN_SECONDS);
+        } else {
+            // If data is empty, set a shorter cache time (e.g., 5 minutes) to retry soon
+            set_transient($transient_key, [], 5 * MINUTE_IN_SECONDS);
+        }
+    }
+
+    return $propertytype_multilang;
+}
+
+function mls_plugin_get_cached_propertytype_customfilterid($mls_atts_filterid, $language) {
+    // Create a unique transient key based on the language
+    $transient_key = 'mls_plugin_propertytype_customfilterid_lang_' . sanitize_key($language) . '_filterid_' . sanitize_key($mls_atts_filterid);
+    
+    // Try to get property types from the transient
+    $propertytype_multilang = get_transient($transient_key);
+    
+    if ($propertytype_multilang === false) {
+        // If transient does not exist, fetch from API
+        $propertytype_multilang = mls_plugin_property_type_filter_callback_customfilterid($mls_atts_filterid, $language);
         
         // Check if property type array is valid and not empty
         if (!empty($propertytype_multilang) && !empty($propertytype_multilang['PropertyTypes']['PropertyType'])) {
@@ -372,7 +509,7 @@ function check_mls_connection() {
 //     die('tst-end');
 
     // Make the API request.
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return "Error: " . $response->get_error_message();
@@ -391,22 +528,22 @@ function check_mls_connection() {
 }
 
 // Function to fetch properties using the Resales Online API.
-function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $additional_features) {
+function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min_price, $max_price, $filter_type, $p_sorttype, $page, $query_id, $language, $newdevelopment, $mls_search_features_search_type, $additional_features, $mls_atts_propertytypes, $mls_atts_locations, $mls_atts_filterid, $mls_atts_pmustfeatures) {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');
     $mls_plugin_client_id = get_option('mls_plugin_client_id');
     $mls_plugin_filter_id_sales = get_option('mls_plugin_filter_id_sales');
     $mls_plugin_filter_id_short_rentals = get_option('mls_plugin_filter_id_short_rentals');
     $mls_plugin_filter_id_long_rentals = get_option('mls_plugin_filter_id_long_rentals');
     $mls_plugin_filter_id_features = get_option('mls_plugin_filter_id_features');
-	$type = implode(',', $type);
-	$area = implode(',', $area);
+	$type = !empty($mls_atts_propertytypes) ? $mls_atts_propertytypes : implode(',', $type);
+	$area = !empty($mls_atts_locations) ? $mls_atts_locations : implode(',', $area);
 	$beds = $beds ? $beds. 'x' : '';
 	$baths = $baths ? $baths. 'x' : '';
 	if (!get_option('mls_plugin_style_proplanghide')) {
         $language = get_option('mls_plugin_prop_language');
     }
-
-
+// 	echo '<br> mls_atts_filterid' . $mls_atts_filterid . '<br>';
+	
 	if ($filter_type === 'short_rentals') {
         $filter_id = $mls_plugin_filter_id_short_rentals;
     } elseif ($filter_type === 'long_rentals') {
@@ -432,11 +569,11 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
 
     // Build the full URL with the passed parameters
     $query_args = array(
-		'P_ApiId' => $filter_id,
+		'P_ApiId' => !empty($mls_atts_filterid) ? $mls_atts_filterid : $filter_id,
         'p1' => $mls_plugin_client_id,
         'p2' => $mls_plugin_api_key,
         'P_Location' => $area ? urlencode($area) : '',
-        'P_PropertyTypes' => $type,
+        'P_PropertyTypes' => $type ? urlencode($type) : '',
         'P_Beds' => $beds ? urlencode($beds) : '',
         'P_Baths' => $baths ? urlencode($baths) : '',
         'P_Min' => $min_price ? urlencode($min_price) : '',
@@ -452,10 +589,10 @@ function mls_plugin_fetch_properties($area, $type, $keyword, $beds, $baths, $min
     if ($query_id) {
         $query_args['P_QueryId'] = $query_id;
     }
-	
-// For Additional Features parameter
+
+	// For Additional Features parameter
 if (!empty($additional_features) && is_array($additional_features) && !empty(array_filter($additional_features)) ) {
-	$query_args['P_MustHaveFeatures'] = $mls_search_features_search_type;
+    $query_args['P_MustHaveFeatures'] = $mls_search_features_search_type;
     foreach ($additional_features as $feature_key => $feature_values) {
         if (!empty($feature_values) && is_array($feature_values)) {
             foreach ($feature_values as $value) {
@@ -466,7 +603,17 @@ if (!empty($additional_features) && is_array($additional_features) && !empty(arr
         }
     }
 }
-
+elseif (!empty($mls_atts_pmustfeatures)) { 
+    $query_args['P_MustHaveFeatures'] = '2'; // Default search type
+    $preselected_features = explode(',', $mls_atts_pmustfeatures);
+    
+    foreach ($preselected_features as $feature_value) {
+        $feature_value = trim($feature_value);
+        if (!empty($feature_value)) {
+            $query_args[$feature_value] = '1';
+        }
+    }
+}
 
     $baseurl = add_query_arg($query_args, $endpoint);
 
@@ -474,7 +621,7 @@ if (!empty($additional_features) && is_array($additional_features) && !empty(arr
 
 
     // Make the API request.
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return "Error: " . $response->get_error_message();
@@ -523,7 +670,7 @@ function mls_plugin_fetch_ref($reference, $type, $language, $newdevelopment) {
     // echo 'base url' . $baseurl . '<br>';
     
     // Make the API request
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return [];
@@ -568,7 +715,7 @@ function mls_plugin_fetch_searchfeatures($language) {
 //     echo 'base url' . $baseurl . '<br>';
     
     // Make the API request
-    $response = wp_remote_get($baseurl);
+    $response = wp_remote_get($baseurl, ['timeout' => '20','redirection' => 5]);
 
     if (is_wp_error($response)) {
         return [];
@@ -588,7 +735,7 @@ function mls_plugin_fetch_searchfeatures($language) {
 	
 }
 
-function mls_plugin_cached_searchfeatures_multilang($mls_language) {
+function mls_plugin_cached_searchfeatures_multilang($mls_language, $mls_atts_pmustfeatures) {
 	
 	if (!get_option('mls_plugin_style_proplanghide')) {
 		$language = get_option('mls_plugin_prop_language');
@@ -614,36 +761,98 @@ function mls_plugin_cached_searchfeatures_multilang($mls_language) {
         }
     }
 
-// Retrieve filter values from session
-$session_filters = isset($_SESSION['mls_search_filters']) ? $_SESSION['mls_search_filters'] : [];
-$mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_search_performed'] == '1';
+    // Parse pmustfeatures and create a mapping for pre-selection
+    $preselected_features = [];
+    if (!empty($mls_atts_pmustfeatures)) {
+        $features_array = explode(',', $mls_atts_pmustfeatures);
+        foreach ($features_array as $feature) {
+            $feature = trim($feature);
+            if (!empty($feature)) {
+                $preselected_features[] = $feature;
+            }
+        }
+        
+        // If values are present and no search performed yet, store them in session
+        if (!isset($_SESSION['mls_search_filters'])) { 
+            $_SESSION['mls_search_filters'] = []; 
+        }
+        
+        if (!isset($_GET['mls_search_performed'])) {
+            if (!empty($preselected_features)) { 
+                // Parse preselected features and organize by category
+                $organized_features = [];
+                
+                foreach ($preselected_features as $feature_value) {
+                    // Find which category and feature name this value belongs to
+                    foreach ($searchfeatures_multilang['FeaturesData']['Category'] as $index => $category) {
+                        foreach ($category['Feature'] as $feature) {
+                            if ($feature['ParamName'] === $feature_value) {
+                                $feature_categories = [
+                                    'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+                                    'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+                                    'Category', 'Rentals', 'Plots'
+                                ];
+                                $categorySlug = $feature_categories[$index];
+                                $organized_features[$categorySlug][$feature['Name']] = $feature_value;
+                                break 2; // Break both loops once found
+                            }
+                        }
+                    }
+                }
+                
+                $_SESSION['mls_search_filters']['additional_features'] = $organized_features;
+            } else {
+				echo 'no_preselected_features' ;
+                $_SESSION['mls_search_filters']['additional_features'] = '';
+            }
+        }
+    }
 
-  // Start building the accordion HTML
-   $html = '<div id="mls-af-accord1" class="mls-af-accordian">';
+    // Retrieve filter values from session
+    $session_filters = isset($_SESSION['mls_search_filters']) ? $_SESSION['mls_search_filters'] : [];
+    $mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_search_performed'] == '1';
 
-	$feature_categories = [
-    'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
-    'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
-    'Category', 'Rentals', 'Plots'
-];
+    // Start building the accordion HTML
+    $html = '<div id="mls-af-accord1" class="mls-af-accordian">';
+
+    $feature_categories = [
+        'Setting', 'Orientation', 'Condition', 'Pool', 'Climate', 'Views', 'Features', 
+        'Furniture', 'Kitchen', 'Garden', 'Security', 'Parking', 'Utilities', 
+        'Category', 'Rentals', 'Plots'
+    ];
 	
     // Loop through each category
     foreach ($searchfeatures_multilang['FeaturesData']['Category'] as $index => $category) {
         $categoryName = $category['@attributes']['Name'];
-		$categorySlug = $feature_categories[$index];
+        $categorySlug = $feature_categories[$index];
         $options = '';
-		$selected_labels_html = '';
+        $selected_labels_html = '';
+
+        // Get selected labels for this category
+        $selected_labels = [];
+        if (isset($session_filters['additional_features'][$categorySlug]) && $mls_search_performed) {
+            $selected_labels = $session_filters['additional_features'][$categorySlug];
+        } elseif (!empty($preselected_features) && isset($session_filters['additional_features'][$categorySlug])) {
+            // Use preselected features if no search performed yet
+            $selected_labels = $session_filters['additional_features'][$categorySlug];
+        }
 
         // Loop through each feature in the category
         foreach ($category['Feature'] as $feature) {
             $optionLabel = $feature['Name'];
             $optionValue = $feature['ParamName'];
             $optionId = 'mls-af-checkbox-' . sanitize_title($optionValue);
-			// Get selected labels for this category
-        $selected_labels = (isset($session_filters['additional_features'][$categorySlug]) && $mls_search_performed) ? $session_filters['additional_features'][$categorySlug] : [];
-        
+            
             // Check if the option should be checked
-            $checked = in_array($optionValue, $selected_labels) ? 'checked' : '';
+            $checked = '';
+            if (is_array($selected_labels)) {
+                $checked = in_array($optionValue, $selected_labels) ? 'checked' : '';
+            }
+            
+            // Also check if this feature is in preselected features (for direct attribute matching)
+            if (!$checked && in_array($optionValue, $preselected_features)) {
+                $checked = 'checked';
+            }
 
             // If checked, add to selected labels HTML
             if ($checked) {
@@ -658,7 +867,7 @@ $mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_searc
             <li>
                 <input class='mls-af-checkbox' id='$optionId' type='checkbox' name='mls_search_feature_{$categorySlug}[]' value='$optionValue' $checked>
                 <label for='$optionId'>$optionLabel</label>
-				    <input type='hidden' name='mls_search_features_labels[$optionValue]' value='$optionLabel'>
+                <input type='hidden' name='mls_search_features_labels[$optionValue]' value='$optionLabel'>
             </li>";
         }
 
@@ -668,7 +877,7 @@ $mls_search_performed = isset($_GET['mls_search_performed']) && $_GET['mls_searc
             <h2 class='mls-af-accodian-title'>$categoryName</h2>
             <section class='mls-af-accodian-cnts' style='display: none;'>
                 <div class='mls-af-sel-wrap'>
-                    <h3>Select Options:</h3>
+                    <h3>" . mls_plugin_translate('general', 'selectoption') . ":</h3>
                     <div class='mls-af-selected-labels'>$selected_labels_html</div>
                     <ul class='mls-af-wrap-list'>
                         $options
@@ -734,4 +943,233 @@ $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_re
 }
 	return $view_more_url;
 }
-?>
+
+/*function mls_render_location_group_manager() {
+    $locations = mls_plugin_fetch_locations();
+    if ($locations) {
+		$locations_array = [];
+		if (is_array($locations['LocationData']['ProvinceArea'])) {
+        foreach ($locations['LocationData']['ProvinceArea'] as $province) {
+          if (isset($province['Location']) && is_array($province['Location'])) {
+            $locations_array = array_merge($locations_array,  $province['Location']);
+          } else {
+            if (isset($province['Locations'])) {
+              if (is_array($province['Locations']['Location'])) {
+                $locations_array = array_merge($locations_array,  $province['Locations']['Location']);
+              } else { 
+                $one_location[] = $province['Locations']['Location'];
+                $locations_array = array_merge($locations_array,  $one_location);
+              }
+            } else if (isset($province['Location'])) {
+              $one_location[] = $province['Location'];
+              $locations_array = array_merge($locations_array,  $one_location);
+            }
+          }
+        }
+      }else {
+        $locations_array =  $locations['LocationData']['ProvinceArea']['Locations']['Location'];
+      }
+		 $locations_array = $locations_array; }
+	else{
+        echo '<p>No locations returned by mls_plugin_fetch_locations().</p>';
+        return;
+    }
+
+    $groups = get_option('mls_location_groups', []);
+    if (empty($groups)) {
+        $groups[] = [ 'parent' => '', 'children' => [] ];
+    }
+    ?>
+<div class="mls-location-groups-table">
+    <table class="widefat mls-table-theme" id="mls-lg-table">
+        <thead>
+        <tr>
+            <th style="width:30%">Parent (single)</th>
+            <th style="width:60%">Children (multi)</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($groups as $i => $row) : ?>
+            <tr class="mls-lg-row">
+                <td>
+                    <select class="mls_location_parent" name="mls_location_groups[<?php echo $i; ?>][parent]" style="width:100%">
+                        <option value="">— Select —</option>
+                        <?php foreach ($locations_array as $loc) : ?>
+                            <option value="<?php echo esc_attr($loc); ?>" <?php selected($row['parent'], $loc); ?>>
+                                <?php echo esc_html($loc); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+                <td>
+                    <select multiple class="mls_location_childgroups" name="mls_location_groups[<?php echo $i; ?>][children][]" style="width:100%;min-height:120px">
+                        <?php foreach ($locations_array as $loc) : ?>
+                            <option value="<?php echo esc_attr($loc); ?>"
+                                <?php echo in_array($loc, $row['children'], true) ? 'selected' : ''; ?>>
+                                <?php echo esc_html($loc); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+                <td style="text-align: center;"><span class="mls-lg-remove dashicons dashicons-no-alt" title="Remove row"></span></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+    <p><button type="button" class="button" id="mls-lg-add">+ Add Locations</button><button type="button" class="button" id="mls-lg-add-predefined">Add Default Malaga Locations</button></p>
+    <?php
+}*/
+
+function mls_render_location_group_manager() {
+    $locations = mls_plugin_fetch_locations();
+
+    if ($locations) {
+        $locations_array = [];
+        if (is_array($locations['LocationData']['ProvinceArea'])) {
+            foreach ($locations['LocationData']['ProvinceArea'] as $province) {
+                if (isset($province['Location']) && is_array($province['Location'])) {
+                    $locations_array = array_merge($locations_array, $province['Location']);
+                } else {
+                    if (isset($province['Locations'])) {
+                        if (is_array($province['Locations']['Location'])) {
+                            $locations_array = array_merge($locations_array, $province['Locations']['Location']);
+                        } else {
+                            $one_location[] = $province['Locations']['Location'];
+                            $locations_array = array_merge($locations_array, $one_location);
+                        }
+                    } else if (isset($province['Location'])) {
+                        $one_location[] = $province['Location'];
+                        $locations_array = array_merge($locations_array, $one_location);
+                    }
+                }
+            }
+        } else {
+            $locations_array = $locations['LocationData']['ProvinceArea']['Locations']['Location'];
+        }
+    } else {
+        echo '<p>No locations returned by mls_plugin_fetch_locations().</p>';
+        return;
+    }
+
+    $groups = get_option('mls_location_groups', []);
+    if (empty($groups)) {
+        // default one empty row
+        $groups[] = [
+            'parent' => '',
+            'children' => [],
+            'parent_type' => 'select'
+        ];
+    }
+    ?>
+    <style>
+      /* small layout helpers */
+      .mls-parent-toggle .mls-custom-wrap { margin-top:6px; display:block; }
+      .mls-parent-toggle .mls-custom-input { display:block; margin-top:6px; width:100%; box-sizing:border-box; }
+      .mls-parent-toggle .mls-select-wrap { display:block; margin-top:6px; }
+      .mls-parent-toggle .mls-hidden { display:none; }
+      /* adjust as needed in your admin css */
+    </style>
+
+    <div class="mls-location-groups-table">
+        <table class="widefat easySel-style form-table mls-table-theme" id="mls-lg-table">
+            <thead>
+            <tr>
+                <th style="width:30%">Parent (single)</th>
+                <th style="width:60%">Children (multi)</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($groups as $i => $row) :
+                $parent_type = isset($row['parent_type']) ? $row['parent_type'] : 'select';
+                $parent_value = isset($row['parent']) ? $row['parent'] : '';
+            ?>
+                <tr class="mls-lg-row">
+                    <td>
+                        <div class="mls-parent-toggle">
+                            <!-- checkbox to switch to custom -->
+                            <label style="display:block;">
+                                <input type="checkbox"
+                                       class="mls_parent_toggle_checkbox"
+                                       data-index="<?php echo $i; ?>"
+                                       <?php echo ($parent_type === 'custom') ? 'checked' : ''; ?> />
+                                Use custom parent
+                            </label>
+
+                            <!-- select (existing) -->
+                            <div class="mls-select-wrap" <?php echo ($parent_type === 'custom') ? 'style="display:none;"' : ''; ?> >
+                                <select class="mls_location_parent" 
+                                        name="mls_location_groups[<?php echo $i; ?>][parent_select]"
+                                        style="width:100%;">
+                                    <option value="">— Select —</option>
+                                    <?php foreach ($locations_array as $loc) : ?>
+                                        <option value="<?php echo esc_attr($loc); ?>"
+                                            <?php selected(($parent_type === 'select' ? $parent_value : ''), $loc); ?>>
+                                            <?php echo esc_html($loc); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- custom input -->
+                            <div class="mls-custom-wrap" <?php echo ($parent_type === 'custom') ? '' : 'style="display:none;"'; ?> >
+                                <input type="text"
+                                       class="mls_location_parent_custom mls-custom-input"
+                                       name="mls_location_groups[<?php echo $i; ?>][parent_custom]"
+                                       placeholder="Enter custom parent name"
+                                       value="<?php echo ($parent_type === 'custom') ? esc_attr($parent_value) : ''; ?>" />
+                            </div>
+
+                            <!-- hidden canonical parent (always posted) -->
+                            <input type="hidden"
+                                   class="mls_location_parent_hidden"
+                                   name="mls_location_groups[<?php echo $i; ?>][parent]"
+                                   value="<?php echo esc_attr($parent_value); ?>" />
+
+                            <!-- hidden parent_type (always posted) -->
+                            <input type="hidden"
+                                   class="mls_parent_type_hidden"
+                                   name="mls_location_groups[<?php echo $i; ?>][parent_type]"
+                                   value="<?php echo esc_attr($parent_type); ?>" />
+                        </div>
+                    </td>
+
+                    <td style="vertical-align: bottom;">
+						<div class="mls-multiSelects">
+                        <select multiple class="mls-multiselect mls_location_childgroups sel-app" name="mls_location_groups[<?php echo $i; ?>][children][]" style="width:100%;min-height:120px">
+							<option value="" disabled>— Select Children —</option>
+                            <?php foreach ($locations_array as $loc) : ?>
+                                <option value="<?php echo esc_attr($loc); ?>"
+                                    <?php echo in_array($loc, $row['children'], true) ? 'selected' : ''; ?>>
+                                    <?php echo esc_html($loc); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+						</div>
+                    </td>
+
+                    <td style="text-align: center;">
+                        <span class="mls-lg-remove dashicons dashicons-no-alt" title="Remove row"></span>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <button type="button" class="button" id="mls-lg-add">+ Add Locations</button>
+        <button type="button" class="button" id="mls-lg-add-predefined">Add Default Malaga Locations</button>
+        <div class="mls-admin-info-wrap mt-3">
+			<span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
+			<div class="mls-admin-info-toggle" style="display: none;">
+				<p>The predefined location import feature is only intended for the Málaga province. If your account is set to a different province, please do not use this feature, as many of the predefined locations will not be available in your Resales Online data. Using it outside Málaga may cause the import to fail or appear buggy.</p>
+			</div>                            
+		</div>
+    </div>
+    <?php
+}
+
+

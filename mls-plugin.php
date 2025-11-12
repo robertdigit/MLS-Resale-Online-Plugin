@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Resales Online MLS Plugin
- * Plugin URI: https://clarkdigital.es/resales-online-real-estate-networking-in-the-costa-del-sol/
+ * Plugin Name: Resales Online Sync Plugin
+ * Plugin URI: https://resales-online-sync.es/download-resales-online-plugin/
  * Description: Seamlessly connect all your ReSales Online properties to your website. This plugin, designed for estate agents, simplifies linking your ReSales Online listings with your site..
- * Version: 1.2.5
+ * Version: 2.1
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author: Clark Digital
@@ -52,14 +52,16 @@ function mls_plugin_enqueue_scripts() {
     wp_enqueue_style( 'mls-video-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-video.css', array(), '1.0.0' );
     wp_enqueue_style( 'mls-autoplay-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-autoplay.css', array(), '1.0.0' );
     wp_enqueue_style( 'mls-fullscreen-lg', plugin_dir_url(__FILE__) . 'assets/css/lg-fullscreen.css', array(), '1.0.0' );
-    wp_enqueue_style( 'mls-select-css', plugin_dir_url(__FILE__) . 'assets/css/easySelectStyle.css', array(), '1.0.0' );
-    wp_enqueue_style( 'mls-tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0' );
-    wp_enqueue_style( 'mls-tellinput-css', plugin_dir_url(__FILE__) . 'assets/css/intlTelInput.min.css', array(), '1.0.0' );
-    wp_enqueue_style( 'mls-datepicker-css', plugin_dir_url(__FILE__) . 'assets/css/datepicker.min.css', array(), '1.0.0' );
-    wp_enqueue_style( 'mls-scrolltabs-css', plugin_dir_url(__FILE__) . 'assets/css/scrolltabs.css', array(), '1.0.0' );
-    if (!is_font_awesome_loaded()) { wp_enqueue_style( 'mls-font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), '6.6.0' ); }
-    wp_enqueue_style( 'mls-jqueryui-css', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css', array(), '1.12.1' );
+    wp_enqueue_style( 'mls-multiselect-css', plugin_dir_url(__FILE__) . 'assets/css/mls-multiselect.css', array(), '1.0.0' );
 
+	wp_enqueue_style( 'mls-tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0' );
+    wp_enqueue_style( 'mls-tellinput-css', plugin_dir_url(__FILE__) . 'assets/css/intlTelInput.min.css', array(), '1.0.0' );
+    
+    wp_enqueue_style( 'mls-scrolltabs-css', plugin_dir_url(__FILE__) . 'assets/css/scrolltabs.css', array(), '1.0.0' );
+    if (!is_font_awesome_loaded()) { wp_enqueue_style( 'mls-font-awesome-css', plugin_dir_url(__FILE__) . 'assets/css/all.min.css', array(), '6.7.2' ); }
+    wp_enqueue_style( 'mls-jqueryui-css', plugin_dir_url(__FILE__) . 'assets/css/jquery-ui.min.css', array(), '1.0.0' );
+
+	
     // Enqueue your custom JavaScript file
   
     wp_enqueue_script(
@@ -69,6 +71,7 @@ function mls_plugin_enqueue_scripts() {
         $plugin_version,
         true
     );
+
     wp_enqueue_script(
         'mls-mousewheel-script',
         plugin_dir_url(__FILE__) . 'assets/js/jquery.mousewheel.js',
@@ -133,12 +136,13 @@ function mls_plugin_enqueue_scripts() {
         true
     );
     wp_enqueue_script(
-        'mls-select-script',
-        plugin_dir_url(__FILE__) . 'assets/js/easySelect.js',
+        'mls-multiselect-script',
+        plugin_dir_url(__FILE__) . 'assets/js/mls-multiselect.js',
         array('jquery'),
         '1.0.0',
         true
     );
+
     wp_enqueue_script(
         'mls-tellinput-script',
         plugin_dir_url(__FILE__) . 'assets/js/intlTelInput.min.js',
@@ -148,21 +152,21 @@ function mls_plugin_enqueue_scripts() {
     );
     if (!is_font_awesome_loaded()) { wp_enqueue_script(
         'mls-font-awesome-script',
-        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js',
+        plugin_dir_url(__FILE__) . 'assets/js/all.min.js',
         array('jquery'),
-        '6.6.0',
+        '6.7.2',
         true
     ); }
     wp_enqueue_script(
         'mls-jquery-ui-script',
-        'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
+        plugin_dir_url(__FILE__) . 'assets/js/jquery-ui.min.js',
         array('jquery'),
-        '1.12.1',
+        '1.0.0',
         true
     );
 	wp_enqueue_script(
 		'mls-jquery-touch-script',
-		'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js',
+		plugin_dir_url(__FILE__) . 'assets/js/jquery.ui.touch-punch.min.js',
 		array('jquery'),
 		'1.12.1',
 		true
@@ -181,13 +185,7 @@ function mls_plugin_enqueue_scripts() {
         '1.0.0',
         true
     );
-    wp_enqueue_script(
-        'mls-datepicker-script',
-        plugin_dir_url(__FILE__) . 'assets/js/datepicker.min.js',
-        array('jquery'),
-        '1.0.0',
-        true
-    );
+   
     wp_enqueue_script(
         'mls-map',
         plugin_dir_url(__FILE__) . 'assets/js/mls-map.js',
@@ -199,27 +197,34 @@ function mls_plugin_enqueue_scripts() {
     wp_enqueue_style('mls-leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css', array(), '1.7.1');
     wp_enqueue_script('mls-leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
 
-	// Get translations
-    $translations = [
-        'mls_plugin_prop_detailsidebaroffset' => get_option('mls_plugin_prop_detailsidebaroffset', '20'),
-		'search_area' => mls_plugin_translate('placeholders','search_area'),
-        'search_property_type' => mls_plugin_translate('placeholders','search_property_type'),
-		'search_reference_id' => mls_plugin_translate('placeholders','search_reference_id'),
-		'mls_propertdetail_form_name' => mls_plugin_translate('error','mls_propertdetail_form_name'),
-		'mls_propertdetail_form_email' => mls_plugin_translate('error','mls_propertdetail_form_email'),
-		'mls_propertdetail_form_valid_email' => mls_plugin_translate('error','mls_propertdetail_form_valid_email'),
-		'mls_propertdetail_form_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_phone_number'),
-		'mls_propertdetail_form_valid_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_valid_phone_number'),
-		'mls_propertdetail_form_scheduledate' => mls_plugin_translate('error','mls_propertdetail_form_scheduledate'),
-		'mls_propertdetail_form_submitting' => mls_plugin_translate('error','mls_propertdetail_form_submitting'),
-		'mls_propertdetail_form_submitrequest' => mls_plugin_translate('error','mls_propertdetail_form_submitrequest'),
-		'mls_propertdetail_form_submiterror' => mls_plugin_translate('error','mls_propertdetail_form_submiterror'),
-		'mls_propertdetail_form_submitrequiredmissing' => mls_plugin_translate('error','mls_propertdetail_form_submitrequiredmissing'),
-		'mls_propertdetail_form_name' => mls_plugin_translate('error','mls_propertdetail_form_name'),
-    ];
+	$translations = [
+                'search_area' => mls_plugin_translate('placeholders','search_area'),
+                'search_property_type' => mls_plugin_translate('placeholders','search_property_type'),
+                'search_reference_id' => mls_plugin_translate('placeholders','search_reference_id'),
+                'search_pricerange' => mls_plugin_translate('placeholders','search_pricerange'),
+                'search_pricerange_select' => mls_plugin_translate('placeholders','search_pricerange_select'),
+                'search_pricerange_upto' => mls_plugin_translate('placeholders','search_pricerange_upto'),
+                'search_pricerange_startsfrom' => mls_plugin_translate('placeholders','search_pricerange_startsfrom'),
+                'search_pricerange_to' => mls_plugin_translate('placeholders','search_pricerange_to'),
+                'search_select_dropdown_search' => mls_plugin_translate('placeholders','search_select_dropdown_search'),
+                'search_select_dropdown_clearall' => mls_plugin_translate('placeholders','search_select_dropdown_clearall'),
+                'search_select_dropdown_selectall' => mls_plugin_translate('placeholders','search_select_dropdown_selectall'),
+                'selectoption' => mls_plugin_translate('general','selectoption'),
+                'mls_propertdetail_form_name' => mls_plugin_translate('error','mls_propertdetail_form_name'),
+                'mls_propertdetail_form_email' => mls_plugin_translate('error','mls_propertdetail_form_email'),
+                'mls_propertdetail_form_valid_email' => mls_plugin_translate('error','mls_propertdetail_form_valid_email'),
+                'mls_propertdetail_form_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_phone_number'),
+                'mls_propertdetail_form_valid_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_valid_phone_number'),
+                'mls_propertdetail_form_scheduledate' => mls_plugin_translate('error','mls_propertdetail_form_scheduledate'),
+                'mls_propertdetail_form_submitting' => mls_plugin_translate('error','mls_propertdetail_form_submitting'),
+                'mls_propertdetail_form_submitrequest' => mls_plugin_translate('error','mls_propertdetail_form_submitrequest'),
+                'mls_propertdetail_form_submiterror' => mls_plugin_translate('error','mls_propertdetail_form_submiterror'),
+                'mls_propertdetail_form_submitrequiredmissing' => mls_plugin_translate('error','mls_propertdetail_form_submitrequiredmissing'),
+            ];
 
-    // Localize the script
+	wp_localize_script('mls-multiselect-script', 'mlsTranslations', $translations);
     wp_localize_script('mls-plugin-ajax-script', 'mlsTranslations', $translations);
+	
     // Localize the script with the admin-ajax URL for AJAX calls
     wp_localize_script('mls-plugin-ajax-script', 'mls_ajax_obj', array( 'ajax_url' => admin_url('admin-ajax.php') ) );
 }
@@ -243,9 +248,9 @@ function mls_plugin_enqueue_admin_assets() {
         $plugin_version, // Version number
         'all' // Media type
     );
-    wp_enqueue_style( 'mls-plugin-select-css', plugin_dir_url(__FILE__) . 'assets/css/easySelectStyle.css', array(), '1.0.0', 'all');
     wp_enqueue_style( 'mls-plugin-tagsinput-css', plugin_dir_url(__FILE__) . 'assets/css/jquery.tagsinput-revisited.css', array(), '1.0.0', 'all');
-	wp_enqueue_style( 'mls-font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), NULL );
+	wp_enqueue_style( 'mls-font-awesome-css', plugin_dir_url(__FILE__) . 'assets/css/all.min.css', array(), '6.7.2' );
+	wp_enqueue_style( 'mls-admin-multiselect-css', plugin_dir_url(__FILE__) . 'assets/css/admin-mls-multiselect.css', array(), '1.0.0' );
 
     // Enqueue admin scripts
     wp_enqueue_script(
@@ -255,12 +260,12 @@ function mls_plugin_enqueue_admin_assets() {
         $plugin_version, // Version number
         true // Load in footer
     );
-    wp_enqueue_script(
-        'mls-plugin-select-script', // Handle of the script
-        plugin_dir_url(__FILE__) . 'assets/js/easySelect.js', // Path to the JS file
-        array('jquery'), // Dependencies
-        '1.0.0', // Version number (optional)
-        true // Load the script in the footer
+	wp_enqueue_script(
+        'mls-multiselect-script',
+        plugin_dir_url(__FILE__) . 'assets/js/mls-multiselect.js',
+        array('jquery'),
+        '1.0.0',
+        true
     );
     wp_enqueue_script(
         'mls-plugin-tagsinput-script', // Handle of the script
@@ -271,14 +276,23 @@ function mls_plugin_enqueue_admin_assets() {
     );
 	wp_enqueue_script(
         'mls-font-awesome-script', // Handle of the script
-        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js', // Path to the JS file
+        plugin_dir_url(__FILE__) . 'assets/js/all.min.js', // Path to the JS file
         array('jquery'), // Dependencies
-        '6.6.0', // Version number (optional)
+        '6.7.2', // Version number (optional)
         true // Load the script in the footer
     );
 	wp_enqueue_script('mls-sweetalert', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', array('jquery'), null, true);
 
 
+	$translations = [
+                'search_area' => mls_plugin_translate('placeholders','search_area'),
+                'search_property_type' => mls_plugin_translate('placeholders','search_property_type'),
+                'search_select_dropdown_search' => mls_plugin_translate('placeholders','search_select_dropdown_search'),
+                'search_select_dropdown_clearall' => mls_plugin_translate('placeholders','search_select_dropdown_clearall'),
+                'search_select_dropdown_selectall' => mls_plugin_translate('placeholders','search_select_dropdown_selectall'),
+                'selectoption' => mls_plugin_translate('general','selectoption'),
+            ];
+	
     // Localize script if you need to pass PHP data to JS
     wp_localize_script(
         'mls-plugin-admin-script', 
@@ -288,6 +302,8 @@ function mls_plugin_enqueue_admin_assets() {
 			'pluginsPageUrl' => admin_url('plugins.php'),
         )
     );
+	wp_localize_script('mls-multiselect-script', 'mlsTranslations', $translations);
+	wp_localize_script('mls-plugin-admin-script', 'mlsPredefinedLocations', mls_plugin_get_predefined_locations());
 }
 add_action('admin_enqueue_scripts', 'mls_plugin_enqueue_admin_assets');
 
@@ -389,6 +405,13 @@ $prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
 
 }
 add_action('init', 'mls_add_rewrite_rules');
+
+add_filter('wp_kses_allowed_html', function($tags, $context) {
+    if (!isset($tags['option'])) $tags['option'] = [];
+    $tags['option']['data-parent'] = true;
+    return $tags;
+}, 10, 2);
+
 
 
 
@@ -591,6 +614,17 @@ function mls_plugin_init() {
     if (mls_plugin_check_license_status()) {
         add_filter('pre_set_site_transient_update_plugins', 'mls_plugin_check_for_update');
     }else{ delete_site_transient('update_plugins'); }
+	
+	if (get_option('mls_plugin_adminnotificationerror') == 'yes' && !wp_next_scheduled('mls_plugin_check_connection_cron')) {
+        wp_schedule_event(time(), 'hourly', 'mls_plugin_check_connection_cron');
+    }
+	if (!get_option('mls_plugin_adminnotificationerror')) {
+        add_option('mls_plugin_adminnotificationerror', 'yes');
+    }
+	if (!get_option('mls_plugin_last_connection_status')) {
+        add_option('mls_plugin_last_connection_status', '');
+    }
+	
 }
 
 function mls_plugin_check_for_update($transient) {
@@ -703,6 +737,46 @@ function mls_plugin_update_check($upgrader_object, $options) {
         }
     }
 }
+if (mls_plugin_check_license_status()) {
+add_shortcode('mls_property_search', 'mls_plugin_property_search_form');
+add_shortcode('mls_property_searchformcode', 'mls_plugin_property_searchformcode');
+add_shortcode('mls_search_results', 'mls_plugin_display_search_results');
+add_shortcode('mls_property_list', 'mls_property_list_shortcode');
+add_shortcode('mls_banner_searchform', 'mls_plugin_banner_search_form');
+add_shortcode('mls_property_byrefs', 'mls_property_byrefs_shortcode');
+}
+
+function mls_localize_translations_for_language($language) {
+    update_option('mls_temp_language_code', $language);
+
+    $translations = [
+                'search_area' => mls_plugin_translate('placeholders','search_area'),
+                'search_property_type' => mls_plugin_translate('placeholders','search_property_type'),
+                'search_reference_id' => mls_plugin_translate('placeholders','search_reference_id'),
+                'search_pricerange' => mls_plugin_translate('placeholders','search_pricerange'),
+                'search_pricerange_select' => mls_plugin_translate('placeholders','search_pricerange_select'),
+                'search_pricerange_upto' => mls_plugin_translate('placeholders','search_pricerange_upto'),
+                'search_pricerange_startsfrom' => mls_plugin_translate('placeholders','search_pricerange_startsfrom'),
+                'search_pricerange_to' => mls_plugin_translate('placeholders','search_pricerange_to'),
+                'search_select_dropdown_search' => mls_plugin_translate('placeholders','search_select_dropdown_search'),
+                'search_select_dropdown_clearall' => mls_plugin_translate('placeholders','search_select_dropdown_clearall'),
+                'search_select_dropdown_selectall' => mls_plugin_translate('placeholders','search_select_dropdown_selectall'),
+                'selectoption' => mls_plugin_translate('general','selectoption'),
+                'mls_propertdetail_form_name' => mls_plugin_translate('error','mls_propertdetail_form_name'),
+                'mls_propertdetail_form_email' => mls_plugin_translate('error','mls_propertdetail_form_email'),
+                'mls_propertdetail_form_valid_email' => mls_plugin_translate('error','mls_propertdetail_form_valid_email'),
+                'mls_propertdetail_form_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_phone_number'),
+                'mls_propertdetail_form_valid_phone_number' => mls_plugin_translate('error','mls_propertdetail_form_valid_phone_number'),
+                'mls_propertdetail_form_scheduledate' => mls_plugin_translate('error','mls_propertdetail_form_scheduledate'),
+                'mls_propertdetail_form_submitting' => mls_plugin_translate('error','mls_propertdetail_form_submitting'),
+                'mls_propertdetail_form_submitrequest' => mls_plugin_translate('error','mls_propertdetail_form_submitrequest'),
+                'mls_propertdetail_form_submiterror' => mls_plugin_translate('error','mls_propertdetail_form_submiterror'),
+                'mls_propertdetail_form_submitrequiredmissing' => mls_plugin_translate('error','mls_propertdetail_form_submitrequiredmissing'),
+            ];
+
+    wp_localize_script('mls-plugin-ajax-script', 'mlsTranslations', $translations);
+	wp_localize_script('mls-multiselect-script', 'mlsTranslations', $translations);
+}
 
 function mls_plugin_breadcrumb() {
     // Get current page title and URL
@@ -780,6 +854,7 @@ include(plugin_dir_path(__FILE__) . 'includes/mls_plugin_license.php');
 include(plugin_dir_path(__FILE__) . 'includes/mls_plugin_languages.php');
 // Include the view details in update notice functionality file.
 include(plugin_dir_path(__FILE__) . 'includes/mls_plugin_updatedetail.php');
+include(plugin_dir_path(__FILE__) . 'includes/mls-plugin-predefined-locations.php');
 
 // Include the display properties functionality file.
 include(plugin_dir_path(__FILE__) . 'public/mls-plugin-propertieslist.php');
@@ -819,6 +894,7 @@ function mls_plugin_activate() {
 	if (mls_plugin_check_license_status()) {
         mls_plugin_check_for_update('');
     }
+	
 }
 
 register_activation_hook(__FILE__, 'mls_plugin_activate');
@@ -880,6 +956,8 @@ function mls_plugin_handle_deactivation() {
     // Save the user's preference in the database.
     update_option('mls_plugin_delete_data', $delete_data);
 
+	wp_clear_scheduled_hook('mls_plugin_check_connection_cron');
+	
     // Deactivate the plugin.
     deactivate_plugins(plugin_basename(__FILE__));
 
@@ -991,6 +1069,8 @@ delete_option('mls_plugin_leadformheading');
 delete_option('mls_plugin_leadformscheduledatehide');
 delete_option('mls_plugin_leadformlanghide');
 delete_option('mls_plugin_leadformbuyersellerhide');
+delete_option('mls_plugin_enable_thirdparty_form');
+delete_option('mls_plugin_thirdparty_formcode');
 
 delete_option('mls_plugin_leadformtomail');
 delete_option('mls_plugin_leadformccmail');
@@ -1004,10 +1084,11 @@ delete_option('mls_plugin_map_provider');
 		
 delete_option('mls_plugin_prop_language');
 delete_option('mls_plugin_style_proplanghide');
+		
+delete_option('mls_plugin_license_status');
+delete_option('mls_plugin_trialenabled');
+delete_option('mls_plugin_expiration_date');
+delete_option('mls_plugin_license_key');
 
     }
 }
-
-
-
-?> 

@@ -1,7 +1,7 @@
 @media (min-width: 651px)
 {
     .mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper {padding: 0 20px 20px;}
-    .mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper .mls-button.mls-pyc-button {padding: 8px 30px; width: auto; border-radius: 38px;}
+    .mls-pro-list-wrapper.pro-list .mls-pyc-btn-wrapper .mls-button.mls-pyc-button {padding: 8px 30px; width: auto; border-radius: 4px;}
 }
 
 

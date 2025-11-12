@@ -143,29 +143,9 @@ jQuery(document).ready(function($) {
     });
 });
 
-jQuery(document).ready(function(jQuery){
- jQuery("#mls_property_types").easySelect({
-     buttons: true, 
-    search: true,
-   placeholder: 'Type',
-    placeholderColor: '',
-   selectColor: '#524781',
-    itemTitle: 'Car selected',
-     showEachItem: true,
-   width: '100%',
-   dropdownMaxHeight: '214px',
- })
- jQuery("#mls_avail_time").easySelect({
-     buttons: true, // 
-     search: true,
-     placeholder: 'Type',
-     placeholderColor: '',
-     selectColor: '#524781',
-     itemTitle: 'Car selected',
-     showEachItem: true,
-     width: '100%',
-     dropdownMaxHeight: '214px',
- })
+jQuery(function($){
+ if(window.MLSSelecttypes) MLSSelecttypes.init(".mls_type_sel");
+ if(window.MLSSelectLocation) MLSSelectLocation.init("#mls_avail_time");
 });
 
 jQuery(document).ready(function(jQuery){
@@ -385,6 +365,7 @@ jQuery(document).ready(function (jQuery) {
     }
   });
   jQuery('.proplang-note').hide();
+  jQuery('.mls_tog_thirdpartyform_row').hide();
   jQuery('.tog-propdetailpage-row-show').hide();
   jQuery('.tog-dark-row').hide();
   jQuery('input[type="checkbox"]#tog-timing-hide').each(function () {
@@ -401,6 +382,13 @@ jQuery(document).ready(function (jQuery) {
     if (jQuery(this).prop('checked')) {
      jQuery(this).parents("table").find('.tog-proplang-row').hide();
      jQuery(this).parents("table").find('.proplang-note').show();
+    }
+  });
+	jQuery('input[type="checkbox"]#tog-leadform-hide').each(function () {
+    if (jQuery(this).prop('checked')) {
+     jQuery(this).parents("table").find('tr:not(:first)').hide();
+	 jQuery(this).parents('tr').show();
+     jQuery(this).parents("table").find('.mls_tog_thirdpartyform_row').show();
     }
   });
   jQuery('input[type="checkbox"]#tog-propdetailpage-hide').each(function () {
@@ -466,6 +454,17 @@ jQuery(document).ready(function(jQuery) {
 		} else {
   		    jQuery(this).parents("table").find('.tog-proplang-row').show();
             jQuery(this).parents("table").find('.proplang-note').hide();
+		}
+	});
+	jQuery('input[type="checkbox"]#tog-leadform-hide').change(function() {
+        if(jQuery(this).is(':checked')) {
+  		    jQuery(this).parents("table").find('tr:not(:first)').hide();
+			jQuery(this).parents('tr').show();
+            jQuery(this).parents("table").find('.mls_tog_thirdpartyform_row').show();
+		} else {
+  		    jQuery(this).parents("table").find('tr:not(:first)').show();
+			jQuery(this).parents('tr').show();
+            jQuery(this).parents("table").find('.mls_tog_thirdpartyform_row').hide();
 		}
 	});
 	jQuery('input[type="checkbox"]#tog-propdetailpage-hide').change(function() {
@@ -557,3 +556,256 @@ else if (jQuery("input#weblink_basic").is(":checked")) {
     }
   });
 });
+
+jQuery(document).on('click', '.scrolableDiv li label', function () {
+  const label = jQuery(this).text().trim(); 
+  const input = jQuery(this).find('input'); 
+  const isChecked = input.is(':checked'); 
+
+  // If it's a parent
+  const selectOption = jQuery(`#mls_property_types option:contains("${label}")`);
+  if (selectOption.attr('data-role') === 'parent') {
+    const group = selectOption.data('group');
+    jQuery(`#mls_property_types option[data-group="${group}"].child-option`).each(function () {
+      jQuery(this).prop('selected', isChecked);
+    });
+
+    // Update plugin
+    jQuery('#mls_property_types').trigger('change');
+  }
+});
+
+
+// Location group manager
+// Location group manager - improved custom parent toggle (checkbox)
+jQuery(function ($) {
+  const $tableBody = $('#mls-lg-table tbody');
+
+  // helper: initialize row UI based on hidden parent_type value
+  function syncRowUI($row) {
+    const $parentTypeHidden = $row.find('.mls_parent_type_hidden');
+    const type = ($parentTypeHidden.length && $parentTypeHidden.val() === 'custom') ? 'custom' : 'select';
+    const $selectWrap = $row.find('.mls-select-wrap');
+    const $customWrap = $row.find('.mls-custom-wrap');
+    const $checkbox = $row.find('.mls_parent_toggle_checkbox');
+    const $select = $row.find('.mls_location_parent');
+    const $custom = $row.find('.mls_location_parent_custom');
+    const $hidden = $row.find('.mls_location_parent_hidden');
+
+    if (type === 'custom') {
+      $checkbox.prop('checked', true);
+      $selectWrap.hide();
+      $customWrap.show();
+      // canonical parent value is from custom input (if present)
+      $hidden.val($custom.val() ? $custom.val() : '');
+      $parentTypeHidden.val('custom');
+    } else {
+      $checkbox.prop('checked', false);
+      $selectWrap.show();
+      $customWrap.hide();
+      // canonical parent value from select
+      $hidden.val($select.val() ? $select.val() : '');
+      $parentTypeHidden.val('select');
+    }
+  }
+
+  // when checkbox toggles
+  $tableBody.on('change', '.mls_parent_toggle_checkbox', function () {
+    const $row = $(this).closest('tr.mls-lg-row');
+    const checked = $(this).is(':checked');
+    const $selectWrap = $row.find('.mls-select-wrap');
+    const $customWrap = $row.find('.mls-custom-wrap');
+    const $parentTypeHidden = $row.find('.mls_parent_type_hidden');
+    const $hidden = $row.find('.mls_location_parent_hidden');
+
+    if (checked) {
+      $selectWrap.hide();
+      $customWrap.show();
+      $parentTypeHidden.val('custom');
+      // set canonical parent to custom input value (if any)
+      const cval = $row.find('.mls_location_parent_custom').val();
+      $hidden.val(cval ? cval : '');
+    } else {
+      $selectWrap.show();
+      $customWrap.hide();
+      $parentTypeHidden.val('select');
+      const sval = $row.find('.mls_location_parent').val();
+      $hidden.val(sval ? sval : '');
+    }
+  });
+
+  // when select or custom input changes, update canonical hidden parent
+  $tableBody.on('change input', '.mls_location_parent, .mls_location_parent_custom', function () {
+    const $row = $(this).closest('tr.mls-lg-row');
+    const $hidden = $row.find('.mls_location_parent_hidden');
+    $hidden.val($(this).val() ? $(this).val() : '');
+  });
+
+  // on form submit ensure each row canonical parent & parent_type are synced
+  $(document).on('submit', 'form', function () {
+    $tableBody.find('tr.mls-lg-row').each(function () {
+      syncRowUI($(this));
+    });
+    // continue submit
+  });
+
+  // add new row (clone first)
+  $('#mls-lg-add').on('click', function (e) {
+    e.preventDefault();
+    const $rows = $tableBody.find('tr.mls-lg-row');
+    if (!$rows.length) return;
+    const index = $rows.length;
+    const $clone = $rows.first().clone();
+
+    // reset values & update names to new index
+    $clone.find('input, select').each(function () {
+      const $el = $(this);
+      const name = $el.attr('name');
+      if (name) {
+        $el.attr('name', name.replace(/\[\d+]/, '[' + index + ']'));
+      }
+
+      // reset visible values
+      if ($el.is('select')) {
+        $el.prop('selectedIndex', 0);
+      } else if ($el.hasClass('mls_location_parent_custom')) {
+        $el.val('');
+      } else if ($el.hasClass('mls_location_parent_hidden')) {
+        $el.val('');
+      } else if ($el.hasClass('mls_parent_type_hidden')) {
+        $el.val('select'); // default
+      } else if ($el.is(':checkbox')) {
+        $el.prop('checked', false);
+      } else if ($el.is(':text')) {
+        // any other text input reset
+        $el.val('');
+      }
+    });
+
+    // ensure UI starts with select shown
+    $clone.find('.mls-select-wrap').show();
+    $clone.find('.mls-custom-wrap').hide();
+
+    $tableBody.append($clone);
+    syncRowUI($clone);
+	  
+	if (window.MLSSelectLocation) {
+  	window.MLSSelectLocation.init('.mls-multiselect');
+  	console.log('MLSSelectLocation initialized on .mls-multiselect');
+	}
+
+  });
+
+  // remove row
+  $tableBody.on('click', '.mls-lg-remove, .dashicons-no-alt', function (e) {
+    e.preventDefault();
+    const $rows = $tableBody.find('tr.mls-lg-row');
+    if ($rows.length > 1) {
+      $(this).closest('tr.mls-lg-row').remove();
+    }
+  });
+
+  // predefined locations: mlsPredefinedLocations should be an object like { "Parent A": ["Child1", "Child2"], ... }
+ 
+	$('#mls-lg-add-predefined').on('click', function (e) {
+  e.preventDefault();
+  const $btn = $(this);
+  if (typeof mlsPredefinedLocations === 'undefined') return;
+
+  // disable button & show spinner
+  $btn.prop('disabled', true).addClass('loading');
+  const originalText = $btn.text();
+  $btn.data('original-text', originalText);
+  $btn.html('<span class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top-color:#333;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle;"></span> Loading...');
+
+  // small async delay to allow UI to repaint before processing heavy loop
+  setTimeout(function () {
+    $.each(mlsPredefinedLocations, function (parent, children) {
+      const $base = $tableBody.find('tr.mls-lg-row').first();
+      const index = $tableBody.find('tr.mls-lg-row').length;
+      const $clone = $base.clone();
+
+      // update names
+      $clone.find('input, select').each(function () {
+        const $el = $(this);
+        const name = $el.attr('name');
+        if (name) {
+          $el.attr('name', name.replace(/\[\d+]/, '[' + index + ']'));
+        }
+        if ($el.is('select')) {
+          $el.prop('selectedIndex', 0);
+        } else if ($el.hasClass('mls_location_parent_custom')) {
+          $el.val('');
+        } else if ($el.hasClass('mls_location_parent_hidden')) {
+          $el.val('');
+        } else if ($el.hasClass('mls_parent_type_hidden')) {
+          $el.val('select');
+        } else if ($el.is(':checkbox')) {
+          $el.prop('checked', false);
+        }
+      });
+
+      const $parentSelect = $clone.find('.mls_location_parent');
+      const $parentCustom = $clone.find('.mls_location_parent_custom');
+      const $parentHidden = $clone.find('.mls_location_parent_hidden');
+      const $parentTypeHidden = $clone.find('.mls_parent_type_hidden');
+      const $selectWrap = $clone.find('.mls-select-wrap');
+      const $customWrap = $clone.find('.mls-custom-wrap');
+
+      if ($parentSelect.find(`option[value="${parent}"]`).length) {
+        $parentSelect.val(parent);
+        $selectWrap.show();
+        $customWrap.hide();
+        $parentHidden.val(parent);
+        $parentTypeHidden.val('select');
+      } else {
+//      showMissingNotice(parent, child);
+        $parentCustom.val(parent);
+        $selectWrap.hide();
+        $customWrap.show();
+        $parentHidden.val(parent);
+        $parentTypeHidden.val('custom');
+        $clone.find('.mls_parent_toggle_checkbox').prop('checked', true);
+      }
+
+      const $childSel = $clone.find('.mls_location_childgroups');
+      if (Array.isArray(children)) {
+        children.forEach(function (child) {
+          if ($childSel.find(`option[value="${child}"]`).length) {
+            $childSel.find(`option[value="${child}"]`).prop('selected', true);
+          }else {
+//             showMissingNotice(parent, child);
+          }
+        });
+      }
+
+      $tableBody.append($clone);
+      syncRowUI($clone);
+      if (window.MLSSelectLocation) {
+        window.MLSSelectLocation.init('.mls-multiselect');
+      }
+    });
+
+    // re-enable button & remove spinner
+    $btn.prop('disabled', false).removeClass('loading').text(originalText);
+  }, 100);
+});
+ 
+  // show missing notice
+  function showMissingNotice(parent, child) {
+    const msg = child
+      ? `⚠️ Missing predefined Child "${child}" under Parent "${parent}"`
+      : `⚠️ Missing predefined Parent "${parent}"`;
+    if (!$('#mls-lg-missing').length) {
+      $('#mls-lg-table').before('<div id="mls-lg-missing" class="notice notice-warning"><ul></ul></div>');
+    }
+    $('#mls-lg-missing ul').append('<li>' + msg + '</li>');
+  }
+
+  // init: sync existing rows on load
+  $tableBody.find('tr.mls-lg-row').each(function () {
+    syncRowUI($(this));
+  });
+});
+
+

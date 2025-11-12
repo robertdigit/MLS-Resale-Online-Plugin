@@ -462,5 +462,3 @@ function format_prices($price, $currency = 'EUR') {
 // 		return $formattedPrice . ' ' . $currencyFormat['symbol'];
     }
 }
-
-?>

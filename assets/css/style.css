@@ -142,7 +142,7 @@
     text-transform: capitalize;
     padding: 6px 12px 4px;
     border: 1px solid var(--mls-ButtonBorder-color);
-    line-height: 25px;
+    line-height: 26px;
     color: var(--mls-Button-color);
     font-size: 15px;
     font-weight: 500;
@@ -814,9 +814,20 @@ span.mls-share-social-fn {cursor: pointer;}
 }
 .mls-property-box .mls-property-img:hover .slick-slide:before
 {
-	background-color: rgba(0,0,0,0.3);
+	background-color: rgba(0,0,0,0.15);
 	transition: all 0.2s linear;
 }
+.mls-property-box .mls-property-img .slick-slide.slick-current img
+{
+    transform: scale(1);
+	transition: all 0.2s linear;
+}
+.mls-property-box .mls-property-img:hover .slick-slide.slick-current img
+{
+    transform: scale(1.08);
+	transition: all 0.4s linear;
+}
+
 .mls-project-listing-slider .slick-slide a.pro-li-fly-link
 {
 	position: absolute;
@@ -1203,7 +1214,7 @@ span.mls-share-social-fn {cursor: pointer;}
 }
 
 .filter-form-wrapper.mls-banner-search {background-color: var(--mlsbannersearchbackground-color); margin: 0;}
-.filter-form-wrapper.mls-banner-search h4, .filter-form-wrapper.mls-banner-search form .mls-form-group > label {color: var(--mlsbannersearch-color);}
+.filter-form-wrapper.mls-banner-search h4, .filter-form-wrapper.mls-banner-search form .mls-form-group > label, .filter-form-wrapper.mls-banner-search form .mls-form-group > div > label {color: var(--mlsbannersearch-color);}
 .mls-banner-search-wrapper > .mls-container {padding: 0 !important;}
 .filter-form-wrapper.mls-banner-search .mls-search-features-dropdown h4, .filter-form-wrapper.mls-banner-search form .mls-search-features-dropdown .mls-form-group > label {color: var(--mls-Text-color);}
 
@@ -1830,12 +1841,13 @@ body.mls-dark-theme .layout-filter img, body.dark .mls-pycf-c img, body.mls-dark
 
 body.mls-dark-theme .tagsinput .tag {background: var(--mls-BgDark-color);}
 body.mls-dark-theme .scrolableDiv .checkmark, body.mls-dark-theme .slider-range-wrapper .ui-widget.ui-widget-content {background-color: var(--mls-BgDark-color);}
+body.mls-dark-theme .scrolableDiv .checkmark:after {border-color: #fff;}
 body.mls-dark-theme #clearAlleasySelect, body.mls-dark-theme #selectAlleasySelect {border: 1px solid var(--mls-Border-color);}
 
 /*--------Update--26.11.24-----------*/
 
 .tagsinput .tag .tag-remove:before, .tagsinput .tag .tag-remove:after {background: #ff8d8d !important;}
-ul.mls-pagination-list li a, ul.mls-pagination-list li span {min-height: 36px; line-height: 24px;}
+ul.mls-pagination-list li a, ul.mls-pagination-list li span {min-height: 36px; line-height: 24px; text-decoration: none !important;}
 
 .mls-form .iti {width: 100%;}
 .mls-form .iti input.iti__tel-input[type=text] {padding-left: 93px;}
@@ -2290,7 +2302,7 @@ body.mls-dark-theme .mls-af-accordian h2.mls-af-accodian-title:hover:after, body
 
 /*-------Tabs Scroll----------*/
 
-.mls-searchresult-form {position: relative; z-index; 999;}
+.mls-searchresult-form {position: relative; z-index: 999;}
 .mls-navtab-wrapper {
   width: 100%;
   position: relative;
@@ -2410,4 +2422,122 @@ body.mls-dark-theme .mls-af-accordian h2.mls-af-accodian-title:hover:after, body
   .mls-navtab-wrapper.full-tabs-mobile .nav-tabs-wrapper .nav-tabs-items .tabs-item {
     width: 100%;
   }
+}
+
+/*-----------Combo Tree-----------*/
+
+.mls-form-group .comboTreeDropDownContainer li {position: relative; padding-left: 25px; margin: 0 0 5px;}
+.mls-form-group .comboTreeDropDownContainer span.comboTreeItemTitle {position: relative; padding: 0; font-size: var(--mls-md-fontsize); line-height: 1.4; padding-left: 20px;}
+.mls-form-group .comboTreeDropDownContainer .comboTreeItemTitle input[type="checkbox"] {appearance: auto !important; position: absolute; left: 0; top: 5px; margin: 0; cursor: pointer;}
+.mls-form-group .comboTreeInputWrapper button.comboTreeArrowBtn {display: none !important;}
+.mls-form-group .comboTreeParentPlus {position: absolute; top: 1px; left: 5px; width: 15px; text-align: center; display: inline-block; line-height: 1;}
+.mls-form-group .comboTreeDropDownContainer {padding: 10px; border-radius: 6px;}
+.mls-form-group .comboTreeDropDownContainer input.multiplesFilter {margin-bottom: 15px; height: 34px; padding: 5px 10px; font-size: var(--mls-md-fontsize);}
+.mls-form-group .comboTreeDropDownContainer li.ComboTreeItemParent > ul {margin-top: 5px;}
+.mls-form-group .comboTreeDropDownContainer li.ComboTreeItemParent > ul li.ComboTreeItemChlid {padding-left: 10px;}
+.mls-form-group .comboTreeDropDownContainer li:hover {background-color: transparent;}
+.mls-form-group .comboTreeDropDownContainer li span.comboTreeItemTitle.comboTreeItemHover {background-color: transparent; color: var(--mls-Text-color);}
+
+/*--------------------*/
+
+.comboTreeDropDownContainer .comboTreeItemTitle label,
+.comboTreeDropDownContainer .comboTreeItemTitle span {
+  position: relative;
+  padding-left: 28px;
+}
+
+/* base box */
+.comboTreeDropDownContainer .comboTreeItemTitle label::before,
+.comboTreeDropDownContainer .comboTreeItemTitle span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid #c0c0c0;
+  border-radius: 3px;
+  background: #fff;
+}
+
+/* checked */
+.comboTreeDropDownContainer .comboTreeItemTitle label.ct-checked::before,
+.comboTreeDropDownContainer .comboTreeItemTitle span.ct-checked::before {
+  background: #1976d2;
+  border-color: #1976d2;
+}
+
+.comboTreeDropDownContainer .comboTreeItemTitle label.ct-checked::after,
+.comboTreeDropDownContainer .comboTreeItemTitle span.ct-checked::after {
+  content: "✔";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 12px;
+}
+
+
+/*------mls-ui-multiselect-----------*/
+
+.mls-ui-multiselect button.ui-multiselect 
+{
+	width: 100% !important;
+    font-family: var(--mls-fontfamily);
+    background-color: var(--mls-BgWhite-color);
+    margin: 0 0 10px;
+    border: 1px solid var(--mls-Border-color);
+    font-size: var(--mls-lg-fontsize);
+    color: var(--mls-Text-color);
+    box-shadow: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-transform: none;
+    text-shadow: none;
+    text-align: left;
+    height: 40px;
+    margin: 0;
+    line-height: 1.2;
+    font-weight: 400;
+}
+.mls-ui-multiselect button.ui-multiselect .ui-icon.ui-icon-triangle-1-s
+{
+	width: 18px;
+    height: 18px;
+    background-image: url(../images/down-arrow-blk.png);
+    background-size: 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ui-multiselect-optgroup .ui-multiselect-grouplabel {position: relative; opacity: 0; z-index: 9; margin-left: 30px;}
+.ui-multiselect-optgroup.ui-multiselect-collapsed .ui-multiselect-grouplabel {opacity: 1;}
+.ui-multiselect-optgroup > ul {margin-top: -36px;}
+.ui-multiselect-checkboxes li:not(.ui-multiselect-optgroup) {clear: none !important;}
+
+.ui-multiselect-checkboxes label {padding-left: 25px;}
+.ui-multiselect-checkboxes input {width: 14px; margin-right: 5px;}
+
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container {display: grid; grid-template-columns: calc(50% - 10px) calc(50% - 10px); gap: 20px; width: calc(50% - 10px);}
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-add-feat-btn-wrapper.mls-f-order5 {width: 40px; order: 8;}
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-f-order9 {width: calc(25% - 75px);}
+
+@media (max-width: 1200px)
+{
+	.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container {width: calc(66.666% - 10px);}
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-add-feat-btn-wrapper.mls-f-order5, .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-f-order9 {width: calc(33.333% - 14px);}
+}
+
+@media (max-width: 767px)
+{
+	.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container {width: calc(100% - 0px);}
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-add-feat-btn-wrapper.mls-f-order5, .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-f-order9 {width: calc(50% - 10px);}
+}
+
+@media (max-width: 480px)
+{
+	.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container {gap: 10px; grid-template-columns: calc(100% - 0px);}
+	.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container > div + div {height: 64px;}
+.filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-add-feat-btn-wrapper.mls-f-order5, .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-f-order9 {width: calc(100% - 0px);}
 }

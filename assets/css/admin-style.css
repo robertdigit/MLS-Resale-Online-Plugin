@@ -350,7 +350,7 @@ input.vd-btn.button.deact-btn:hover {color: #f06c70; background: #fff;}
 .form-table .tagsinput .tag .tag-remove:before, .form-table .tagsinput .tag .tag-remove:after {background: #f14a4a;}
 /*-----------------*/
 
-.wp-core-ui .form-table select {min-width: 240px; max-width: 240px; height: 40px; border-radius: 4px; border: 1px solid #dedede;}
+.wp-core-ui .form-table select {min-width: 240px; max-width: 240px; height: 40px; border-radius: 4px; border: 1px solid #dedede; color: #5c727d !important; font-size: 16px; line-height: 16px;}
 
 .wp-core-ui .mls-trial-notice.notice
 {
@@ -692,7 +692,7 @@ table.mls-table-theme thead th {color: #fff; font-weight: 700; border-bottom: 1p
 	padding-top: 0;
 }
 .mls-section-style1 form tbody > tr td p:first-child {margin-top: 0;}
-.mls-section-style1.mls-licence-tab form > p.submit, .tab-content p.submit {padding-bottom: 0; margin-bottom: 0; margin-top: 10px !important; padding-left: 220px;}
+.mls-section-style1.mls-licence-tab form > p.submit, .tab-content p.submit {padding-bottom: 0; margin-bottom: 0; margin-top: 10px !important; padding-left: 210px;}
 .mls-section-style1 form tbody > tr th {font-size: 16px; vertical-align: top;}
 
 .wp-core-ui .mls-section-style1 .button-primary
@@ -837,7 +837,7 @@ h3.mls-ap-heading-style3
 	height: auto;
     width: 100%;
     max-width: 100%;
-    position: absolute;
+     position: absolute; 
     top: 0;
     left: 0;
     right: 0;
@@ -1057,6 +1057,7 @@ code.mls-shortcode {display: inline-block; width: auto;}
     max-width: 240px;
     height: 40px;
     border: 1px solid #dedede;
+     color: #5c727d !important; font-size: 16px; line-height: 16px;
 }
 
 .mls-custom-checkbox-group
@@ -1298,3 +1299,26 @@ tr + tr.mls-row-heading th h2 {margin-top: 10px !important;}
 .basadv-col .basadv-result p {display: none; margin: 0;}
 .basadv-col.advanced .basadv-result p.mls_plugin_weblink_structure_advanced {display: block;}
 .basadv-col.basic .basadv-result p.mls_plugin_weblink_structure_basic {display: block;}
+
+table.mls-guide-table thead {display: block;}
+table.mls-table-theme.mls-guide-table tbody
+{
+	display: block;
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+table.mls-table-theme.mls-guide-table thead th, table.mls-table-theme.mls-guide-table tbody td {width: 200px;}
+
+.mls-location-groups-table table.mls-table-theme {margin: 10px 0; border-collapse: collapse; border: 1px solid #e6e6e6;}
+.mls-location-groups-table table.mls-table-theme tbody td {border: 1px solid #e6e6e6; padding: 15px 10px 15px 10px;}
+span.mls-lg-remove {cursor: pointer; display: inline-block;}
+
+table.mls-table-theme.easySel-style.form-table {overflow: auto; overflow-x: hidden;}
+.mls-parent-toggle > label {margin-bottom: 15px;}
+
+.mls-admin-info-wrap.mt-3 {margin-top: 3px;}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
