@@ -926,15 +926,9 @@ function mls_plugin_fetch_google_fonts($api_key) {
 }
 
 function mls_plugin_weblink_structure($property_title, $property_ref, $property_filter_type, $language){
-$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
-$prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
-$prpdetailpage = get_post($prpdetailpage_id);
-if (get_option('mls_plugin_style_proplanghide')) {
-$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
-}else{
-$prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
-}
 
+$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug', 'property-detail');
+	
 $weblinkstructure = get_option('mls_plugin_weblink_structure', 'weblink_advanced');
 if ($weblinkstructure == 'weblink_advanced') {
 $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_ref}/?type={$property_filter_type}&lang={$language}");
@@ -944,83 +938,7 @@ $view_more_url = home_url("{$prpdetailpage_slug}/{$property_title}/{$property_re
 	return $view_more_url;
 }
 
-/*function mls_render_location_group_manager() {
-    $locations = mls_plugin_fetch_locations();
-    if ($locations) {
-		$locations_array = [];
-		if (is_array($locations['LocationData']['ProvinceArea'])) {
-        foreach ($locations['LocationData']['ProvinceArea'] as $province) {
-          if (isset($province['Location']) && is_array($province['Location'])) {
-            $locations_array = array_merge($locations_array,  $province['Location']);
-          } else {
-            if (isset($province['Locations'])) {
-              if (is_array($province['Locations']['Location'])) {
-                $locations_array = array_merge($locations_array,  $province['Locations']['Location']);
-              } else { 
-                $one_location[] = $province['Locations']['Location'];
-                $locations_array = array_merge($locations_array,  $one_location);
-              }
-            } else if (isset($province['Location'])) {
-              $one_location[] = $province['Location'];
-              $locations_array = array_merge($locations_array,  $one_location);
-            }
-          }
-        }
-      }else {
-        $locations_array =  $locations['LocationData']['ProvinceArea']['Locations']['Location'];
-      }
-		 $locations_array = $locations_array; }
-	else{
-        echo '<p>No locations returned by mls_plugin_fetch_locations().</p>';
-        return;
-    }
 
-    $groups = get_option('mls_location_groups', []);
-    if (empty($groups)) {
-        $groups[] = [ 'parent' => '', 'children' => [] ];
-    }
-    ?>
-<div class="mls-location-groups-table">
-    <table class="widefat mls-table-theme" id="mls-lg-table">
-        <thead>
-        <tr>
-            <th style="width:30%">Parent (single)</th>
-            <th style="width:60%">Children (multi)</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($groups as $i => $row) : ?>
-            <tr class="mls-lg-row">
-                <td>
-                    <select class="mls_location_parent" name="mls_location_groups[<?php echo $i; ?>][parent]" style="width:100%">
-                        <option value="">— Select —</option>
-                        <?php foreach ($locations_array as $loc) : ?>
-                            <option value="<?php echo esc_attr($loc); ?>" <?php selected($row['parent'], $loc); ?>>
-                                <?php echo esc_html($loc); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-                <td>
-                    <select multiple class="mls_location_childgroups" name="mls_location_groups[<?php echo $i; ?>][children][]" style="width:100%;min-height:120px">
-                        <?php foreach ($locations_array as $loc) : ?>
-                            <option value="<?php echo esc_attr($loc); ?>"
-                                <?php echo in_array($loc, $row['children'], true) ? 'selected' : ''; ?>>
-                                <?php echo esc_html($loc); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-                <td style="text-align: center;"><span class="mls-lg-remove dashicons dashicons-no-alt" title="Remove row"></span></td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-    <p><button type="button" class="button" id="mls-lg-add">+ Add Locations</button><button type="button" class="button" id="mls-lg-add-predefined">Add Default Malaga Locations</button></p>
-    <?php
-}*/
 
 function mls_render_location_group_manager() {
     $locations = mls_plugin_fetch_locations();

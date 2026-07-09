@@ -366,7 +366,7 @@ jQuery(document).ready(function (jQuery) {
   });
   jQuery('.proplang-note').hide();
   jQuery('.mls_tog_thirdpartyform_row').hide();
-  jQuery('.tog-propdetailpage-row-show').hide();
+  
   jQuery('.tog-dark-row').hide();
   jQuery('input[type="checkbox"]#tog-timing-hide').each(function () {
     if (jQuery(this).prop('checked')) {
@@ -391,12 +391,7 @@ jQuery(document).ready(function (jQuery) {
      jQuery(this).parents("table").find('.mls_tog_thirdpartyform_row').show();
     }
   });
-  jQuery('input[type="checkbox"]#tog-propdetailpage-hide').each(function () {
-    if (jQuery(this).prop('checked')) {
-     jQuery(this).parents("table").find('.tog-propdetailpage-row').hide();
-     jQuery(this).parents("table").find('.tog-propdetailpage-row-show').show();
-    }
-  });
+  
   jQuery('input[type="checkbox"]#tog-darklight-hide').each(function () {
     if (jQuery(this).prop('checked')) {
      jQuery(this).parents("table").find('.tog-light-row').hide();
@@ -467,15 +462,7 @@ jQuery(document).ready(function(jQuery) {
             jQuery(this).parents("table").find('.mls_tog_thirdpartyform_row').hide();
 		}
 	});
-	jQuery('input[type="checkbox"]#tog-propdetailpage-hide').change(function() {
-        if(jQuery(this).is(':checked')) {
-  		    jQuery(this).parents("table").find('.tog-propdetailpage-row').hide();
-            jQuery(this).parents("table").find('.tog-propdetailpage-row-show').show();
-		} else {
-  		    jQuery(this).parents("table").find('.tog-propdetailpage-row').show();
-            jQuery(this).parents("table").find('.tog-propdetailpage-row-show').hide();
-		}
-	});
+	
 	jQuery('input[type="checkbox"]#tog-darklight-hide').change(function() {
         if(jQuery(this).is(':checked')) {
   		    jQuery(this).parents("table").find('.tog-light-row').hide();

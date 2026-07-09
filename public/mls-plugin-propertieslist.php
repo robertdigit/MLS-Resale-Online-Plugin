@@ -179,7 +179,7 @@ if (get_option('mls_plugin_style_proplanghide')) {
 									if(!$price){ $price = $property['RentalPrice1']; }
 									$rentalpriceperiod = $property['RentalPeriod'] ?? mls_plugin_translate('general','month'); ?>
                                     
-									<h3><?php echo esc_html( RESALES_ONLINE_API_CURRENCY[$property['Currency']] ) . ' ' . esc_html( format_prices( $price, $property['Currency'] ) ); if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
+									<h3><?php echo esc_html( format_prices( $price, $property['Currency'] ) ); if ($filter_type === 'short_rentals' || $filter_type === 'long_rentals') { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?>
 									</h3>
                                     <p>
 										<?php echo esc_html( wp_trim_words( wpautop( esc_html( $property['Description'] ) ), 25, '...' ) ); ?>
@@ -353,7 +353,8 @@ function social_share_function( $property_link ) {
     $social_icons = array(
         'facebook' => 'https://www.facebook.com/sharer.php?u=' . $property_link,
         'twitter' => 'https://twitter.com/intent/tweet?url=' . $property_link,
-        'whatsapp' => 'https://web.whatsapp.com/send?text=' . urlencode($property_link . ' (Shared from ' . get_bloginfo('name') . ')'), // WhatsApp Web link
+//         'whatsapp' => 'https://web.whatsapp.com/send?text=' . urlencode($property_link . ' (Shared from ' . get_bloginfo('name') . ')'),
+		'whatsapp' => 'https://api.whatsapp.com/send?text=' . urlencode($property_link . ' (Shared from ' . get_bloginfo('name') . ')'),
         'linkedin' => 'https://www.linkedin.com/shareArticle?mini=true&url=' . $property_link
     );
 
@@ -449,7 +450,8 @@ function format_prices($price, $currency = 'EUR') {
         );
 
         // Add currency symbol and return formatted range
-        return $formattedMinPrice . ' ' . $currencyFormat['symbol'] . ' - ' . $formattedMaxPrice . ' ' . $currencyFormat['symbol'];
+//         return $formattedMinPrice . ' ' . $currencyFormat['symbol'] . ' - ' . $formattedMaxPrice . ' ' . $currencyFormat['symbol'];
+		return $currencyFormat['symbol'] . ' ' . $formattedMinPrice . ' - ' . $currencyFormat['symbol'] . ' ' . $formattedMaxPrice;
     } else {
         // Handle single price
         $formattedPrice = number_format(
@@ -458,7 +460,7 @@ function format_prices($price, $currency = 'EUR') {
             $formatRules['decimal_sep'],
             $formatRules['thousands_sep']
         );
-        return $formattedPrice;
+        return $currencyFormat['symbol'] . ' ' . $formattedPrice;
 // 		return $formattedPrice . ' ' . $currencyFormat['symbol'];
     }
 }

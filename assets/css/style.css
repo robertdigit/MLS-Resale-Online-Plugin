@@ -1120,6 +1120,7 @@ span.mls-share-social-fn {cursor: pointer;}
     padding: 25px;
 	border-radius: 8px;
 	margin: 0 0 25px;
+    border-color: transparent;
 }
 .filter-form-wrapper form 
 {
@@ -2522,6 +2523,10 @@ body.mls-dark-theme .mls-af-accordian h2.mls-af-accodian-title:hover:after, body
 .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-location-group-container {display: grid; grid-template-columns: calc(50% - 10px) calc(50% - 10px); gap: 20px; width: calc(50% - 10px);}
 .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-add-feat-btn-wrapper.mls-f-order5 {width: 40px; order: 8;}
 .filter-form-wrapper.locationgroupingenabled .mls-form-group.mls-f-order9 {width: calc(25% - 75px);}
+
+.mls-virtual-btn img {filter: brightness(0) saturate(100%) invert(100%) sepia(5%) saturate(5%) hue-rotate(91deg) brightness(105%) contrast(100%); margin-right: 3px;}
+.mls-virtual-btn #open-video-tour img {height: 20px; margin-top: -4px;}
+.mls-virtual-btn #open-virtual-tour img {height: 13px; margin-top: -6px;}
 
 @media (max-width: 1200px)
 {

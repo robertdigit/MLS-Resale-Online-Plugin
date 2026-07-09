@@ -3,7 +3,7 @@
  * Plugin Name: Resales Online Sync Plugin
  * Plugin URI: https://resales-online-sync.es/download-resales-online-plugin/
  * Description: Seamlessly connect all your ReSales Online properties to your website. This plugin, designed for estate agents, simplifies linking your ReSales Online listings with your site..
- * Version: 2.1
+ * Version: 2.2
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * Author: Clark Digital
@@ -69,6 +69,13 @@ function mls_plugin_enqueue_scripts() {
         plugin_dir_url(__FILE__) . 'assets/js/main.js',
         array('jquery'),
         $plugin_version,
+        true
+    );
+    wp_enqueue_script(
+        'mls-sidebar-script',
+        plugin_dir_url(__FILE__) . 'assets/js/jquery.sticky-sidebar.min.js',
+        array('jquery'),
+        '1.0.0',
         true
     );
 
@@ -157,6 +164,7 @@ function mls_plugin_enqueue_scripts() {
         '6.7.2',
         true
     ); }
+	
     wp_enqueue_script(
         'mls-jquery-ui-script',
         plugin_dir_url(__FILE__) . 'assets/js/jquery-ui.min.js',
@@ -178,13 +186,6 @@ function mls_plugin_enqueue_scripts() {
         '1.0.0',
         true
     );
-    wp_enqueue_script(
-        'mls-sidebar-script',
-        plugin_dir_url(__FILE__) . 'assets/js/jquery.sticky-sidebar.min.js',
-        array('jquery'),
-        '1.0.0',
-        true
-    );
    
     wp_enqueue_script(
         'mls-map',
@@ -198,6 +199,7 @@ function mls_plugin_enqueue_scripts() {
     wp_enqueue_script('mls-leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
 
 	$translations = [
+		'mls_plugin_prop_detailsidebaroffset' => get_option('mls_plugin_prop_detailsidebaroffset', '20'),
                 'search_area' => mls_plugin_translate('placeholders','search_area'),
                 'search_property_type' => mls_plugin_translate('placeholders','search_property_type'),
                 'search_reference_id' => mls_plugin_translate('placeholders','search_reference_id'),
@@ -386,14 +388,7 @@ function mls_plugin_allow_font_uploads($mime_types) {
 add_filter('upload_mimes', 'mls_plugin_allow_font_uploads');
 
 function mls_add_rewrite_rules() {
-	$prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
-    $prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
-    $prpdetailpage = get_post($prpdetailpage_id);
-    if (get_option('mls_plugin_style_proplanghide')) {
-$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
-}else{
-$prpdetailpage_slug = $prpdetailpage ? $prpdetailpage->post_name : '';
-}
+	$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug');
 
     if ($prpdetailpage_slug) {
     add_rewrite_rule(
@@ -986,6 +981,7 @@ function mls_plugin_cleanup() {
     delete_option('mls_plugin_style_propdetailpagehide');
     delete_option('mls_plugin_style_proplanghide');
     delete_option('mls_plugin_property_detail_page_slug');
+	delete_option('mls_plugin_property_search_page_slug');
     delete_option('mls_plugin_property_detail_page_id');
     delete_option('mls_plugin_property_types');
 		

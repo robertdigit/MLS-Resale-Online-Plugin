@@ -46,7 +46,7 @@ if ($atts['searchtitle'] == 'searchtitle') {
 	$mls_atts_filterid = isset($atts['filterid']) ? $atts['filterid'] : '';
     $mls_atts_propertytypes = ( isset($atts['propertytypes']) && empty($mls_atts_filterid) ) ? $atts['propertytypes'] : '';
     $mls_atts_locations = ( isset($atts['locations']) && empty($mls_atts_filterid) ) ? $atts['locations'] : '';
-    $mls_atts_pmustfeatures = ( isset($atts['pmustfeatures']) && empty($mls_atts_filterid) ) ? $atts['pmustfeatures'] : '';
+    $mls_atts_pmustfeatures =  isset($atts['pmustfeatures'])  ? $atts['pmustfeatures'] : '';
 
     // If values are present, store them in session
     if (!isset($_SESSION['mls_search_filters'])) { $_SESSION['mls_search_filters'] = []; }
@@ -104,7 +104,11 @@ else{ $locations = mls_plugin_get_cached_locations(); }
       }else {
         $locations_array =  $locations['LocationData']['ProvinceArea']['Locations']['Location'];
       }
-		 $locations_array = $locations_array; }
+		 $locations_array = $locations_array; 
+	$locations_array = array_unique($locations_array);
+   
+    sort($locations_array);
+	}
         //  else{ echo 'no location'; }
 
     // Retrieve filter values from session
@@ -545,18 +549,34 @@ foreach ($feature_categories as $category) {
 // Detect WPML language directly from the form
 $current_lang = isset($_POST['wpml_lang']) ? sanitize_text_field($_POST['wpml_lang']) : 'en';
 
-// Check if WPML is active
-if (defined('ICL_SITEPRESS_VERSION') && get_option('mls_plugin_style_proplanghide')) {
+// Get slug from plugin settings
+$search_page_slug = get_option('mls_plugin_property_search_page_slug', '');
 
-    if (function_exists('icl_object_id')) {
-        $search_page_id = icl_object_id(7866, 'page', true, $current_lang);
+if (empty($search_page_slug)) {
+
+    // No slug configured - fallback to the original page ID
+    if (defined('ICL_SITEPRESS_VERSION') && get_option('mls_plugin_style_proplanghide')) {
+
+        if (function_exists('icl_object_id')) {
+            $search_page_id = icl_object_id(7866, 'page', true, $current_lang);
+        } else {
+            $search_page_id = ($current_lang === 'es') ? 19713 : 7866;
+        }
+
     } else {
-        $search_page_id = ($current_lang === 'es') ? 19713 : 7866;
+        $search_page_id = 7866;
     }
 
-} else {
-    $search_page_id = 7866; 
+    // Get slug from the page
+    $page = get_post($search_page_id);
+
+    if ($page) {
+        $search_page_slug = $page->post_name;
+    }
 }
+
+// Build the URL from the slug
+$search_page_url = home_url('/' . trim($search_page_slug, '/') . '/');
 		
         // Conditional redirect based on 'ownpageresult' value
         if ($ownpageresult === 'true') {
@@ -564,7 +584,7 @@ if (defined('ICL_SITEPRESS_VERSION') && get_option('mls_plugin_style_proplanghid
             wp_redirect(add_query_arg(array('mls_search_performed' => '1', 'query_id' => $query_id , 'page_num' => $page, 'p_sorttype' => $p_sorttype ), wp_get_referer()));
         } else {
             // Redirect to page ID 931 (replace with your page ID or URL)
-            wp_redirect(add_query_arg(array('mls_search_performed' => '1', 'query_id' => $query_id , 'page_num' => $page , 'p_sorttype' => $p_sorttype), get_permalink($search_page_id)));
+            wp_redirect(add_query_arg(array('mls_search_performed' => '1', 'query_id' => $query_id , 'page_num' => $page , 'p_sorttype' => $p_sorttype), $search_page_url));
         }
         
     }
@@ -786,7 +806,7 @@ function mls_property_list_shortcode($atts = []) {
     $mls_atts_filterid = isset($atts['filterid']) ? $atts['filterid'] : '';
 	$mls_atts_propertytypes = ( isset($atts['propertytypes']) && empty($mls_atts_filterid) ) ? $atts['propertytypes'] : '';
     $mls_atts_locations = ( isset($atts['locations']) && empty($mls_atts_filterid) ) ? $atts['locations'] : '';
-    $mls_atts_pmustfeatures = ( isset($atts['pmustfeatures']) && empty($mls_atts_filterid) && !isset($_GET['mls_search_performed']) ) ? $atts['pmustfeatures'] : '';
+    $mls_atts_pmustfeatures = ( isset($atts['pmustfeatures']) && !isset($_GET['mls_search_performed']) ) ? $atts['pmustfeatures'] : '';
 
 	if(!get_option('mls_plugin_style_proplanghide') ){ $language = get_option('mls_plugin_prop_language'); }
 	else{ $language = isset($atts['language']) ? sanitize_text_field($atts['language']) : '1'; }
@@ -1369,21 +1389,37 @@ $mls_search_features_search_type = sanitize_text_field($_POST['mls_search_featur
 // Detect WPML language directly from the form
 $current_lang = isset($_POST['wpml_lang']) ? sanitize_text_field($_POST['wpml_lang']) : 'en';
 
-// Check if WPML is active
-if (defined('ICL_SITEPRESS_VERSION') && get_option('mls_plugin_style_proplanghide')) {
+// Get slug from plugin settings
+$search_page_slug = get_option('mls_plugin_property_search_page_slug', '');
 
-    if (function_exists('icl_object_id')) {
-        $search_page_id = icl_object_id(7866, 'page', true, $current_lang);
+if (empty($search_page_slug)) {
+
+    // No slug configured - fallback to the original page ID
+    if (defined('ICL_SITEPRESS_VERSION') && get_option('mls_plugin_style_proplanghide')) {
+
+        if (function_exists('icl_object_id')) {
+            $search_page_id = icl_object_id(7866, 'page', true, $current_lang);
+        } else {
+            $search_page_id = ($current_lang === 'es') ? 19713 : 7866;
+        }
+
     } else {
-        $search_page_id = ($current_lang === 'es') ? 19713 : 7866;
+        $search_page_id = 7866;
     }
 
-} else {
-    $search_page_id = 7866; 
+    // Get slug from the page
+    $page = get_post($search_page_id);
+
+    if ($page) {
+        $search_page_slug = $page->post_name;
+    }
 }
+
+// Build the URL from the slug
+$search_page_url = home_url('/' . trim($search_page_slug, '/') . '/');
 		
         // Redirect to the search results page (replace 7866 with your actual search results page ID)
-        wp_redirect(add_query_arg(array('mls_search_performed' => '1', 'query_id' => $query_id, 'page_num' => $page), get_permalink($search_page_id)));
+        wp_redirect(add_query_arg(array('mls_search_performed' => '1', 'query_id' => $query_id, 'page_num' => $page), $search_page_url ));
         exit;
     }
 }

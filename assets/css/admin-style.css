@@ -1033,7 +1033,8 @@ code.mls-shortcode {display: inline-block; width: auto;}
 	width: 12px;
     height: 16px;
     font-size: 12px;
-    vertical-align: middle;
+    vertical-align: middle !important;
+    line-height: 1 !important;
 }
 .mls_plugin_refresh_btn.button
 {

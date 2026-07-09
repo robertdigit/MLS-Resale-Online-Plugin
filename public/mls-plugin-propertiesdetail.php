@@ -183,8 +183,8 @@ $filter_map = [
                             <span class="mls-ss-title"><?php echo mls_plugin_translate('general','share'); ?></span> <?php echo wp_kses_post(social_share_function($view_more_url)); ?>
                         </div>
 						 <div class="mls-virtual-btn">
-							 <?php if($prpVirtualTour){ ?> <a href="javascript:void(0);" id="open-virtual-tour" class="mls-button"><i class="fa-solid fa-vr-cardboard"></i> <?php echo mls_plugin_translate('buttons','virtual_tour'); ?></a><?php } ?> 
-							<?php if($prpVideoTour){ ?> <a href="javascript:void(0);" id="open-video-tour" class="mls-button"><i class="fa-solid fa-video"></i> <?php echo mls_plugin_translate('buttons','video_tour'); ?></a><?php } ?> 
+							 <?php if($prpVirtualTour){ ?> <a href="javascript:void(0);" id="open-virtual-tour" class="mls-button"><img src="<?php echo esc_url(plugins_url('assets/images/virtual-reality.png', __DIR__)); ?>" class="tour-ico" alt="" /> <?php echo mls_plugin_translate('buttons','virtual_tour'); ?></a><?php } ?> 
+							<?php if($prpVideoTour){ ?> <a href="javascript:void(0);" id="open-video-tour" class="mls-button"><img src="<?php echo esc_url(plugins_url('assets/images/video_t.png', __DIR__)); ?>" class="tour-ico" alt="" /> <?php echo mls_plugin_translate('buttons','video_tour'); ?></a><?php } ?> 
 						 </div>
                      </div>
                  </div>
@@ -203,7 +203,7 @@ $filter_map = [
                         <div class="mls-prj-price cn-area">
                            <div><a href="#contact-from" class="mls-button"><?php echo get_option("mls_plugin_leadformheading") ?: mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
+                            <h3><?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; }?></h3>
                         </div>
                     </div>
                  </div>
@@ -420,19 +420,244 @@ $filter_map = [
                         if ($map_provider === 'openstreetmap') {
 // Mapping array to convert locations
 $prplocation_mapping = [
+
+    "Altos de los Monteros" => [
+        "lng" => 36.527307,
+        "lat" => -4.835518
+    ],
+    "Atalaya" => [
+        "lng" => 36.471417,
+        "lat" => -5.019894
+    ],
+    "Bajondillo" => [
+        "lng" => 36.623923,
+        "lat" => -4.501755
+    ],
+    "Bel Air" => [
+        "lng" => 36.465999,
+        "lat" => -5.042318
+    ],
+    "Benalmadena" => [
+        "lng" => 36.596827,
+        "lat" => -4.519794
+    ],
+    "Benamara" => [
+        "lng" => 36.462865,
+        "lat" => -5.022394
+    ],
     "Calahonda" => [
-        "name" => "Sitio de Calahonda",
+        "lng" => 36.492133,
+        "lat" => -4.723547
+    ],
+    "Cártama" => [
+        "lng" => 36.712302,
+        "lat" => -4.630442
+    ],
+    "Casares Playa" => [
+        "lng" => 36.379222,
+        "lat" => -5.218411
+    ],
+    "Chilches" => [
+        "lng" => 36.726340,
+        "lat" => -4.224356
+    ],
+    "Churriana" => [
+        "lng" => 36.659425,
+        "lat" => -4.503998
+    ],
+    "Cortijo Blanco" => [
+        "lng" => 36.479053,
+        "lat" => -4.972137
+    ],
+    "Doña Julia" => [
+        "lng" => 36.398427,
+        "lat" => -5.236998
+    ],
+    "Dos Hermanas" => [
+        "lng" => 36.702864,
+        "lat" => -4.448902
+    ],
+    "El Ejido" => [
+        "lng" => 36.772289,
+        "lat" => -2.811460
+    ],
+    "El Paraiso" => [
+        "lng" => 36.469253,
+        "lat" => -5.029598
+    ],
+    "El Pinillo" => [
+        "lng" => 36.504832,
+        "lat" => -4.844823
+    ],
+    "El Presidente" => [
+        "lng" => 36.466481,
+        "lat" => -5.021896
+    ],
+    "El Rosario" => [
+        "lng" => 36.505402,
+        "lat" => -4.808350
+    ],
+    "Higueron" => [
+        "lng" => 36.580635,
+        "lat" => -4.598161
+    ],
+    "Humilladero" => [
+        "lng" => 37.114294,
+        "lat" => -4.703727
+    ],
+    "Jubrique" => [
+        "lng" => 36.564845,
+        "lat" => -5.215668
+    ],
+    "La Heredia" => [
+        "lng" => 36.521692,
+        "lat" => -5.006342
+    ],
+    "La Luz" => [
+        "lng" => 36.422567,
+        "lat" => -5.160567
     ],
     "La Quinta" => [
-        "lng" => 36.516720,
-        "lat" => -4.997039
+        "lng" => 36.514682,
+        "lat" => -4.997628
+    ],
+    "La Trinidad" => [
+        "lng" => 36.725099,
+        "lat" => -4.430944
+    ],
+    "La Victoria" => [
+        "lng" => 36.725219,
+        "lat" => -4.415374
+    ],
+    "La Viñuela" => [
+        "lng" => 36.865014,
+        "lat" => -4.141871
+    ],
+    "Las Brisas" => [
+        "lng" => 36.694381,
+        "lat" => -4.470821
+    ],
+    "Las Lagunas" => [
+        "lng" => 36.543168,
+        "lat" => -4.637390
+    ],
+    "Las Zorrillas" => [
+        "lng" => 36.814539,
+        "lat" => -4.172425
+    ],
+    "Limonar" => [
+        "lng" => 36.726479,
+        "lat" => -4.398369
+    ],
+    "Los Almendros - Puerto de la Torre" => [
+        "lng" => 36.736122,
+        "lat" => -4.483398
+    ],
+    "Los Flamingos" => [
+        "lng" => 36.477952,
+        "lat" => -5.048860
+    ],
+    "Los Monteros" => [
+        "lng" => 36.525011,
+        "lat" => -4.844655
+    ],
+    "Mijas Costa" => [
+        "lng" => 36.547051,
+        "lat" => -4.636139
+    ],
+    "Miraflores" => [
+        "lng" => 36.494720,
+        "lat" => -4.705636
+    ],
+    "Nerja" => [
+        "lng" => 36.753139,
+        "lat" => -3.869270
     ],
     "New Golden Mile" => [
-        "name" => "Urb. Coto de la Serena"
+        "lng" => 36.466408,
+        "lat" => -5.036472
+    ],
+    "Paseo Marítimo Oeste" => [
+        "lng" => 36.506993,
+        "lat" => -4.907335
+    ],
+    "Periana" => [
+        "lng" => 36.928676,
+        "lat" => -4.191578
+    ],
+    "Pol. Crta. De Cártama" => [
+        "lng" => 36.715505,
+        "lat" => -4.626869
+    ],
+    "Polígonos" => [
+        "lng" => 36.694873,
+        "lat" => -4.487581
+    ],
+    "Puerto de Cabopino" => [
+        "lng" => 36.485943,
+        "lat" => -4.741260
+    ],
+    "Recinto Ferial" => [
+        "lng" => 36.519294,
+        "lat" => -4.870143
+    ],
+    "Reserva de Marbella" => [
+        "lng" => 36.493998,
+        "lat" => -4.749804
+    ],
+    "Río Real" => [
+        "lng" => 36.513073,
+        "lat" => -4.847504
+    ],
+    "San Pedro de Alcántara" => [
+        "lng" => 36.485517,
+        "lat" => -4.993386
+    ],
+    "Santa Clara" => [
+        "lng" => 36.507695,
+        "lat" => -4.816387
+    ],
+    "Sierrezuela" => [
+        "lng" => 36.554995,
+        "lat" => -4.647583
+    ],
+	"San Diego" => [
+        "lng" => 36.313160,
+        "lat" => -5.256203
+    ],
+    "Sotogrande Costa" => [
+        "lng" => 36.279668,
+        "lat" => -5.286071
+    ],
+    "Valle del Sol" => [
+        "lng" => 36.883899,
+        "lat" => -4.141477
     ],
     "The Golden Mile" => [
-        "name" => "El Vicario"
-    ]
+        "lng" => 36.509197,
+        "lat" => -4.935009
+    ],
+    "Torreblanca" => [
+        "lng" => 36.568249,
+        "lat" => -4.610213
+    ],
+    "Torremolinos" => [
+        "lng" => 36.624208,
+        "lat" => -4.501996
+    ],
+    "Torremolinos Este" => [
+        "lng" => 36.642391,
+        "lat" => -4.483972
+    ],
+    "Torremolinos Oeste" => [
+        "lng" => 36.607398,
+        "lat" => -4.518304
+    ],
+    "Zona Sohail" => [
+        "lng" => 36.549868,
+        "lat" => -4.637414
+    ],
+
 ];
 
 // Check if $prplocation exists in the mapping array and replace it
@@ -678,7 +903,7 @@ if (!empty($mlsplugin_thirdpartyformcode)) { echo '<div class="mls-form">'. $mls
                         <div class="mls-prj-price cn-area">
                            <div><a href="#contact-from" class="mls-button"><?php echo get_option("mls_plugin_leadformheading") ?: mls_plugin_translate('buttons','book_viewing'); ?></a></div>                            			<?php $price = $property_details['Price'];
                             if(!$price){ $price = $property_details['RentalPrice1']; }?>
-                            <h3><small><?php echo esc_html(RESALES_ONLINE_API_CURRENCY[$property_details['Currency']]); ?></small> <?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
+                            <h3><?php echo esc_html(format_prices($price)); if ($mlsrentkey === mls_plugin_translate('labels','for_rent') ) { echo '<span>/'. $rentalpriceperiod .'</span>'; } ?></h3>
                         </div>
                     </div>
                     <div class="mls-latest-post">

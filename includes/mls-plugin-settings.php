@@ -51,9 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		update_option('mls_plugin_style_propdetailpagehide', sanitize_text_field($_POST['mls_plugin_style_propdetailpagehide']));
 		update_option('mls_plugin_style_proplanghide', sanitize_text_field($_POST['mls_plugin_style_proplanghide']));
 		update_option('mls_plugin_property_detail_page_slug', sanitize_text_field($_POST['mls_plugin_property_detail_page_slug']));
+		update_option('mls_plugin_property_search_page_slug', sanitize_text_field($_POST['mls_plugin_property_search_page_slug']));
 		
-    $selected_page_id = sanitize_text_field($_POST['mls_plugin_property_detail_page_id']);
-    update_option('mls_plugin_property_detail_page_id', $selected_page_id);
 
 // 		clear cache & sync latest data from resle online
 		mls_plugin_refresh_locations();
@@ -1617,44 +1616,9 @@ case 'styles':
                                 </div>
                             </td>
                         </tr>
+						
+						
 						<tr valign="top">
-                            <th scope="row">Enable Multi-language</th>
-                            <td>
-							 <section class="toggle-Section">
-								  <label class="mls-switch">
-									  <input type="checkbox" id="tog-propdetailpage-hide" name="mls_plugin_style_proplanghide" value="1" <?php checked(get_option('mls_plugin_style_proplanghide'), '1'); ?>>
-								  <span class="mls-tog-slider round"></span>
-								  </label>
-							   </section>
-								<p class="description note-style">Enable this toggle if your site is multi-language.</p>
-								<p class="description note-style"><b>Warning:</b> Enabling this toggle will hide the dropdown for 'Property types, Property Language, Property Detail Page'.<br>You have to add the language attributes in each language pages for all shortcodes, enter the slug for property detail page and All Property types will show directly in the filters based on the language attributes.</p>
-								<p class="description note-style"><b>Eg Shortcode:</b> <code>[mls_property_list language='2' ]</code></p>
-							</td>
-                        </tr>
-						<tr valign="top" class="tog-propdetailpage-row">
-<?php $prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', ''); // Get saved page ID
-    $mls_allpages = get_pages(); ?>							
-                            <th scope="row">Select Property Detail Page</th>
-                            <td>
-								<select name="mls_plugin_property_detail_page_id">
-                            <option value="">-- Select a Page --</option>
-                            <?php foreach ($mls_allpages as $page): ?>
-                                <option value="<?php echo esc_attr($page->ID); ?>" 
-            <?php selected($prpdtselected_page_id, $page->ID); ?>>
-            <?php echo esc_html($page->post_title); ?>
-        </option>
-                            <?php endforeach; ?>
-                        </select>
-								<div class="mls-admin-info-wrap">
-                                <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
-                                <div class="mls-admin-info-toggle" style="display: none;">
-                                     <p>Select the page to display property details.</p>
-                                 </div>                            
-                                </div>
-                   <p class="description note-style"> Use shortcode <code>[mls_property_details]</code> on the selected page.</p>
-							</td>
-                        </tr>
-						<tr valign="top" class="tog-propdetailpage-row-show">
                             <th scope="row">Property Detail Page Slug</th>
                             <td>
 								<input type="text" class="" name="mls_plugin_property_detail_page_slug" value="<?php echo esc_attr(get_option('mls_plugin_property_detail_page_slug')); ?>" placeholder="property-detail"/>
@@ -1665,6 +1629,19 @@ case 'styles':
                                  </div>                            
                                 </div>
                    <p class="description note-style"> Note: All Language property detail page slug should be same. <br>Use shortcode <code>[mls_property_details]</code> on the selected page.</p>
+							</td>
+                        </tr>
+						<tr valign="top" >
+                            <th scope="row">Property Search Result Page Slug</th>
+                            <td>
+								<input type="text" class="" name="mls_plugin_property_search_page_slug" value="<?php echo esc_attr(get_option('mls_plugin_property_search_page_slug')); ?>" placeholder="property-search-result"/>
+								<div class="mls-admin-info-wrap">
+                                <span class="mls-admin-info-btn"><i class="fa-solid fa-circle-info"></i></span>
+                                <div class="mls-admin-info-toggle" style="display: none;">
+                                     <p>Enter the page slug without slashes to display search listings.</p>
+                                 </div>                            
+                                </div>
+                   <p class="description note-style"> Note: All Language search result page slug should be same. <br>Use shortcode <code>[mls_search_results]</code> on the selected page.</p>
 							</td>
                         </tr>
 						<tr valign="top">
@@ -2040,26 +2017,22 @@ function mls_highlight_admin_pages($title, $post_id) {
 add_filter('the_title', 'mls_highlight_admin_pages', 10, 2);
 
 function mls_plugin_admin_notice() {
-    $selected_page_id = get_option('mls_plugin_property_detail_page_id', '');
+    
 	$prpdetail_page_slug = get_option('mls_plugin_property_detail_page_slug', '');
+	$prpsearchres_page_slug = get_option('mls_plugin_property_search_page_slug', '');
 	$proplanghide = get_option('mls_plugin_style_proplanghide', '');
     
-    if (empty($selected_page_id) ) {
-        echo '<div class="notice notice-warning is-dismissible">';
-        echo '<p>Please select a property detail page in the MLS Plugin settings. Use the shortcode <code>[mls_property_details]</code> on the selected page.</p>';
-        echo '</div>';
-    }elseif ($proplanghide && !$prpdetail_page_slug ) {
-        echo '<div class="notice notice-warning is-dismissible">';
+    if (empty($prpdetail_page_slug) ) {
+       echo '<div class="notice notice-warning is-dismissible">';
         echo '<p>Please enter a property detail page slug in the MLS Plugin settings. Use the shortcode <code>[mls_property_details]</code> on the selected page.</p>';
         echo '</div>';
     }
-	
-	if (isset($_POST['mls_plugin_save_prop_language_settings'])) {
-    echo '<div class="notice notice-warning is-dismissible">';
-        echo '<p>Please Select Property types in <a href="?page=mls_plugin_settings">connection tab</a> to get data in your selected language.</p>';
+	if (empty($prpsearchres_page_slug) ) {
+        echo '<div class="notice notice-warning is-dismissible">';
+        echo '<p>Please enter a property search result page slug in the MLS Plugin settings. Use the shortcode <code>[mls_search_results]</code> on the selected page.</p>';
         echo '</div>';
-		
-	}
+    }
+	
 	
 	/* Trial Period Notice */
 $trialperiodnotice = mls_plugin_check_license_status();

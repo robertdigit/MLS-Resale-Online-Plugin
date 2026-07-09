@@ -1,16 +1,17 @@
 <?php
 
 function mls_plugin_get_current_language() {
-	
-    if (!get_option('mls_plugin_style_proplanghide')) {
-    $prpdtselected_page_id = get_option('mls_plugin_property_detail_page_id', '');
-    $prpdetailpage_id = $prpdtselected_page_id ? $prpdtselected_page_id : 7865;
+		
+$prpdetailpage_slug = get_option('mls_plugin_property_detail_page_slug', '');
 
-    if (is_page($prpdetailpage_id)) {
+if (!get_option('mls_plugin_style_proplanghide')) {
+
+    if (!empty($prpdetailpage_slug) && is_page($prpdetailpage_slug)) {
         $language_code = get_option('mls_temp_language_code', '1');
     } else {
         $language_code = get_option('mls_plugin_prop_language', '1');
     }
+
 } else {
     $language_code = get_option('mls_temp_language_code', '1');
 }

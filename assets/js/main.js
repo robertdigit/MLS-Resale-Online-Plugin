@@ -246,6 +246,19 @@ jQuery('#open-virtual-tour').on('click', function() {
 });
 
 
+jQuery(document).ready(function() {
+let stickyHeaderHeight = parseInt(mlsTranslations.mls_plugin_prop_detailsidebaroffset, 10);
+ 
+ jQuery('.mls-prj-sidebar').stickySidebar({
+      topSpacing: stickyHeaderHeight,
+      container: '.mls-prj-detail-full',
+      sidebarInner: '.mls-prj-sidebar-inner',
+      callback: function() {
+//           console.log('Sticky sidebar fired!');
+      }
+  });
+});
+
 /*Search Form Submit ajax functino*/
 
 jQuery(function($){
@@ -554,19 +567,6 @@ if (jQuery(window).scrollTop() >= 200) {
  else {
   jQuery('header').removeClass('fixed');
  }
-});
-
-jQuery(document).ready(function() {
-let stickyHeaderHeight = parseInt(mlsTranslations.mls_plugin_prop_detailsidebaroffset, 10);
- 
- jQuery('.mls-prj-sidebar').stickySidebar({
-      topSpacing: stickyHeaderHeight,
-      container: '.mls-prj-detail-full',
-      sidebarInner: '.mls-prj-sidebar-inner',
-      callback: function() {
-//           console.log('Sticky sidebar fired!');
-      }
-  });
 });
 
 
@@ -1207,6 +1207,5 @@ jQuery(document).ready(function($) {
 	
 	
 });
-
 
 
