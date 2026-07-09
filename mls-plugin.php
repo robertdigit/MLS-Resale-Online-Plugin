@@ -678,7 +678,7 @@ function mls_plugin_update_information($false, $action, $arg) {
 
         if (!is_wp_error($remote) && isset($remote['body'])) {
             $remote_body = json_decode($remote['body']);
-			$tested_up_to = "6.8.3";
+			$tested_up_to = "7.0";
 			$requires_php = "7.4";
 			$author = 'Clark Digital';
 			$author_profile = 'https://resales-online-sync.es/download-resales-online-plugin/';
