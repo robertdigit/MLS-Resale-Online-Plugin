@@ -1,4 +1,6 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
 // Function to display the search form in Search result & Propertylist shortcode.
 function mls_plugin_property_searchformcode($atts = []) {
     // Define default attributes

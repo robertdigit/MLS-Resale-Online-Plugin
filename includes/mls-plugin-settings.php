@@ -1,4 +1,6 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
 // Hook to add the settings page to the WordPress admin menu.
 add_action('admin_menu', 'mls_plugin_add_admin_menu');
 

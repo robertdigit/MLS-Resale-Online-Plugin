@@ -1,5 +1,5 @@
 <?php
-// mls-map.php
+if (!defined('ABSPATH')) exit;
 
 function mls_plugin_display_map($title, $geoX, $geoY, $location) {
     // Static values (replace with dynamic values as needed)

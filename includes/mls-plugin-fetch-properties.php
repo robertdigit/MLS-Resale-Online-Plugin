@@ -1,4 +1,6 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
 // Function to fetch locations using the Resales Online API
 function mls_plugin_fetch_locations() {
     $mls_plugin_api_key = get_option('mls_plugin_api_key');

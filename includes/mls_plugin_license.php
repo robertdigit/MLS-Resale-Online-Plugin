@@ -1,4 +1,6 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
 function my_plugin_register_settings() {
     register_setting('mls_plugin_options_group', 'mls_plugin_license_key');
 }

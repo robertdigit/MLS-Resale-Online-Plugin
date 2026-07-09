@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 
 // Handle AJAX lead form submission
 function mls_plugin_handle_lead_form_submission() {

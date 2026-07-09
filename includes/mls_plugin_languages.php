@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 
 function mls_plugin_get_current_language() {
 		

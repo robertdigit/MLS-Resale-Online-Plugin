@@ -1,5 +1,10 @@
 <?php
 
+// Prevent direct access to the file.
+if ( !defined('ABSPATH') ) {
+    exit;
+}
+
 // Add submenu for documentation.
 function mls_plugin_add_shortcodes_submenu() {
     add_submenu_page(

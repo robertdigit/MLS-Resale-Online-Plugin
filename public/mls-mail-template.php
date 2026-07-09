@@ -1,5 +1,7 @@
 <?php
-   // Set the background color, using the dynamic color or default if not set
+if (!defined('ABSPATH')) exit;
+
+// Set the background color, using the dynamic color or default if not set
    $purchase_url = 'https://clarkdigital.es/resales-online-plugin/#contactplugin';
    $dark_light_hide = get_option('mls_plugin_style_darklighthide');
 	if ($dark_light_hide) { 

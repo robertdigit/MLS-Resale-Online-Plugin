@@ -1,4 +1,5 @@
 <?php 
+if (!defined('ABSPATH')) exit;
 
 $description = 'Our Resales Online WordPress Plugin is a powerful, customizable tool designed to seamlessly integrate Resales Online listings into your WordPress website. It offers real estate agents a user-friendly solution to showcase properties, with advanced features and regular updates from our dedicated development team. Enhance your website’s functionality, improve user experience, and stay ahead in the competitive real estate market with our innovative plugin.';
 
